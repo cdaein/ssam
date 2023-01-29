@@ -7,7 +7,7 @@ Ssam wraps your HTML5 Canvas sketches and provides helpful features such as anim
 ## Install
 
 ```sh
-...
+npm install ssam
 ```
 
 ## Features

@@ -49,22 +49,19 @@ export type {
   WebGLProps,
 } from "./types/types";
 
-export const sketchWrapper = async (
-  sketch: Sketch,
-  settings: SketchSettings
-) => {
+export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
   const wrap = new Wrap();
   try {
     await wrap.init(sketch, settings);
   } catch (err: any) {
-    throw new Error("couldn't initialize sketchWrapper", err);
+    throw new Error("couldn't initialize ssam", err);
   }
 };
 
 export class Wrap {
   // render!: SketchRender;
   constructor() {
-    // use sketchWrapper() function for interfacing with user. (class constructor can't use async)
+    // use ssam() function for interfacing with user. (class constructor can't use async)
     // use class to hoist render function and to make it available within init
   }
 
