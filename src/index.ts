@@ -51,11 +51,7 @@ export type {
 
 export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
   const wrap = new Wrap();
-  try {
-    await wrap.init(sketch, settings);
-  } catch (err: any) {
-    throw new Error("couldn't initialize ssam", err);
-  }
+  await wrap.init(sketch, settings);
 };
 
 export class Wrap {
