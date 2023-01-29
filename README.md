@@ -20,6 +20,62 @@ npm install ssam
 - **Sketch props**: Use props for each mode to help your coding.
 - **File exports**: Export canvas as image, animated GIF or WebM video at various frame rates using keyboard shortcuts.
 
+## Example
+
+```js
+import { ssam } from "ssam";
+import type { Sketch, SketchProps, SketchSettings } from "ssam";
+
+const sketch = ({ wrap, width, height }: SketchProps) => {
+  //  setup/init
+  const numShapes = 40;
+  const colors = [`#aaa`, `blue`, `white`, `black`, `lightpink`];
+  const positions: [number, number][] = new Array(numShapes)
+    .fill([])
+    .map(() => [Math.random() * width, 0]);
+  const sizes: [number, number][] = new Array(numShapes)
+    .fill(0)
+    .map(() => [(Math.random() * width) / 10 + width / 40, height]);
+
+  wrap.render = ({ context: ctx, playhead }: SketchProps) => {
+    // animation loop
+    ctx.fillStyle = `lightblue`;
+    ctx.fillRect(0, 0, width, height);
+
+    positions.forEach((pos, i) => {
+      const cycle = Math.sin(i + playhead * Math.PI * 2);
+      ctx.beginPath();
+      ctx.rect(pos[0] + (cycle * width) / 8, pos[1], ...sizes[i]);
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fill();
+    });
+  };
+
+  wrap.resize = ({ width, height }: SketchProps) => {
+    // resize
+    console.log(width, height);
+  };
+};
+
+// sketch settings
+const settings: SketchSettings = {
+  mode: "2d",
+  dimensions: [320, 320],
+  pixelRatio: 1,
+  duration: 3000,
+  playFps: 12,
+  exportFps: 12,
+  frameFormat: "png",
+  framesFormat: "gif",
+};
+
+ssam(sketch as Sketch, settings);
+```
+
+The code above can create and export the gif:
+
+![example gif animation](./docs/example.gif)
+
 ## License
 
 MIT
