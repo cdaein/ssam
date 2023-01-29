@@ -1,0 +1,49 @@
+{
+  "name": "ssam",
+  "version": "0.1.0",
+  "description": "Creative coding sketch helper",
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "type": "module",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "demo": "vite ./demo",
+    "prebuild": "license-checker --exclude 'MIT, MIT OR X11, BSD, ISC' -production",
+    "build": "tsc --noemit && tsup",
+    "build-vite": "tsc --noemit && vite build --config vite.build.config.ts",
+    "preview": "vite preview"
+  },
+  "author": "Daeinc",
+  "license": "MIT",
+  "dependencies": {
+    "@daeinc/canvas": "^0.13.0",
+    "@daeinc/dom": "^0.4.1",
+    "gifenc": "^1.0.3",
+    "webm-muxer": "^1.1.9"
+  },
+  "devDependencies": {
+    "@daeinc/color": "^0.2.4",
+    "@daeinc/draw": "^0.4.0",
+    "@types/node": "^18.11.18",
+    "@types/ogl": "npm:ogl-types@^0.0.102",
+    "license-checker": "^25.0.1",
+    "ogl": "^0.0.103",
+    "tsup": "^6.5.0",
+    "typescript": "^4.9.3",
+    "vite": "^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cdaein/ssam.git"
+  },
+  "keywords": [
+    "creative-coding"
+  ],
+  "bugs": {
+    "url": "https://github.com/cdaein/ssam/issues"
+  },
+  "homepage": "https://github.com/cdaein/ssam#readme"
+}
