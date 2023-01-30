@@ -1,6 +1,6 @@
 # Sketch Settings
 
-Ssam uses the `settings` you provide to prepare and set up the canvas. Any undefined settings will use the default values.
+Ssam uses the `settings` object you provide to prepare and set up the canvas. Any undefined settings will use the default values.
 
 ### Document Settings
 
@@ -28,7 +28,7 @@ Ssam uses the `settings` you provide to prepare and set up the canvas. Any undef
 | :---------: | :-------: | :--------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 |  `animate`  | `boolean` |   `true`   | Set to `true` for animating. Set to `false` for static sketches or render-on-demand (use with `render` function prop).                                        |
 |  `playFps`  | `number`  |   `null`   | Set frame rate for playback. If not set, will use the current display refresh rate. Most display runs at 60Hz but newer ones may run at 120Hz or even higher. |
-| `exportFps` | `number`  |    `60`    | Set frame rate for video/GIF export. Supports up to 60fps.(GIF is capped at 50fpx)                                                                            |
+| `exportFps` | `number`  |    `60`    | Set frame rate for video/GIF export. Supports up to 60fps.(GIF is capped at 50fps)                                                                            |
 | `duration`  | `number`  | `Infinity` | Set loop duration in `ms` (ex. `4000` = 4 sec)                                                                                                                |
 
 ### Export Settings
@@ -40,4 +40,6 @@ Ssam uses the `settings` you provide to prepare and set up the canvas. Any undef
 |    `suffix`    |               `string`               |   `""`   | Set suffix to filename                                                                                                |
 | `frameFormat`  | `"png" \| "jpeg" \| "jpg" \| "webp"` | `"png"`  | Set image export format. To export multiple formats at the same time, use array like `["png", "webp"]`.               |
 | `framesFormat` |          `"webm" \| "gif"`           | `"webm"` | Set moving image export format. To export multiple frames formats at the same time, use array like `["webm", "gif"]`. |
-|   `hotkeys`    |              `boolean`               |  `true`  | Set to `false` to disable keyboard shortcuts such as `Cmd + S` to export image                                        |
+|   `hotkeys`    |              `boolean`               |  `true`  | Set to `false` to disable keyboard shortcuts                                                                          |
+
+Next, check out [Image/Video Exports](./file-exports.md)

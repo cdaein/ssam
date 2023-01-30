@@ -1,6 +1,6 @@
 # Sketch (Rendering) Modes
 
-You can set `settings.mode` to `2d`, `webgl` or `webgl2` based on the type of sketch you are working on. For example, to integrate with Three.js, you will want to use either `webgl` or `webgl2`.
+You can set `settings.mode` to `2d`, `webgl` or `webgl2` based on the type of a sketch you are working on. For example, to integrate with Three.js, you will want to use either `webgl` or `webgl2` and supply the canvas to Three.js' renderer.
 
 ```js
 const settings = {
@@ -10,7 +10,7 @@ const settings = {
 
 ## `2d` (default)
 
-Use the `2d` mode to create a 2D Canvas sketch. When you set to this mode, you can access the `context` prop.
+Use the `2d` mode to create a 2D Canvas sketch. You can now access the `context` prop.
 
 ```js
 const sketch = ({ wrap, context }) => {
@@ -21,7 +21,7 @@ const sketch = ({ wrap, context }) => {
 };
 ```
 
-The `context` is `CanvasRenderingContext2D` object from the vanilla Canvas API, and you can call many drawing methods on it.
+The `context` is a `CanvasRenderingContext2D` object from the vanilla Canvas API, and you can call many methods on it. See the [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) for more info.
 
 In TypeScript,
 
@@ -47,7 +47,7 @@ const sketch = ({ wrap, context: ctx }) => {
 
 ## `webgl` and `webgl2`
 
-The `webgl` mode is for 3d or shader sketches. You will most likely use it to integrate with 3d libraries such as Three.js or OGL. It give you `gl` prop, which is `WebGLRenderingContext` or `WebGL2RenderingContext` object. Note that now you don't have access to `context` prop.
+The `webgl` mode is for 3d or shader sketches. You will most likely use it to integrate with 3d libraries such as Three.js or OGL. It gives you the `gl` prop, which is `WebGLRenderingContext` or `WebGL2RenderingContext` object. Note that now you use `gl` instead of the `context` prop.
 
 ```js
 const sketch = ({ wrap, gl }) => {
@@ -70,3 +70,5 @@ const sketch = ({ wrap, gl }: WebGLProps) => {
   };
 };
 ```
+
+Next, check out [Sketch Props](./props.md).

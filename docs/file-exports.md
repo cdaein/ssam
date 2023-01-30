@@ -22,6 +22,8 @@ const settings = {
 };
 ```
 
+> ☝️ Note: in the `webgl` or `webgl2` mode, you also need to set `attributes.preserveDrawingBuffer` to `true` in the `settings` object. Otherwise, you will only get a blank image.
+
 ### Video/GIF Export
 
 You can set the video file format in the `settings` object:
@@ -51,3 +53,5 @@ MP4 encoding is not yet supported. If you have `ffmpeg` installed on your machin
 ```sh
 for i in *.webm; do ffmpeg -i "$i" -c:v libx264 -crf 21 "${i%.*}.mp4"; done
 ```
+
+Next, check out [Keyboard Shortcuts](./keyboard.md).
