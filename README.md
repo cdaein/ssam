@@ -9,7 +9,7 @@ Ssam wraps your HTML5 Canvas sketches and provides helpful features such as anim
 The easiest way to set up a sketch with Ssam is to use `create-ssam` CLI app.
 
 ```sh
-npm create ssam
+npm create ssam # for latest version: npm create ssam@latest
 ```
 
 And follow the prompts.
