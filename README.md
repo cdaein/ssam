@@ -12,7 +12,7 @@ The easiest way to set up a sketch with Ssam is to use `create-ssam` CLI command
 npm create ssam@latest
 ```
 
-Then, follow the prompts.
+Then, follow the prompts. See [`create-ssam`](https://github.com/cdaein/create-ssam) for the list of templates.
 
 Or, if you want to install `ssam` into your own set up:
 
