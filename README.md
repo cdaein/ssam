@@ -30,6 +30,10 @@ npm install ssam
 - **Sketch props**: Use props for each mode to help your coding.
 - **File exports**: Export canvas as image, animated GIF or WebM video at various frame rates using keyboard shortcuts.
 
+## How to
+
+See [documentation](./docs/index.md)
+
 ## Example
 
 ```js
