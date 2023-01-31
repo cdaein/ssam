@@ -29,6 +29,9 @@ export default ({
       } else {
         states.captureDone = true;
       }
+    } else if ((ev.metaKey || ev.ctrlKey) && ev.key === "k") {
+      console.log("git commit is not yet implemented");
+      // TODO: if in dev server, send the message to the server to git-commit.
     } else if (ev.key === "t") {
       states.timeResetted = true;
     }
