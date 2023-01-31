@@ -7,6 +7,7 @@ import { createProps } from "./props";
 import { createSettings } from "./settings";
 import { createStates } from "./states";
 import {
+  P5Props,
   Sketch,
   SketchLoop,
   SketchProps,
@@ -51,7 +52,7 @@ export type {
 export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
   const wrap = new Wrap();
   try {
-    await wrap.init(sketch, settings);
+    await wrap.run(sketch, settings);
   } catch (err: any) {
     console.error("Error:", err); // this is more descriptive
     return null;
@@ -62,11 +63,11 @@ export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
 export class Wrap {
   // render!: SketchRender;
   constructor() {
-    // use ssam() function for interfacing with user. (class constructor can't use async)
-    // use class to hoist render function and to make it available within init
+    // use ssam() for interfacing with user and to use async. (class constructor can't use async)
+    // use Wrap class to hoist render function and to make it available as on-demand prop.
   }
 
-  async init(sketch: Sketch, userSettings: SketchSettings) {
+  async run(sketch: Sketch, userSettings: SketchSettings) {
     // combine settings; a few may have null or undefined values (ex. canvas)
     const settings = createSettings({
       main: userSettings,
@@ -331,5 +332,13 @@ export class Wrap {
   noLoop() {
     // TODO: need this.settings first
     // settings.animate = false;
+  }
+
+  preload(props: P5Props) {
+    //
+  }
+
+  init(props: P5Props) {
+    //
   }
 }

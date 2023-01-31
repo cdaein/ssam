@@ -1,5 +1,6 @@
 import { Wrap } from "..";
 import { Format as GifFormat } from "gifenc";
+import type p5 from "p5";
 
 export type Sketch = (props: SketchProps | WebGLProps) => Promise<void> | void;
 
@@ -24,7 +25,7 @@ export type SketchLoop = (timestamp: number) => void;
 //   resize: SketchResize;
 // };
 
-export type SketchMode = "2d" | "webgl" | "webgl2";
+export type SketchMode = "2d" | "webgl" | "webgl2" | "p5";
 
 // gif is not supported by default
 export type FrameFormat = "png" | "jpg" | "jpeg" | "webp";
@@ -96,6 +97,8 @@ export type SketchSettings = {
   hotkeys?: boolean;
   /** set sketch mode to use or integrate with other libraries */
   mode?: SketchMode;
+  /** pass the p5 library reference */
+  p5: typeof p5;
 };
 
 /**
@@ -206,9 +209,10 @@ export interface WebGLProps extends BaseProps {
   gl: WebGLRenderingContext;
 }
 
-// export interface P5Props extends BaseProps {
-//   p5: p5;
-// }
+export interface P5Props extends BaseProps {
+  p5: p5;
+  context: CanvasRenderingContext2D;
+}
 
 // export interface Props {
 //   wrap: Wrap;

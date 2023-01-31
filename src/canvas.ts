@@ -1,5 +1,6 @@
 import {
   BaseProps,
+  SketchMode,
   SketchSettings,
   SketchSettingsInternal,
   SketchStates,
@@ -51,11 +52,18 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
   let [width, height] = settings.dimensions;
   const pixelRatio = Math.max(settings.pixelRatio, 1);
 
+  let ctxString: "2d" | "webgl" | "webgl2";
+  if (settings.mode === "p5") {
+    ctxString = "2d";
+  } else {
+    ctxString = settings.mode;
+  }
+
   if (settings.canvas === undefined || settings.canvas === null) {
     // create new canvas
     ({ canvas, context, gl, width, height } = create({
       parent: settings.parent,
-      context: settings.mode,
+      context: ctxString,
       width,
       height,
       pixelRatio,
@@ -71,7 +79,7 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
 
     ({ context, gl, width, height } = resize({
       canvas,
-      context: settings.mode,
+      context: ctxString,
       width,
       height,
       pixelRatio,
