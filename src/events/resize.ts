@@ -39,6 +39,13 @@ export default ({
     //  2. if parent, don't go into fullscreen at all.
     //  3. inline-styling will override anyways...
 
+    let ctxString: "2d" | "webgl" | "webgl2";
+    if (settings.mode === "p5") {
+      ctxString = "2d";
+    } else {
+      ctxString = settings.mode;
+    }
+
     // when fullscreen & new canvas
     if (
       userSettings.dimensions === undefined &&
@@ -46,7 +53,7 @@ export default ({
     ) {
       ({ width: props.width, height: props.height } = resizeCanvas({
         canvas,
-        context: settings.mode,
+        context: ctxString,
         width: window.innerWidth,
         height: window.innerHeight,
         pixelRatio: Math.max(settings.pixelRatio, 1),

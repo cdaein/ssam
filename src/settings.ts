@@ -14,6 +14,12 @@ export const createSettings = ({
   // REVIEW: or NonNullable<SketchSettings>
   main: Exclude<SketchSettings, undefined>;
 }) => {
+  // p5 error handling
+  // REVIEW: make sure to test
+  if (main.mode === "p5" && main.canvas) {
+    throw new Error("p5 doesn't allow using a custom canvas");
+  }
+
   // data flow: userSettings + defaultSettings => settings => states (mutable) => props => sketch()
   // default settings
   // TODO: create settings.ts
@@ -61,6 +67,9 @@ export const createSettings = ({
       combined[key] = defaultSettings[key as keyof SketchSettings];
     }
   }
+
+  // error handling
+  // REVIEW
   if (Object.values(combined).some((value) => value === undefined)) {
     throw new Error("settings object cannot have undefined values");
   }

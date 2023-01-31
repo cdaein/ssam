@@ -1,5 +1,6 @@
 import {
   BaseProps,
+  P5Props,
   SketchMode,
   SketchSettings,
   SketchSettingsInternal,
@@ -7,6 +8,7 @@ import {
 } from "./types/types";
 import { createCanvas as create, resizeCanvas as resize } from "@daeinc/canvas";
 import { toHTMLElement } from "@daeinc/dom";
+import type p5 from "p5";
 
 export const destroyCanvas = (canvas: HTMLCanvasElement) => {
   if (canvas) {
@@ -20,6 +22,7 @@ export const destroyCanvas = (canvas: HTMLCanvasElement) => {
 };
 
 export const prepareCanvas = (
+  userSettings: SketchSettings,
   settings: SketchSettingsInternal,
   states: SketchStates
 ): {
@@ -39,10 +42,14 @@ export const prepareCanvas = (
       throw new Error("provided canvas must be an HTMLCanvasElement");
     }
   }
-  return createCanvas(settings);
+
+  return createCanvas(userSettings, settings);
 };
 
-export const createCanvas = (settings: SketchSettingsInternal) => {
+export const createCanvas = (
+  userSettings: SketchSettings,
+  settings: SketchSettingsInternal
+) => {
   let canvas: HTMLCanvasElement;
   let context:
     | CanvasRenderingContext2D

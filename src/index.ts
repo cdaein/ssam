@@ -77,8 +77,15 @@ export class Wrap {
 
     const props = createProps({
       wrap: this,
+      userSettings,
       settings,
       states,
+      p5Methods: {
+        preload: () => this.preload(<P5Props>props),
+        init: () => this.init(<P5Props>props),
+        render: () => this.render(<P5Props>props),
+        resize: () => this.resize(<P5Props>props),
+      },
       renderProp: () => this.render(props),
       resizeProp: () => this.resize(props),
     });
@@ -107,8 +114,12 @@ export class Wrap {
       settings,
       props,
     });
-    // render at least once
-    this.render(props);
+    if (settings.mode === "p5") {
+      (props as P5Props).p5.redraw();
+    } else {
+      // render at least once
+      this.render(props);
+    }
 
     // animation render loop
 
@@ -203,7 +214,11 @@ export class Wrap {
       computeLastTimestamp({ states, props });
 
       try {
-        await this.render(props);
+        if (settings.mode === "p5") {
+          (props as P5Props).p5.redraw();
+        } else {
+          await this.render(props);
+        }
       } catch (err: any) {
         console.error(err);
         return null;

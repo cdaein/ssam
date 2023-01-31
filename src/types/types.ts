@@ -98,7 +98,7 @@ export type SketchSettings = {
   /** set sketch mode to use or integrate with other libraries */
   mode?: SketchMode;
   /** pass the p5 library reference */
-  p5: typeof p5;
+  p5?: typeof p5;
 };
 
 /**
