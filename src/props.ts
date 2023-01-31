@@ -103,7 +103,11 @@ const createFunctionProps = ({
   return {
     exportFrame: createExportFrameProp({ canvas, settings, states }),
     // REVIEW: is it ok to expose internal settings like this?
-    update: createUpdateProp({ canvas, prevSettings: settings, resizeCanvas }),
+    update: createUpdateProp({
+      canvas,
+      currentSettings: settings,
+      resizeCanvas,
+    }),
     togglePlay: createTogglePlay({ states }),
   };
 };
@@ -139,17 +143,53 @@ const createTogglePlay = ({ states }: { states: SketchStates }) => {
 };
 
 // FIX: screen flicker, doesn't work when paused
+const updatableKeys = [
+  // DOM
+  "parent",
+  "title",
+  "background",
+  // canvas
+  "dimensions",
+  "width",
+  "height",
+  "pixelRatio",
+  "pixelated",
+  // animation
+  "duration",
+  "totalFrames",
+  "playFps",
+  "exportFps",
+  // file export
+  "filename",
+  "prefix",
+  "suffix",
+  "frameFormat",
+  "framesFormat",
+];
+
 const createUpdateProp = ({
   canvas,
-  prevSettings,
+  currentSettings,
   resizeCanvas,
 }: {
   canvas: HTMLCanvasElement;
-  prevSettings: SketchSettingsInternal;
+  currentSettings: SketchSettingsInternal;
   resizeCanvas: any;
 }) => {
-  return (settings: SketchSettings) => {
+  return (options: any) => {
     console.log("update() prop is not yet implemented.");
+
+    // check if options only include updatableKeys
+
+    // check if it's trying to update both duration & totalFrames at the same time
+
+    // DOM
+
+    // canvas
+
+    // animation
+
+    // file export
 
     // if (settings.pixelRatio) {
     //   resizeCanvas({
