@@ -43,3 +43,5 @@ Ssam uses the `settings` object you provide to prepare and set up the canvas. An
 |   `hotkeys`    |              `boolean`               |  `true`  | Set to `false` to disable keyboard shortcuts                                                                          |
 
 Next, check out [Image/Video Exports](./file-exports.md)
+
+Or, go back to [Documentation](./index.md).

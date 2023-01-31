@@ -72,3 +72,5 @@ const sketch = ({ wrap, gl }: WebGLProps) => {
 ```
 
 Next, check out [Sketch Props](./props.md).
+
+Or, go back to [Documentation](./index.md).

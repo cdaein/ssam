@@ -61,3 +61,7 @@ Based on which sketch mode you are using, you will have access to either `contex
 | `togglePlay`  | `function` | Call to toggle play and pause.                                                                                                        |
 |   `render`    | `function` | Call to run the code in `wrap.render()` manually. Useful for rendering on-demand when you don't need to run the animation constantly. |
 |   `update`    | `function` | not yet implemented. takes `settings` object to update settings. ex. `update({ pixelRatio: 2 })`                                      |
+
+Next, check out [Sketch Settings](./settings.md)
+
+Or, go back to [Documentation](./index.md).

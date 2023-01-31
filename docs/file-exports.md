@@ -55,3 +55,5 @@ for i in *.webm; do ffmpeg -i "$i" -c:v libx264 -crf 21 "${i%.*}.mp4"; done
 ```
 
 Next, check out [Keyboard Shortcuts](./keyboard.md).
+
+Or, go back to [Documentation](./index.md).
