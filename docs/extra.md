@@ -9,6 +9,11 @@ const sketch = ({ wrap, render }) => {
   // when this object changes, it renders a new frame
   someObject.addEventListener("change", render);
 
+  // run render() for each mouse click
+  window.addEventListener("click", () => {
+    render();
+  });
+
   wrap.render = () => {
     // place rendering code here
   };
@@ -33,6 +38,7 @@ Sometimes, you need to run an asynchronous operation such as loading image or te
 
 ```js
 const sketch = async ({ wrap }) => {
+  // 3d libraries may have async methods like this:
   const texture = await TextureLoader.load("/texture.png");
 
   wrap.render = async ({ width, height }) => {

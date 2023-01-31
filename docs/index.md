@@ -41,7 +41,6 @@ const sketch = ({ wrap }) => {
 
   wrap.resize = () => {
     // any code that runs when the canvas resizes goes here.
-    // resize() also runs immediately after render() the first time.
   };
 };
 

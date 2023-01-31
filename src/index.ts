@@ -10,8 +10,6 @@ import {
   Sketch,
   SketchLoop,
   SketchProps,
-  SketchRender,
-  SketchResize,
   SketchSettings,
   SketchSettingsInternal,
   SketchStates,
@@ -35,6 +33,7 @@ import {
   exportGifAnim,
   endGifAnimRecord,
 } from "./recorders/export-frames-gif";
+import { fitCanvasToWindow } from "./canvas";
 
 export type {
   FrameFormat,
@@ -51,7 +50,13 @@ export type {
 
 export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
   const wrap = new Wrap();
-  await wrap.init(sketch, settings);
+  try {
+    await wrap.init(sketch, settings);
+  } catch (err: any) {
+    console.error("Error:", err); // this is more descriptive
+    return null;
+  }
+  return;
 };
 
 export class Wrap {
@@ -74,12 +79,17 @@ export class Wrap {
       settings,
       states,
       renderProp: () => this.render(props),
+      resizeProp: () => this.resize(props),
     });
 
-    await sketch(props);
+    try {
+      await sketch(props);
+    } catch (err: any) {
+      console.error("Error at the sketch init:", err);
+      return null;
+    }
 
-    const { add: addResize, handleResize } = resizeHandler({
-      canvas: props.canvas,
+    const { add: addResize } = resizeHandler({
       props,
       userSettings,
       settings,
@@ -91,10 +101,13 @@ export class Wrap {
       states,
     });
 
-    // run it very first time (render, too)
-    handleResize();
-    // resize runs first frame when dimensions are set
-    if (userSettings.dimensions) this.resize(props);
+    fitCanvasToWindow({
+      userSettings,
+      settings,
+      props,
+    });
+    // render at least once
+    this.render(props);
 
     // animation render loop
 
@@ -152,12 +165,9 @@ export class Wrap {
       // when paused, accumulate pausedDuration
       if (states.paused) {
         states.pausedDuration = timestamp - states.pausedStartTime;
-
-        // console.log({ timestamp });
         window.requestAnimationFrame(loop);
         return;
       }
-      // console.log({ pausedDuration: states.pausedDuration });
 
       if (states.timeResetted) {
         resetTime({ settings, states, props });
@@ -191,8 +201,15 @@ export class Wrap {
       // update lastTimestamp for deltaTime calculation
       computeLastTimestamp({ states, props });
 
-      await this.render(props);
+      try {
+        await this.render(props);
+      } catch (err: any) {
+        console.error(err);
+        return null;
+      }
       window.requestAnimationFrame(loop);
+
+      return;
     };
 
     // for manual counting when recording (use only for recording)
@@ -242,7 +259,12 @@ export class Wrap {
       props.frame = _frameCount;
       computeLastTimestamp({ states, props });
 
-      await this.render(props);
+      try {
+        await this.render(props);
+      } catch (err: any) {
+        console.error(err);
+        return null;
+      }
       window.requestAnimationFrame(loop);
 
       _frameCount += 1;
@@ -289,7 +311,9 @@ export class Wrap {
 
         _frameCount = 0; // reset local frameCount for next recording
       }
+      return;
     };
+    return;
   }
 
   // REVIEW: does this have to by async method?

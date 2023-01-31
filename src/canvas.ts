@@ -1,4 +1,9 @@
-import { SketchSettingsInternal } from "./types/types";
+import {
+  BaseProps,
+  SketchSettings,
+  SketchSettingsInternal,
+  SketchStates,
+} from "./types/types";
 import { createCanvas as create, resizeCanvas as resize } from "@daeinc/canvas";
 import { toHTMLElement } from "@daeinc/dom";
 
@@ -14,7 +19,8 @@ export const destroyCanvas = (canvas: HTMLCanvasElement) => {
 };
 
 export const prepareCanvas = (
-  settings: SketchSettingsInternal
+  settings: SketchSettingsInternal,
+  states: SketchStates
 ): {
   canvas: HTMLCanvasElement;
   context?:
@@ -98,4 +104,31 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
   }
 
   return { canvas, context, gl, width, height, pixelRatio };
+};
+
+export const fitCanvasToWindow = ({
+  userSettings,
+  settings,
+  props,
+}: {
+  userSettings: SketchSettings;
+  settings: SketchSettingsInternal;
+  props: BaseProps;
+}) => {
+  // resizing canvas style (when !fullscreen & centered)
+  // REVIEW: this should be better done with CSS class rules.
+  if (userSettings.dimensions !== undefined && settings.centered) {
+    const margin = 50; // px // TODO: add to settings
+    const canvasParent = props.canvas.parentElement!;
+    const parentWidth = canvasParent.clientWidth;
+    const parentHeight = canvasParent.clientHeight;
+    const scale = Math.min(
+      1,
+      Math.min(
+        (parentWidth - margin * 2) / props.width,
+        (parentHeight - margin * 2) / props.height
+      )
+    );
+    props.canvas.style.transform = `scale(${scale})`;
+  }
 };

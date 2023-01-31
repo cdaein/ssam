@@ -55,9 +55,9 @@ Based on which sketch mode you are using, you will have access to either `contex
 
 ### Function Props
 
-|     name      |    type    | description                                                                                                                  |
-| :-----------: | :--------: | ---------------------------------------------------------------------------------------------------------------------------- |
-| `exportFrame` | `function` | Call to save a frame. Useful if you want to attach to an event.                                                              |
-| `togglePlay`  | `function` | Call to toggle play and pause.                                                                                               |
-|   `render`    | `function` | Call to run the code in `wrap.render()`. Useful for rendering-on-demand when you don't need to run the animation constantly. |
-|   `update`    | `function` | not yet implemented. takes `settings` object to update settings. ex. `update({ pixelRatio: 2 })`                             |
+|     name      |    type    | description                                                                                                                           |
+| :-----------: | :--------: | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `exportFrame` | `function` | Call to save a frame. Useful if you want to attach to an event.                                                                       |
+| `togglePlay`  | `function` | Call to toggle play and pause.                                                                                                        |
+|   `render`    | `function` | Call to run the code in `wrap.render()` manually. Useful for rendering on-demand when you don't need to run the animation constantly. |
+|   `update`    | `function` | not yet implemented. takes `settings` object to update settings. ex. `update({ pixelRatio: 2 })`                                      |

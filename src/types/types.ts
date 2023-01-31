@@ -183,6 +183,7 @@ export interface BaseProps {
   togglePlay: () => void;
   /** call without any props for rendering-on-demand. it will call sketch's returned function. good for manually advancing animation frame-by-frame. */
   render: () => void;
+  resize: () => void;
   /** not yet implemented */
   update: (settings: SketchSettings) => void;
 }

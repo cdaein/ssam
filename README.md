@@ -6,15 +6,15 @@ Ssam wraps your HTML5 Canvas sketches and provides helpful features such as anim
 
 ## Install
 
-The easiest and quickest way to set up a sketch with Ssam is to use `create-ssam` CLI command.
+The easiest and quickest way to set up a sketch with Ssam is to use `create-ssam` CLI command. You don't need to install anything (except Node.js of course) in advance. Simply run the command to set up dependencies and bundler and you can jump straight into creative coding:
 
 ```sh
 npm create ssam@latest
 ```
 
-Then, follow the prompts. See [`create-ssam`](https://github.com/cdaein/create-ssam) for the list of templates.
+The prompts will guide you through selecting a template. See [`create-ssam`](https://github.com/cdaein/create-ssam) for the list of templates.
 
-Or, if you want to install `ssam` into your own set up:
+Alternatively, if you only want to install `ssam` package into your own set up:
 
 ```sh
 npm install ssam

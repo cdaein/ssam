@@ -25,14 +25,18 @@ export const createProps = ({
   settings,
   states,
   renderProp,
+  resizeProp,
 }: {
   wrap: Wrap;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  renderProp: () => void; // TODO: proper typing. should i move this to createFunctionProps()?
+  // TODO: proper typing. should i move this to createFunctionProps()?
+  renderProp: () => void;
+  resizeProp: () => void;
 }) => {
   const { canvas, context, gl, width, height, pixelRatio } = prepareCanvas(
-    settings
+    settings,
+    states
   ) as CanvasProps;
 
   // function props
@@ -60,6 +64,7 @@ export const createProps = ({
     exportFrame,
     togglePlay,
     render: renderProp,
+    resize: resizeProp,
     update,
   };
 
