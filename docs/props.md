@@ -44,16 +44,16 @@ Based on which sketch mode you are using, you will have access to either `contex
 
 ### Animation Props
 
-|     name      |   type   | description                                                                                                       |
-| :-----------: | :------: | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-|  `duration`   | `number` | get loop duration in `ms` (ex. `4000` = 4 sec). If `settings.duration` is not set, it will be `Infinity`.         |
-| `totalFrames` | `number` | get the number of total frames. If `settings.duration` is not set, it will be `Infinity`.                         |
-|    `frame`    | `number` | get current frame count. starts at `0`                                                                            |
-|    `time`     | `number` | get current time in `ms`. starts at `0`                                                                           |
-|  `deltaTime`  | `number` | get delta time between frame renders in `ms`                                                                      |
-|  `playhead`   | `number` | goes from `0` to `1` over animation duration. If `duration` is not set, it does not update, and will stay at `0`. |
-|   `playFps`   | `number  | null`                                                                                                             | get playback frame rate. If `settings.playFps` is not set, it will return `null` |
-|  `exportFps`  | `number` | get export frame rate. If `settings.exportFps` is not set, it defaults to `60`.                                   |
+|     name      |       type        | description                                                                                                       |
+| :-----------: | :---------------: | ----------------------------------------------------------------------------------------------------------------- |
+|  `duration`   |     `number`      | get loop duration in `ms` (ex. `4000` = 4 sec). If `settings.duration` is not set, it will be `Infinity`.         |
+| `totalFrames` |     `number`      | get the number of total frames. If `settings.duration` is not set, it will be `Infinity`.                         |
+|    `frame`    |     `number`      | get current frame count. starts at `0`                                                                            |
+|    `time`     |     `number`      | get current time in `ms`. starts at `0`                                                                           |
+|  `deltaTime`  |     `number`      | get delta time between frame renders in `ms`                                                                      |
+|  `playhead`   |     `number`      | goes from `0` to `1` over animation duration. If `duration` is not set, it does not update, and will stay at `0`. |
+|   `playFps`   | `number  \| null` | get playback frame rate. If `settings.playFps` is not set, it will return `null`                                  |
+|  `exportFps`  |     `number`      | get export frame rate. If `settings.exportFps` is not set, it defaults to `60`.                                   |
 
 ### Function Props
 
