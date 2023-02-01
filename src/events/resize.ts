@@ -41,6 +41,7 @@ export default ({
       userSettings.dimensions === undefined &&
       userSettings.canvas === undefined
     ) {
+      // console.log("handle resize");
       // the event is attached to the window, so no need to check for now
       // const doResize =
       //   canvas.width !== canvas.clientWidth ||

@@ -1,9 +1,16 @@
 import { resizeCanvas } from "@daeinc/canvas";
-import { toElement } from "@daeinc/dom";
+import { toElement, toHTMLElement } from "@daeinc/dom";
 import { Wrap } from ".";
 import { createCanvas } from "./canvas";
 import { toArray } from "./helpers";
 import { saveCanvasFrame } from "./recorders/export-frame";
+import {
+  computeExportFps,
+  computeExportTotalFrames,
+  computeFrameInterval,
+  computePlayFps,
+  computeTotalFrames,
+} from "./time";
 import type {
   BaseProps,
   SketchProps,
@@ -166,8 +173,8 @@ const updatableKeys = [
   // "pixelated", // TODO
   // animation
   "duration",
-  // "playFps", // TODO
-  // "exportFps", // TODO
+  "playFps",
+  "exportFps",
   // file export
   "filename",
   "prefix",
@@ -193,6 +200,7 @@ const createUpdateProp = ({
     let invalidKey: string | null = null;
     for (const key in options) {
       if (!updatableKeys.includes(key)) {
+        invalidKey = key;
         throw new Error(`${invalidKey} is not updatable`);
       }
     }
@@ -201,12 +209,12 @@ const createUpdateProp = ({
       // DOM
       if (key === "parent") {
         // FIX: when resized, canvas size (or style) changes
+        //      resize fitCanvasToWindow() calculation affects
         if (
           typeof options[key] === "string" ||
           options[key] instanceof Element
         ) {
-          const parent = toElement(options[key]);
-          parent.appendChild(canvas);
+          toHTMLElement(options[key]).appendChild(canvas);
         } else {
           throw new Error(`${options[key]} must be either string or Element`);
         }
@@ -249,11 +257,21 @@ const createUpdateProp = ({
       // animation
       else if (key === "duration") {
         props.duration = options[key];
+        settings.duration = options[key];
+        computeTotalFrames(settings);
+        props.totalFrames = settings.totalFrames;
       } else if (key === "playFps") {
-        console.log(`${key} update is not yet implemented`);
-        // settings.playFps = options[key]; // this alone is not enough. check how time is calculated
+        settings.playFps = options[key];
+        computePlayFps(settings);
+        computeTotalFrames(settings);
+        props.playFps = settings.playFps;
+        props.totalFrames = settings.totalFrames;
+        computeFrameInterval(settings, states);
       } else if (key === "exportFps") {
-        console.log(`${key} update is not yet implemented`);
+        settings[key] = options[key];
+        computeExportFps(settings);
+        computeExportTotalFrames(settings);
+        props.exportFps = settings.exportFps;
       }
       // file export
       else if (key === "filename" || key === "prefix" || key === "suffix") {

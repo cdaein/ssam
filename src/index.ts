@@ -66,10 +66,6 @@ export class Wrap {
     // use class to hoist render function and to make it available within init
   }
 
-  transformUserSettings() {
-    // fill in any missing settings from user
-  }
-
   async run(sketch: Sketch, userSettings: SketchSettings) {
     // combine settings; a few may have null or undefined values (ex. canvas)
     const settings = createSettings({

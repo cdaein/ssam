@@ -48,7 +48,7 @@ Based on which sketch mode you are using, you will have access to either `contex
 | :-----------: | :---------------: | ----------------------------------------------------------------------------------------------------------------- |
 |  `duration`   |     `number`      | get loop duration in `ms` (ex. `4000` = 4 sec). If `settings.duration` is not set, it will be `Infinity`.         |
 | `totalFrames` |     `number`      | get the number of total frames. If `settings.duration` is not set, it will be `Infinity`.                         |
-|    `frame`    |     `number`      | get current frame count. starts at `0`                                                                            |
+|    `frame`    |     `number`      | get current frame count. starts at `0`. the value may not always increment by 1 so that it can keep up with time. |
 |    `time`     |     `number`      | get current time in `ms`. starts at `0`                                                                           |
 |  `deltaTime`  |     `number`      | get delta time between frame renders in `ms`                                                                      |
 |  `playhead`   |     `number`      | goes from `0` to `1` over animation duration. If `duration` is not set, it does not update, and will stay at `0`. |
@@ -57,12 +57,12 @@ Based on which sketch mode you are using, you will have access to either `contex
 
 ### Function Props
 
-|     name      |    type    | description                                                                                                                                                                                                                            |
-| :-----------: | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `exportFrame` | `function` | Call to save a frame. Useful if you want to attach to an event.                                                                                                                                                                        |
-| `togglePlay`  | `function` | Call to toggle play and pause.                                                                                                                                                                                                         |
-|   `render`    | `function` | Call to run the code in `wrap.render()` manually. Useful for rendering on-demand when you don't need to run the animation constantly.                                                                                                  |
-|   `update`    | `function` | Update settings or properties. ex. `update({ pixelRatio: 2 })`. Supported keys are `title`, `background`, `dimensions`, `width`, `height`, `pixelRatio`, `duration`, `filename`, `prefix`, `suffix`, `frameFormat` and `framesFormat`. |
+|     name      |    type    | description                                                                                                                                                                                                                                                    |
+| :-----------: | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `exportFrame` | `function` | Call to save a frame. Useful if you want to attach to an event.                                                                                                                                                                                                |
+| `togglePlay`  | `function` | Call to toggle play and pause.                                                                                                                                                                                                                                 |
+|   `render`    | `function` | Call to run the code in `wrap.render()` manually. Useful for rendering on-demand when you don't need to run the animation constantly.                                                                                                                          |
+|   `update`    | `function` | Update settings or properties. ex. `update({ pixelRatio: 2 })`. Supported keys are `title`, `background`, `dimensions`, `width`, `height`, `pixelRatio`, `duration`, `playFps`, `exportFps`, `filename`, `prefix`, `suffix`, `frameFormat` and `framesFormat`. |
 
 Next, check out [Sketch Settings](./settings.md)
 

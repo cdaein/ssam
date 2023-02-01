@@ -211,9 +211,9 @@ export interface WebGLProps extends BaseProps {
   gl: WebGLRenderingContext;
 }
 
-// export interface P5Props extends BaseProps {
-//   p5: p5;
-// }
+export interface P5Props extends BaseProps {
+  p5: p5;
+}
 
 // export interface Props {
 //   wrap: Wrap;

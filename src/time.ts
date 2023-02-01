@@ -2,12 +2,50 @@
  * time keeping
  */
 
+import { states } from "./states";
 import type {
   BaseProps,
   SketchSettings,
   SketchSettingsInternal,
   SketchStates,
 } from "./types/types";
+
+export const computeFrameInterval = (
+  settings: SketchSettingsInternal,
+  states: SketchStates
+) => {
+  states.frameInterval =
+    settings.playFps !== null ? 1000 / settings.playFps : null;
+};
+
+export const computeExportFps = (settings: SketchSettingsInternal) => {
+  settings.exportFps = Math.max(Math.floor(settings.exportFps), 1);
+};
+
+export const computePlayFps = (settings: SketchSettingsInternal) => {
+  if (settings.playFps !== null) {
+    settings.playFps = Math.max(Math.floor(settings.playFps), 1);
+  }
+};
+
+export const computeTotalFrames = (settings: SketchSettingsInternal) => {
+  // userSettings doesn't have totalFrames, but internally, both will be computed.
+  // when both are Infinity, animation will continue to run,
+  // time/frame updates, playhead doesn't.
+  // REVIEW: use ceil()?
+  if (settings.playFps !== null && settings.duration !== Infinity) {
+    settings.totalFrames = Math.floor(
+      (settings.playFps * settings.duration) / 1000
+    );
+  }
+};
+export const computeExportTotalFrames = (settings: SketchSettingsInternal) => {
+  if (settings.exportFps !== null && settings.duration !== Infinity) {
+    settings.exportTotalFrames = Math.floor(
+      (settings.exportFps * settings.duration) / 1000
+    );
+  }
+};
 
 export const computePlayhead = ({
   settings,

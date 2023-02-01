@@ -1,3 +1,10 @@
+import { toArray } from "./helpers";
+import {
+  computeExportFps,
+  computeExportTotalFrames,
+  computePlayFps,
+  computeTotalFrames,
+} from "./time";
 import { SketchSettings, SketchSettingsInternal } from "./types/types";
 
 /**
@@ -68,33 +75,15 @@ export const createSettings = ({
   document.title = combined.title;
   document.body.style.background = combined.background;
 
-  if (combined.playFps !== null) {
-    combined.playFps = Math.max(Math.floor(combined.playFps), 1);
-  }
-  combined.exportFps = Math.max(Math.floor(combined.exportFps), 1);
-  // userSettings doesn't have totalFrames, but internally, both will be computed.
-  // when both are Infinity, animation will continue to run,
-  // time/frame updates, playhead doesn't.
-  // REVIEW: use ceil()?
-  if (combined.playFps !== null && combined.duration !== Infinity) {
-    combined.totalFrames = Math.floor(
-      (combined.duration * combined.playFps) / 1000
-    );
-  }
-  if (combined.exportFps !== null && combined.duration !== Infinity) {
-    combined.exportTotalFrames = Math.floor(
-      (combined.exportFps * combined.duration) / 1000
-    );
-  }
+  // time
+  computePlayFps(combined);
+  computeExportFps(combined);
+  computeTotalFrames(combined);
+  computeExportTotalFrames(combined);
 
   // convert to array format
-  // TODO: use toArray function
-  if (!Array.isArray(combined.frameFormat)) {
-    combined.frameFormat = [combined.frameFormat];
-  }
-  if (!Array.isArray(combined.framesFormat)) {
-    combined.framesFormat = [combined.framesFormat];
-  }
+  combined.frameFormat = toArray(combined.frameFormat);
+  combined.framesFormat = toArray(combined.framesFormat);
 
   return combined;
 };
