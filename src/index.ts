@@ -90,7 +90,7 @@ export class Wrap {
     try {
       await sketch(props);
     } catch (err: any) {
-      console.error("Error at the sketch init:", err);
+      console.error("Error at sketch init:", err);
       return null;
     }
 
@@ -111,6 +111,7 @@ export class Wrap {
       settings,
       props,
     });
+
     // render at least once
     this.render(props);
 
@@ -144,13 +145,6 @@ export class Wrap {
     };
     if (settings.animate) window.requestAnimationFrame(loop);
 
-    if (settings.animate) {
-      document.addEventListener("DOMContentLoaded", () => {
-        window.onload = () => {
-          // REVIEW
-        };
-      });
-    }
     if (settings.hotkeys) {
       addResize();
       addKeydown();

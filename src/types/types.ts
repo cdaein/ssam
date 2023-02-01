@@ -186,7 +186,7 @@ export interface BaseProps {
   render: () => void;
   resize: () => void;
   /** not yet implemented */
-  update: (settings: SketchSettings) => void;
+  update: (options: Record<string, any>) => void;
 }
 
 // REVIEW: separate updatable/writable props (during life of a sketch), and fixed/readable props

@@ -88,6 +88,7 @@ export const createSettings = ({
   }
 
   // convert to array format
+  // TODO: use toArray function
   if (!Array.isArray(combined.frameFormat)) {
     combined.frameFormat = [combined.frameFormat];
   }

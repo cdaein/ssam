@@ -1,6 +1,8 @@
 import { resizeCanvas } from "@daeinc/canvas";
+import { toElement } from "@daeinc/dom";
 import { Wrap } from ".";
-import { prepareCanvas } from "./canvas";
+import { createCanvas } from "./canvas";
+import { toArray } from "./helpers";
 import { saveCanvasFrame } from "./recorders/export-frame";
 import type {
   BaseProps,
@@ -30,17 +32,15 @@ export const createProps = ({
   wrap: Wrap;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  // TODO: proper typing. should i move this to createFunctionProps()?
   renderProp: () => void;
   resizeProp: () => void;
 }) => {
-  const { canvas, context, gl, width, height, pixelRatio } = prepareCanvas(
-    settings,
-    states
+  const { canvas, context, gl, width, height, pixelRatio } = createCanvas(
+    settings
   ) as CanvasProps;
 
   // function props
-  const { exportFrame, update, togglePlay } = createFunctionProps({
+  const { exportFrame, togglePlay } = createFunctionProps({
     canvas,
     settings,
     states,
@@ -65,7 +65,7 @@ export const createProps = ({
     togglePlay,
     render: renderProp,
     resize: resizeProp,
-    update,
+    update: () => {},
   };
 
   let props: SketchProps | WebGLProps;
@@ -88,6 +88,14 @@ export const createProps = ({
     } as WebGLProps;
   }
 
+  const update = createUpdateProp({
+    canvas,
+    settings,
+    states,
+    props,
+  });
+  props.update = update;
+
   return props;
 };
 
@@ -102,12 +110,13 @@ const createFunctionProps = ({
 }) => {
   return {
     exportFrame: createExportFrameProp({ canvas, settings, states }),
-    // REVIEW: is it ok to expose internal settings like this?
-    update: createUpdateProp({
-      canvas,
-      currentSettings: settings,
-      resizeCanvas,
-    }),
+    // update: createUpdateProp({
+    //   canvas,
+    //   settings,
+    //   states,
+    //   props,
+    //   resizeCanvas,
+    // }),
     togglePlay: createTogglePlay({ states }),
   };
 };
@@ -142,10 +151,9 @@ const createTogglePlay = ({ states }: { states: SketchStates }) => {
   };
 };
 
-// FIX: screen flicker, doesn't work when paused
 const updatableKeys = [
   // DOM
-  "parent",
+  // "parent", // TODO
   "title",
   "background",
   // canvas
@@ -153,12 +161,11 @@ const updatableKeys = [
   "width",
   "height",
   "pixelRatio",
-  "pixelated",
+  // "pixelated", // TODO
   // animation
   "duration",
-  "totalFrames",
-  "playFps",
-  "exportFps",
+  // "playFps", // TODO
+  // "exportFps", // TODO
   // file export
   "filename",
   "prefix",
@@ -167,29 +174,94 @@ const updatableKeys = [
   "framesFormat",
 ];
 
+// FIX: screen flicker, doesn't work when paused
 const createUpdateProp = ({
   canvas,
-  currentSettings,
-  resizeCanvas,
+  settings,
+  states,
+  props,
 }: {
   canvas: HTMLCanvasElement;
-  currentSettings: SketchSettingsInternal;
-  resizeCanvas: any;
+  settings: SketchSettingsInternal;
+  states: SketchStates;
+  props: SketchProps | WebGLProps;
 }) => {
-  return (options: any) => {
-    console.log("update() prop is not yet implemented.");
-
+  return (options: Record<string, any>) => {
     // check if options only include updatableKeys
+    let invalidKey: string | null = null;
+    for (const key in options) {
+      if (!updatableKeys.includes(key)) {
+        throw new Error(`${invalidKey} is not updatable`);
+      }
+    }
+
+    for (const key in options) {
+      // DOM
+      if (key === "parent") {
+        // FIX: when resized, canvas size (or style) changes
+        if (
+          typeof options[key] === "string" ||
+          options[key] instanceof Element
+        ) {
+          const parent = toElement(options[key]);
+          parent.appendChild(canvas);
+        } else {
+          throw new Error(`${options[key]} must be either string or Element`);
+        }
+      } else if (key === "title") {
+        document.title = options[key];
+      } else if (key === "background") {
+        document.body.style.background = options[key];
+      }
+      // canvas
+      else if (
+        key === "dimensions" ||
+        key === "width" ||
+        key === "height" ||
+        key === "pixelRatio"
+      ) {
+        const { width, height } = resizeCanvas({
+          canvas,
+          context: settings.mode,
+          width:
+            key === "dimensions"
+              ? options[key][0]
+              : key === "width"
+              ? options[key]
+              : props.width,
+          height:
+            key === "dimensions"
+              ? options[key][1]
+              : key === "height"
+              ? options[key]
+              : props.height,
+          pixelRatio: key === "pixelRatio" ? options[key] : props.pixelRatio,
+          scaleContext: settings.scaleContext,
+          attributes: settings.attributes,
+        });
+        props.width = width;
+        props.height = height;
+        props.pixelRatio =
+          key === "pixelRatio" ? options[key] : props.pixelRatio;
+      }
+      // animation
+      else if (key === "duration") {
+        props.duration = options[key];
+      } else if (key === "playFps") {
+        console.log(`${key} update is not yet implemented`);
+        // settings.playFps = options[key]; // this alone is not enough. check how time is calculated
+      } else if (key === "exportFps") {
+        console.log(`${key} update is not yet implemented`);
+      }
+      // file export
+      else if (key === "filename" || key === "prefix" || key === "suffix") {
+        settings[key] = options[key];
+      } else if (key === "frameFormat" || key === "framesFormat") {
+        settings[key] = toArray(options[key]);
+      }
+    }
 
     // check if it's trying to update both duration & totalFrames at the same time
-
-    // DOM
-
-    // canvas
-
-    // animation
-
-    // file export
 
     // if (settings.pixelRatio) {
     //   resizeCanvas({
