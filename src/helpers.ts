@@ -62,3 +62,11 @@ export const formatDatetime = (date: Date) => {
 
   return formatted;
 };
+
+export const toArray = (value: any) => {
+  // convert to array format
+  if (!Array.isArray(value)) {
+    return [value];
+  }
+  return value;
+};
