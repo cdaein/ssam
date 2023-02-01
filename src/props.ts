@@ -170,7 +170,7 @@ const updatableKeys = [
   "width",
   "height",
   "pixelRatio",
-  // "pixelated", // TODO
+  "pixelated",
   // animation
   "duration",
   "playFps",
@@ -251,6 +251,20 @@ const createUpdateProp = ({
         props.height = height;
         props.pixelRatio =
           key === "pixelRatio" ? options[key] : props.pixelRatio;
+      } else if (key === "pixelated") {
+        if (options[key] === true) {
+          canvas.style.imageRendering = "pixelated";
+          if (settings.mode === "2d") {
+            //@ts-ignore
+            props.context.imageSmoothingEnabled = false;
+          }
+        } else {
+          canvas.style.imageRendering = "auto";
+          if (settings.mode === "2d") {
+            //@ts-ignore
+            props.context.imageSmoothingEnabled = true;
+          }
+        }
       }
       // animation
       else if (key === "duration") {

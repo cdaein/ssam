@@ -20,7 +20,7 @@ Ssam uses the `settings` object you provide to prepare and set up the canvas. An
 |  `pixelRatio`  |           `number`            |                    `1`                    | Set other than `1` for higher quality image on supported displays (ie. Apple Retina display)                                                             |
 |   `centered`   |           `boolean`           |                  `true`                   | Center canvas in window.                                                                                                                                 |
 | `scaleContext` |           `boolean`           |                  `true`                   | When true, will scale context so `px` values can work for high pixel ratio.                                                                              |
-|  `pixelated`   |           `boolean`           |                  `false`                  | not yet implemented. Only available in the `2d` mode.                                                                                                    |
+|  `pixelated`   |           `boolean`           |                  `false`                  | Pixelate canvas rendering                                                                                                                                |
 
 ### Animation Settings
 

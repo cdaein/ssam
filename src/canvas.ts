@@ -51,6 +51,12 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
     }));
   }
 
+  if (settings.pixelated) {
+    canvas.style.imageRendering = "pixelated";
+    if (settings.mode === "2d")
+      (context as CanvasRenderingContext2D).imageSmoothingEnabled = false;
+  }
+
   centerCanvasToWindow(canvas, settings);
 
   return { canvas, context, gl, width, height, pixelRatio };

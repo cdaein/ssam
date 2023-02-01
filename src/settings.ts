@@ -75,6 +75,9 @@ export const createSettings = ({
   document.title = combined.title;
   document.body.style.background = combined.background;
 
+  // canvas
+  // pixelated is handle at canvas creation
+
   // time
   computePlayFps(combined);
   computeExportFps(combined);
