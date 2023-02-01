@@ -29,9 +29,6 @@ export default ({
 }) => {
   const { canvas } = props;
   // check if canvas size changed
-  const doResize =
-    canvas.width !== canvas.clientWidth ||
-    canvas.height !== canvas.clientHeight;
 
   const handleResize = () => {
     // REVIEW: how to handle if canvas parent is not 100% of window?
@@ -44,6 +41,11 @@ export default ({
       userSettings.dimensions === undefined &&
       userSettings.canvas === undefined
     ) {
+      // the event is attached to the window, so no need to check for now
+      // const doResize =
+      //   canvas.width !== canvas.clientWidth ||
+      //   canvas.height !== canvas.clientHeight;
+
       ({ width: props.width, height: props.height } = resizeCanvas({
         canvas,
         context: settings.mode,
@@ -53,16 +55,15 @@ export default ({
         scaleContext: settings.scaleContext,
       }));
 
-      // call only when canvas size has changed (ie. fullscreen)
-      if (doResize) {
-        try {
-          resize(props);
-          render(props);
-        } catch (err: any) {
-          console.error("Error at resize/render", err);
-          return null;
-        }
+      // if (doResize) {
+      try {
+        resize(props);
+        render(props);
+      } catch (err: any) {
+        console.error("Error at resize/render", err);
+        return null;
       }
+      // }
     }
 
     fitCanvasToWindow({

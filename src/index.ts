@@ -51,7 +51,7 @@ export type {
 export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
   const wrap = new Wrap();
   try {
-    await wrap.init(sketch, settings);
+    await wrap.run(sketch, settings);
   } catch (err: any) {
     console.error("Error:", err); // this is more descriptive
     return null;
@@ -66,12 +66,17 @@ export class Wrap {
     // use class to hoist render function and to make it available within init
   }
 
-  async init(sketch: Sketch, userSettings: SketchSettings) {
+  transformUserSettings() {
+    // fill in any missing settings from user
+  }
+
+  async run(sketch: Sketch, userSettings: SketchSettings) {
     // combine settings; a few may have null or undefined values (ex. canvas)
     const settings = createSettings({
       main: userSettings,
     }) as SketchSettingsInternal;
 
+    // TODO: now with class structure, use class methods
     const states = createStates({ settings });
 
     const props = createProps({

@@ -16,7 +16,6 @@ export const createSettings = ({
 }) => {
   // data flow: userSettings + defaultSettings => settings => states (mutable) => props => sketch()
   // default settings
-  // TODO: create settings.ts
   const defaultSettings: SketchSettingsInternal = {
     // document
     title: "Sketch",

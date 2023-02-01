@@ -51,8 +51,22 @@ export const states = {
     gifOptions: {},
     hotkeys: true,
   },
-  states: {
-    //
+  internals: {
+    paused: false,
+    playMode: "play",
+    savingFrame: false,
+    savingFrames: false,
+    captureReady: false,
+    captureDone: false,
+    startTime: 0,
+    lastStartTime: 0,
+    pausedStartTime: 0,
+    pausedDuration: 0,
+    timestamp: 0,
+    lastTimestamp: 0,
+    // FIX
+    // frameInterval: settings.playFps !== null ? 1000 / settings.playFps : null,
+    timeResetted: false,
   },
   props: {
     //
