@@ -1,4 +1,4 @@
-import { SketchSettingsInternal, SketchStates } from "./types/types";
+import { SketchSettingsInternal, SketchStates, States } from "./types/types";
 
 export const createStates = ({
   settings,
@@ -25,24 +25,23 @@ export const createStates = ({
 
 // not used at the moment
 // TODO: consolidate all wrapper data into a single source of truth
-export const states = {
+export const states: States = {
   settings: {
     title: "Sketch",
     background: "#333",
-    parent: "body",
     mode: "2d",
+    parent: "body",
     canvas: null,
     dimensions: [window.innerWidth, window.innerHeight],
     pixelRatio: 1,
     centered: true,
     scaleContext: true,
     pixelated: false,
+    attributes: {},
     animate: true,
     playFps: null,
     exportFps: 60,
     duration: Infinity,
-    totalFrames: Infinity,
-    exportTotalFrames: Infinity,
     filename: "",
     prefix: "",
     suffix: "",
@@ -64,11 +63,32 @@ export const states = {
     pausedDuration: 0,
     timestamp: 0,
     lastTimestamp: 0,
-    // FIX
-    // frameInterval: settings.playFps !== null ? 1000 / settings.playFps : null,
+    frameInterval: null,
     timeResetted: false,
+    totalFrames: Infinity, // internal use
+    exportTotalFrames: Infinity, // internal use
   },
   props: {
-    //
+    wrap: null,
+    canvas: null,
+    context: null,
+    gl: null,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    pixelRatio: 1,
+    animate: true,
+    playhead: 0,
+    frame: 0,
+    time: 0,
+    deltaTime: 0,
+    duration: 1,
+    totalFrames: 0,
+    recording: false,
+    exportFrame: () => {},
+    togglePlay: () => {},
+    render: () => {},
+    resize: () => {},
+    update: () => {},
+    p5: null,
   },
 };
