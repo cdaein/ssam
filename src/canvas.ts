@@ -77,8 +77,8 @@ export const centerCanvasToWindow = (
   if (settings.centered) {
     if (canvas.parentElement) {
       const canvasContainer = canvas.parentElement;
-      canvasContainer.style.width = "100vw";
-      canvasContainer.style.height = "100vh";
+      // canvasContainer.style.width = "100vw";
+      // canvasContainer.style.height = "100vh";
       canvasContainer.style.display = "flex";
       canvasContainer.style.justifyContent = "center";
       canvasContainer.style.alignItems = "center";
@@ -89,10 +89,10 @@ export const centerCanvasToWindow = (
     }
   } else {
     // scale canvas even when not centered.
-    canvas.style.width = 100 + "%";
-    canvas.style.height = 100 + "%";
-    canvas.style.maxWidth = `${settings.dimensions[0]}px`;
-    canvas.style.maxHeight = `${settings.dimensions[1]}px`;
+    // canvas.style.width = 100 + "%";
+    // canvas.style.height = 100 + "%";
+    // canvas.style.maxWidth = `${settings.dimensions[0]}px`;
+    // canvas.style.maxHeight = `${settings.dimensions[1]}px`;
   }
 };
 
@@ -108,17 +108,46 @@ export const fitCanvasToWindow = ({
   // resizing canvas style (when !fullscreen & centered)
   // REVIEW: this should be better done with CSS class rules.
   if (userSettings.dimensions !== undefined && settings.centered) {
-    const margin = 50; // px // TODO: add to settings
+    const margin = 50; // px // TODO: add to settings.sketchMargin ? canvasMargin
     const canvasParent = props.canvas.parentElement!;
-    const parentWidth = canvasParent.clientWidth;
-    const parentHeight = canvasParent.clientHeight;
-    const scale = Math.min(
-      1,
-      Math.min(
-        (parentWidth - margin * 2) / props.width,
-        (parentHeight - margin * 2) / props.height
-      )
-    );
-    props.canvas.style.transform = `scale(${scale})`;
+
+    if (canvasParent.nodeName.toLowerCase() === "body") {
+      // if canvas is child of body
+      const parentWidth = canvasParent.clientWidth;
+      const parentHeight = canvasParent.clientHeight;
+      const scale = Math.min(
+        1,
+        Math.min(
+          (parentWidth - margin * 2) / props.width,
+          (parentHeight - margin * 2) / props.height
+        )
+      );
+      props.canvas.style.transform = `scale(${scale})`;
+    } else {
+      // TODO: when custom parent & centered, weird scaling issue.
+      //       how should it respond?
+      // if (settings.centered) return;
+
+      // scale canvas style to its parent
+      const scaledDimension = Math.min(
+        canvasParent.clientWidth,
+        canvasParent.clientHeight
+      );
+      props.canvas.style.width = `${scaledDimension}px`;
+      props.canvas.style.height = `${scaledDimension}px`;
+
+      // scale canvas parent to its grand parent
+      const canvasGrandParent = canvasParent.parentElement!;
+      const grandParentWidth = canvasGrandParent.clientWidth;
+      const grandParentHeight = canvasGrandParent.clientHeight;
+      const scale = Math.min(
+        1,
+        Math.min(
+          (grandParentWidth - margin * 2) / canvasParent.clientWidth,
+          (grandParentHeight - margin * 2) / canvasParent.clientHeight
+        )
+      );
+      canvasParent.style.transform = `scale(${scale})`;
+    }
   }
 };

@@ -67,11 +67,13 @@ export default ({
       // }
     }
 
-    fitCanvasToWindow({
-      userSettings,
-      settings,
-      props,
-    });
+    if (settings.centered) {
+      fitCanvasToWindow({
+        userSettings,
+        settings,
+        props,
+      });
+    }
 
     return;
   };

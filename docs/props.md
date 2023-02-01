@@ -57,12 +57,12 @@ Based on which sketch mode you are using, you will have access to either `contex
 
 ### Function Props
 
-|     name      |    type    | description                                                                                                                                                                                                                                                    |
-| :-----------: | :--------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `exportFrame` | `function` | Call to save a frame. Useful if you want to attach to an event.                                                                                                                                                                                                |
-| `togglePlay`  | `function` | Call to toggle play and pause.                                                                                                                                                                                                                                 |
-|   `render`    | `function` | Call to run the code in `wrap.render()` manually. Useful for rendering on-demand when you don't need to run the animation constantly.                                                                                                                          |
-|   `update`    | `function` | Update settings or properties. ex. `update({ pixelRatio: 2 })`. Supported keys are `title`, `background`, `dimensions`, `width`, `height`, `pixelRatio`, `duration`, `playFps`, `exportFps`, `filename`, `prefix`, `suffix`, `frameFormat` and `framesFormat`. |
+|     name      |    type    | description                                                                                                                                                                                                                                                              |
+| :-----------: | :--------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `exportFrame` | `function` | Call to save a frame. Useful if you want to attach to an event.                                                                                                                                                                                                          |
+| `togglePlay`  | `function` | Call to toggle play and pause.                                                                                                                                                                                                                                           |
+|   `render`    | `function` | Call to run the code in `wrap.render()` manually. Useful for rendering on-demand when you don't need to run the animation constantly.                                                                                                                                    |
+|   `update`    | `function` | Update settings or properties. ex. `update({ pixelRatio: 2 })`. Updatable keys are `parent`, `title`, `background`, `dimensions`, `width`, `height`, `pixelRatio`, `duration`, `playFps`, `exportFps`, `filename`, `prefix`, `suffix`, `frameFormat` and `framesFormat`. |
 
 Next, check out [Sketch Settings](./settings.md)
 

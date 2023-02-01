@@ -162,7 +162,7 @@ const createTogglePlay = ({ states }: { states: SketchStates }) => {
 
 const updatableKeys = [
   // DOM
-  // "parent", // TODO
+  "parent",
   "title",
   "background",
   // canvas
@@ -208,8 +208,6 @@ const createUpdateProp = ({
     for (const key in options) {
       // DOM
       if (key === "parent") {
-        // FIX: when resized, canvas size (or style) changes
-        //      resize fitCanvasToWindow() calculation affects
         if (
           typeof options[key] === "string" ||
           options[key] instanceof Element
