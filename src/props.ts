@@ -60,6 +60,8 @@ export const createProps = ({
     deltaTime: 0,
     duration: settings.duration,
     totalFrames: settings.totalFrames,
+    playFps: settings.playFps,
+    exportFps: settings.exportFps,
     recording: false,
     exportFrame,
     togglePlay,

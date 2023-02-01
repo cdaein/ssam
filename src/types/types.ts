@@ -176,6 +176,10 @@ export interface BaseProps {
   duration: number;
   /** number of total frames over duration */
   totalFrames: number;
+  /** play fps */
+  playFps: number | null;
+  /** export fps */
+  exportFps: number;
   /** true if recording in progress */
   recording: boolean;
   /** call to export canvas as image */
