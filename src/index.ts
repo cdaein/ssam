@@ -48,6 +48,27 @@ export type {
   WebGLProps,
 } from "./types/types";
 
+if (import.meta.hot) {
+  import.meta.hot.accept();
+}
+
+export const hotReload = (id: string) => {
+  // need to reference id
+  const oldCanvas = document.getElementById(id) as HTMLCanvasElement;
+  if (oldCanvas) {
+    oldCanvas.width = 0;
+    oldCanvas.height = 0;
+    oldCanvas?.remove();
+    console.log("dispose");
+  }
+
+  // TODO:
+  // no way to prevent ssam to be re-created in sketch.ts
+  // best option is to recreate with existing props values
+  // getCurrentStates()
+  // getCurrentProps()
+};
+
 export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
   const wrap = new Wrap();
   try {
@@ -60,7 +81,12 @@ export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
 };
 
 export class Wrap {
+  props: SketchProps | WebGLProps | undefined;
+  settings: SketchSettingsInternal | undefined;
+  states: SketchStates | undefined;
+
   // render!: SketchRender;
+
   constructor() {
     // use ssam() function for interfacing with user. (class constructor can't use async)
     // use class to hoist render function and to make it available within init
@@ -68,48 +94,45 @@ export class Wrap {
 
   async run(sketch: Sketch, userSettings: SketchSettings) {
     // combine settings; a few may have null or undefined values (ex. canvas)
-    const settings = createSettings({
+    this.settings = createSettings({
       main: userSettings,
     }) as SketchSettingsInternal;
-
-    // TODO: now with class structure, use class methods
-    const states = createStates({ settings });
-
-    const props = createProps({
+    this.states = createStates({ settings: this.settings });
+    this.props = createProps({
       wrap: this,
-      settings,
-      states,
-      renderProp: () => this.render(props),
-      resizeProp: () => this.resize(props),
+      settings: this.settings,
+      states: this.states,
+      renderProp: () => this.render(this.props as SketchProps | WebGLProps),
+      resizeProp: () => this.resize(this.props as SketchProps | WebGLProps),
     });
 
     try {
-      await sketch(props);
+      await sketch(this.props);
     } catch (err: any) {
       console.error("Error at sketch init:", err);
       return null;
     }
 
     const { add: addResize } = resizeHandler({
-      props,
+      props: this.props,
       userSettings,
-      settings,
+      settings: this.settings,
       render: this.render,
       resize: this.resize,
     });
     const { add: addKeydown } = keydownHandler({
-      props,
-      states,
+      props: this.props,
+      states: this.states,
     });
 
     fitCanvasToWindow({
       userSettings,
-      settings,
-      props,
+      settings: this.settings,
+      props: this.props,
     });
 
     // render at least once
-    this.render(props);
+    this.render(this.props);
 
     // animation render loop
 
@@ -125,23 +148,28 @@ export class Wrap {
         return;
       }
 
-      states.timestamp =
-        timestamp - firstLoopRenderTime - states.pausedDuration;
+      this.states!.timestamp =
+        timestamp - firstLoopRenderTime - this.states!.pausedDuration;
 
-      if (!states.savingFrames) {
+      if (!this.states!.savingFrames) {
         playLoop({
           timestamp: timestamp - firstLoopRenderTime,
-          settings,
-          states,
-          props,
+          settings: this.settings as SketchSettingsInternal,
+          states: this.states as SketchStates,
+          props: this.props as SketchProps | WebGLProps,
         });
       } else {
-        recordLoop({ canvas: props.canvas, settings, states, props });
+        recordLoop({
+          canvas: (this.props as SketchProps | WebGLProps).canvas,
+          settings: this.settings as SketchSettingsInternal,
+          states: this.states as SketchStates,
+          props: this.props as SketchProps | WebGLProps,
+        });
       }
     };
-    if (settings.animate) window.requestAnimationFrame(loop);
+    if (this.settings.animate) window.requestAnimationFrame(loop);
 
-    if (settings.hotkeys) {
+    if (this.settings.hotkeys) {
       addResize();
       addKeydown();
     }

@@ -51,6 +51,8 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
     }));
   }
 
+  canvas.id = settings.id;
+
   if (settings.pixelated) {
     canvas.style.imageRendering = "pixelated";
     if (settings.mode === "2d")

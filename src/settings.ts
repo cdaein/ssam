@@ -28,6 +28,7 @@ export const createSettings = ({
     title: "Sketch",
     background: "#333",
     // canvas
+    id: Math.floor(Math.random() * 1000000).toString(),
     parent: "body",
     canvas: null,
     dimensions: [window.innerWidth, window.innerHeight],

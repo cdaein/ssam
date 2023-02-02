@@ -54,6 +54,10 @@ export type SketchSettings = {
   /** set background color of HTML page. uses CSS color string. ex. `#aaa` */
   background?: string;
   // canvas
+  /** set sketch mode to use or integrate with other libraries */
+  mode?: SketchMode;
+  /** canvas id */
+  id?: string;
   /** set canvas parent either as `HTMLElement` object or string selector. ex. `div#app` */
   parent?: HTMLElement | string;
   /** set it to use an existing canvas instead of using one provided by sketch-wrapper */
@@ -95,8 +99,6 @@ export type SketchSettings = {
   // sketch
   /** set to `false` to not use sketch-wrapper provided hot keys (ex. `CMD+S` for image export) */
   hotkeys?: boolean;
-  /** set sketch mode to use or integrate with other libraries */
-  mode?: SketchMode;
 };
 
 /**
@@ -108,6 +110,7 @@ export interface SketchSettingsInternal {
   background: string;
   // canvas
   mode: SketchMode;
+  id: string;
   parent: HTMLElement | string;
   canvas: HTMLCanvasElement | null; // if null, new canvas will be created
   dimensions: [number, number];
