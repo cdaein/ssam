@@ -7,8 +7,10 @@ import { saveCanvasFrame } from "./recorders/export-frame";
 import {
   computeExportFps,
   computeExportTotalFrames,
+  computeFrame,
   computeFrameInterval,
   computePlayFps,
+  computePlayhead,
   computeTotalFrames,
 } from "./time";
 import type {
@@ -172,6 +174,7 @@ const updatableKeys = [
   "pixelRatio",
   "pixelated",
   // animation
+  // "frame", // TODO: for frame-by-frame navigation
   "duration",
   "playFps",
   "exportFps",
@@ -267,7 +270,14 @@ const createUpdateProp = ({
         }
       }
       // animation
-      else if (key === "duration") {
+      else if (key === "frame") {
+        // TODO: when paused, playLoop() returns early, so these commands don't register
+        //       also, computePlayhead() uses props.time / duration
+        //       so any value update here will be overridden inside loop
+        //       props.time needs +/-offset for this to work
+        // states.timeNavOffset = props.deltaTime;
+        // props.frame = options[key] % props.totalFrames;
+      } else if (key === "duration") {
         props.duration = options[key];
         settings.duration = options[key];
         computeTotalFrames(settings);

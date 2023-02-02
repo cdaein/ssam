@@ -32,7 +32,20 @@ export default ({
     } else if ((ev.metaKey || ev.ctrlKey) && ev.key === "k") {
       console.log("git commit is not yet implemented");
       // TODO: if in dev server, send the message to the server to git-commit.
+    } else if (ev.key === "ArrowRight") {
+      // a frame forward
+      if (states.paused) {
+        // TODO
+        // REVIEW: frame needs to wrap totalFrames
+        props.update({ frame: props.frame + 1 });
+      }
+    } else if (ev.key === "ArrowLeft") {
+      if (states.paused) {
+        // TODO
+        props.update({ frame: props.frame - 1 });
+      }
     } else if (ev.key === "t") {
+      // TEST
       states.timeResetted = true;
     }
   };

@@ -172,7 +172,7 @@ export class Wrap {
       // 1. better dt handling
       // props.time = (states.timestamp - states.startTime) % props.duration;
       // 2. full reset each loop. but, dt is one-frame (8 or 16ms) off
-      props.time = states.timestamp - states.startTime;
+      props.time = states.timestamp - states.startTime + states.timeNavOffset;
 
       if (props.time >= props.duration) {
         resetTime({ settings, states, props });
