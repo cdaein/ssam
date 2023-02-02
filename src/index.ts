@@ -63,16 +63,44 @@ export const hotReload = (id: string) => {
   }
 
   // TODO:
-  // no way to prevent ssam to be re-created in sketch.ts
+  // no way to prevent ssam from being re-created in sketch.ts
   // best option is to recreate with existing props values
   // getCurrentStates()
   // getCurrentProps()
 };
 
 export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
-  const wrap = new Wrap();
   try {
-    await wrap.run(sketch, settings);
+    if (import.meta.hot) {
+      console.log("hot-reloading");
+
+      // get current wrap object
+      //
+
+      // get current settings, states and props
+
+      // destory old
+
+      // pass all current data to new Wrap object
+    }
+
+    const wrap = new Wrap();
+    await wrap.setup(sketch, settings);
+
+    // // console.log(wrap.settings, wrap.states, wrap.props);
+    // // send the current wrap object to server
+    // if (import.meta.hot) {
+    //   import.meta.hot.send("ssam:wrap", {
+    //     // wrap: this,
+    //     settings: wrap.settings,
+    //     states: wrap.states,
+    //     // don't include function props ()
+    //     props: {
+    //       time: wrap.props.time,
+    //       playhead: wrap.props.playhead,
+    //     },
+    //   });
+    // }
   } catch (err: any) {
     console.error("Error:", err); // this is more descriptive
     return null;
@@ -81,23 +109,46 @@ export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
 };
 
 export class Wrap {
-  props: SketchProps | WebGLProps | undefined;
-  settings: SketchSettingsInternal | undefined;
-  states: SketchStates | undefined;
+  props!: SketchProps | WebGLProps;
+  settings!: SketchSettingsInternal;
+  states!: SketchStates;
+  removeResize!: () => void;
+  removeKeydown!: () => void;
+  unload?: () => void;
+  firstLoopRender: boolean;
+  firstLoopRenderTime: number;
+  private _frameCount: number;
 
   // render!: SketchRender;
 
   constructor() {
     // use ssam() function for interfacing with user. (class constructor can't use async)
     // use class to hoist render function and to make it available within init
+
+    // there's time delay between first render in handleResize() and first loop render, resulting in animatiom jump. this compesates for that delay
+    this.firstLoopRender = true;
+    this.firstLoopRenderTime = 0;
+
+    // for manual counting when recording (use only for recording)
+    this._frameCount = 0;
+
+    return this;
   }
 
-  async run(sketch: Sketch, userSettings: SketchSettings) {
+  destroy() {
+    // remove any side deffects
+    this.unload && this.unload();
+    window.removeEventListener("resize", this.removeResize);
+    window.removeEventListener("keydown", this.removeKeydown);
+    this.props.canvas.remove();
+  }
+
+  async setup(sketch: Sketch, userSettings: SketchSettings) {
     // combine settings; a few may have null or undefined values (ex. canvas)
     this.settings = createSettings({
       main: userSettings,
     }) as SketchSettingsInternal;
-    this.states = createStates({ settings: this.settings });
+    this.states = <SketchStates>createStates({ settings: this.settings });
     this.props = createProps({
       wrap: this,
       settings: this.settings,
@@ -113,17 +164,19 @@ export class Wrap {
       return null;
     }
 
-    const { add: addResize } = resizeHandler({
+    const { add: addResize, remove: removeResize } = resizeHandler({
       props: this.props,
       userSettings,
       settings: this.settings,
       render: this.render,
       resize: this.resize,
     });
-    const { add: addKeydown } = keydownHandler({
+    this.removeResize = removeResize;
+    const { add: addKeydown, remove: removeKeydown } = keydownHandler({
       props: this.props,
       states: this.states,
     });
+    this.removeKeydown = removeKeydown;
 
     fitCanvasToWindow({
       userSettings,
@@ -135,31 +188,28 @@ export class Wrap {
     this.render(this.props);
 
     // animation render loop
-
-    // there's time delay between first render in handleResize() and first loop render, resulting in animatiom jump. this compesates for that delay
-    let firstLoopRender = true;
-    let firstLoopRenderTime = 0;
-
-    const loop: SketchLoop = (timestamp: number) => {
-      if (firstLoopRender) {
-        firstLoopRenderTime = timestamp;
-        firstLoopRender = false;
+    const loop = (timestamp: number) => {
+      if (this.firstLoopRender) {
+        this.firstLoopRenderTime = timestamp;
+        this.firstLoopRender = false;
         window.requestAnimationFrame(loop);
         return;
       }
 
-      this.states!.timestamp =
-        timestamp - firstLoopRenderTime - this.states!.pausedDuration;
+      this.states.timestamp =
+        timestamp - this.firstLoopRenderTime - this.states.pausedDuration;
 
-      if (!this.states!.savingFrames) {
-        playLoop({
-          timestamp: timestamp - firstLoopRenderTime,
+      if (!this.states.savingFrames) {
+        this.playLoop({
+          loop,
+          timestamp: timestamp - this.firstLoopRenderTime,
           settings: this.settings as SketchSettingsInternal,
           states: this.states as SketchStates,
           props: this.props as SketchProps | WebGLProps,
         });
       } else {
-        recordLoop({
+        this.recordLoop({
+          loop,
           canvas: (this.props as SketchProps | WebGLProps).canvas,
           settings: this.settings as SketchSettingsInternal,
           states: this.states as SketchStates,
@@ -174,168 +224,167 @@ export class Wrap {
       addKeydown();
     }
 
-    const playLoop = async ({
-      timestamp,
-      settings,
-      states,
-      props,
-    }: {
-      timestamp: number;
-      settings: SketchSettingsInternal;
-      states: SketchStates;
-      props: SketchProps | WebGLProps;
-    }) => {
-      // when paused, accumulate pausedDuration
-      if (states.paused) {
-        states.pausedDuration = timestamp - states.pausedStartTime;
+    return this;
+  }
+
+  async playLoop({
+    loop, // TODO
+    timestamp,
+    settings,
+    states,
+    props,
+  }: {
+    loop: any;
+    timestamp: number;
+    settings: SketchSettingsInternal;
+    states: SketchStates;
+    props: SketchProps | WebGLProps;
+  }) {
+    // when paused, accumulate pausedDuration
+    if (states.paused) {
+      states.pausedDuration = timestamp - states.pausedStartTime;
+      window.requestAnimationFrame(loop);
+      return;
+    }
+
+    if (states.timeResetted) {
+      resetTime({ settings, states, props });
+    }
+
+    // time
+    // 1. better dt handling
+    // props.time = (states.timestamp - states.startTime) % props.duration;
+    // 2. full reset each loop. but, dt is one-frame (8 or 16ms) off
+    props.time = states.timestamp - states.startTime + states.timeNavOffset;
+
+    if (props.time >= props.duration) {
+      resetTime({ settings, states, props });
+    }
+    // deltaTime
+    props.deltaTime = states.timestamp - states.lastTimestamp;
+
+    // throttle frame rate
+    if (states.frameInterval !== null) {
+      if (props.deltaTime < states.frameInterval) {
         window.requestAnimationFrame(loop);
         return;
       }
+    }
 
-      if (states.timeResetted) {
-        resetTime({ settings, states, props });
-      }
+    computePlayhead({
+      settings,
+      props,
+    });
+    computeFrame({ settings, states, props });
+    // update lastTimestamp for deltaTime calculation
+    computeLastTimestamp({ states, props });
 
-      // time
-      // 1. better dt handling
-      // props.time = (states.timestamp - states.startTime) % props.duration;
-      // 2. full reset each loop. but, dt is one-frame (8 or 16ms) off
-      props.time = states.timestamp - states.startTime + states.timeNavOffset;
+    try {
+      await this.render(props);
+    } catch (err: any) {
+      console.error(err);
+      return null;
+    }
+    window.requestAnimationFrame(loop);
 
-      if (props.time >= props.duration) {
-        resetTime({ settings, states, props });
-      }
-      // deltaTime
-      props.deltaTime = states.timestamp - states.lastTimestamp;
+    return;
+  }
 
-      // throttle frame rate
-      if (states.frameInterval !== null) {
-        if (props.deltaTime < states.frameInterval) {
-          window.requestAnimationFrame(loop);
-          return;
+  async recordLoop({
+    loop,
+    canvas,
+    settings,
+    states,
+    props,
+  }: {
+    loop: any; // TODO
+    canvas: HTMLCanvasElement;
+    settings: SketchSettingsInternal;
+    states: SketchStates;
+    props: SketchProps | WebGLProps;
+  }) {
+    // TODO: what if duration is not set?
+    if (!states.captureReady) {
+      // reset time only if looping (duration set)
+      // REVIEW: whether to resetTime() needs more testing
+      if (props.duration) resetTime({ settings, states, props });
+
+      settings.framesFormat.forEach((format) => {
+        if (format !== "webm" && format !== "gif") {
+          throw new Error(`${format} export is not supported`);
+        }
+        if (format === "webm") {
+          setupWebMRecord({ canvas, settings });
+        } else if (format === "gif") {
+          setupGifAnimRecord({ canvas, settings });
+        }
+      });
+
+      states.captureReady = true;
+      props.recording = true;
+    }
+
+    // deltaTime
+    props.deltaTime = 1000 / settings.exportFps;
+    // time
+    props.time = this._frameCount * props.deltaTime;
+
+    computePlayhead({
+      settings,
+      props,
+    });
+    props.frame = this._frameCount;
+    computeLastTimestamp({ states, props });
+
+    try {
+      await this.render(props);
+    } catch (err: any) {
+      console.error(err);
+      return null;
+    }
+    window.requestAnimationFrame(loop);
+
+    this._frameCount += 1;
+
+    // save frames
+    settings.framesFormat.forEach((format) => {
+      if (format === "webm") {
+        exportWebM({ canvas, settings, states, props });
+      } else if (format === "gif") {
+        {
+          let context: any; // REVIEW
+          if (settings.mode === "2d") {
+            context = (props as SketchProps).context;
+          } else if (settings.mode === "webgl" || settings.mode === "webgl2") {
+            context = (props as WebGLProps).gl;
+          }
+          exportGifAnim({ canvas, context, settings, states, props });
         }
       }
+    });
 
-      computePlayhead({
-        settings,
-        props,
-      });
-      computeFrame({ settings, states, props });
-      // update lastTimestamp for deltaTime calculation
-      computeLastTimestamp({ states, props });
+    if (props.frame >= settings.exportTotalFrames - 1) {
+      states.captureDone = true;
+    }
 
-      try {
-        await this.render(props);
-      } catch (err: any) {
-        console.error(err);
-        return null;
-      }
-      window.requestAnimationFrame(loop);
-
-      return;
-    };
-
-    // for manual counting when recording (use only for recording)
-    let _frameCount = 0;
-
-    const recordLoop = async ({
-      canvas,
-      settings,
-      states,
-      props,
-    }: {
-      canvas: HTMLCanvasElement;
-      settings: SketchSettingsInternal;
-      states: SketchStates;
-      props: SketchProps | WebGLProps;
-    }) => {
-      // TODO: what if duration is not set?
-      if (!states.captureReady) {
-        // reset time only if looping (duration set)
-        // REVIEW: whether to resetTime() needs more testing
-        if (props.duration) resetTime({ settings, states, props });
-
-        settings.framesFormat.forEach((format) => {
-          if (format !== "webm" && format !== "gif") {
-            throw new Error(`${format} export is not supported`);
-          }
-          if (format === "webm") {
-            setupWebMRecord({ canvas, settings });
-          } else if (format === "gif") {
-            setupGifAnimRecord({ canvas, settings });
-          }
-        });
-
-        states.captureReady = true;
-        props.recording = true;
-      }
-
-      // deltaTime
-      props.deltaTime = 1000 / settings.exportFps;
-      // time
-      props.time = _frameCount * props.deltaTime;
-
-      computePlayhead({
-        settings,
-        props,
-      });
-      props.frame = _frameCount;
-      computeLastTimestamp({ states, props });
-
-      try {
-        await this.render(props);
-      } catch (err: any) {
-        console.error(err);
-        return null;
-      }
-      window.requestAnimationFrame(loop);
-
-      _frameCount += 1;
-
-      // save frames
+    if (states.captureDone) {
       settings.framesFormat.forEach((format) => {
         if (format === "webm") {
-          exportWebM({ canvas, settings, states, props });
+          endWebMRecord({ canvas, settings });
         } else if (format === "gif") {
-          {
-            let context: any; // REVIEW
-            if (settings.mode === "2d") {
-              context = (props as SketchProps).context;
-            } else if (
-              settings.mode === "webgl" ||
-              settings.mode === "webgl2"
-            ) {
-              context = (props as WebGLProps).gl;
-            }
-            exportGifAnim({ canvas, context, settings, states, props });
-          }
+          endGifAnimRecord({ canvas, settings });
         }
       });
 
-      if (props.frame >= settings.exportTotalFrames - 1) {
-        states.captureDone = true;
-      }
+      states.captureReady = false;
+      states.captureDone = false;
+      states.savingFrames = false;
+      states.timeResetted = true; // playLoop should start fresh
 
-      if (states.captureDone) {
-        settings.framesFormat.forEach((format) => {
-          if (format === "webm") {
-            endWebMRecord({ canvas, settings });
-          } else if (format === "gif") {
-            endGifAnimRecord({ canvas, settings });
-          }
-        });
+      props.recording = false;
 
-        states.captureReady = false;
-        states.captureDone = false;
-        states.savingFrames = false;
-        states.timeResetted = true; // playLoop should start fresh
-
-        props.recording = false;
-
-        _frameCount = 0; // reset local frameCount for next recording
-      }
-      return;
-    };
+      this._frameCount = 0; // reset local frameCount for next recording
+    }
     return;
   }
 
