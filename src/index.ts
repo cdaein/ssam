@@ -59,48 +59,81 @@ export const hotReload = (id: string) => {
     oldCanvas.width = 0;
     oldCanvas.height = 0;
     oldCanvas?.remove();
-    console.log("dispose");
+    console.log("canvas disposed");
   }
-
-  // TODO:
-  // no way to prevent ssam from being re-created in sketch.ts
-  // best option is to recreate with existing props values
-  // getCurrentStates()
-  // getCurrentProps()
 };
 
+let wrap: Wrap | null;
+
+// 1. new setup
+// - create a new wrap with sketch/settings
+// - run
+// 2. hot reloaded
+// - get old wrap object
+// - get old settings/states/props
+// -
+//
+// get current wrap object if any
+// if not create a new one
+
+// get current settings, states and props
+// or get them from wrap.setup()
+
+// destory old
+// wrap.destroy();
+
+// pass all current data to new Wrap object
+// wrap = new Wrap();
+// ...
+
 export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
-  try {
-    if (import.meta.hot) {
-      console.log("hot-reloading");
-
-      // get current wrap object
-      //
-
-      // get current settings, states and props
-
-      // destory old
-
-      // pass all current data to new Wrap object
+  // create a new wrap if none exists
+  if (!wrap) {
+    console.log("new wrap");
+    wrap = new Wrap();
+    const result = await wrap.setup(sketch, settings);
+    if (result) {
+      wrap.run({
+        settings: result.settings,
+        states: result.states,
+        props: result.props,
+      });
     }
+  } else {
+    if (import.meta.hot) {
+      const { settings, states, props } = wrap;
 
-    const wrap = new Wrap();
-    await wrap.setup(sketch, settings);
+      wrap.destroy();
+      wrap.props.canvas.remove();
+      // wrap = null;
 
-    // // console.log(wrap.settings, wrap.states, wrap.props);
-    // // send the current wrap object to server
-    // if (import.meta.hot) {
-    //   import.meta.hot.send("ssam:wrap", {
-    //     // wrap: this,
-    //     settings: wrap.settings,
-    //     states: wrap.states,
-    //     // don't include function props ()
-    //     props: {
-    //       time: wrap.props.time,
-    //       playhead: wrap.props.playhead,
-    //     },
-    //   });
-    // }
+      // wrap = new Wrap();
+      const result = await wrap.setup(sketch, settings as SketchSettings);
+
+      // if using old wrap values, value don't update
+      // so for now using new result value to see updates
+      if (result) {
+        wrap.run({
+          settings: result.settings,
+          states: result.states,
+          props: result.props,
+        });
+      }
+    }
+  }
+
+  try {
+    // send the current wrap object to server
+    if (import.meta.hot) {
+      import.meta.hot.send("ssam:wrap", {
+        settings: wrap.settings,
+        states: wrap.states,
+        props: {
+          time: wrap.props.time,
+          playhead: wrap.props.playhead,
+        },
+      });
+    }
   } catch (err: any) {
     console.error("Error:", err); // this is more descriptive
     return null;
@@ -115,23 +148,11 @@ export class Wrap {
   removeResize!: () => void;
   removeKeydown!: () => void;
   unload?: () => void;
-  firstLoopRender: boolean;
-  firstLoopRenderTime: number;
-  private _frameCount: number;
-
-  // render!: SketchRender;
+  private _frameCount!: number;
 
   constructor() {
     // use ssam() function for interfacing with user. (class constructor can't use async)
     // use class to hoist render function and to make it available within init
-
-    // there's time delay between first render in handleResize() and first loop render, resulting in animatiom jump. this compesates for that delay
-    this.firstLoopRender = true;
-    this.firstLoopRenderTime = 0;
-
-    // for manual counting when recording (use only for recording)
-    this._frameCount = 0;
-
     return this;
   }
 
@@ -140,10 +161,15 @@ export class Wrap {
     this.unload && this.unload();
     window.removeEventListener("resize", this.removeResize);
     window.removeEventListener("keydown", this.removeKeydown);
-    this.props.canvas.remove();
+    // this.props.canvas.remove();
+
+    console.log("destroy");
   }
 
   async setup(sketch: Sketch, userSettings: SketchSettings) {
+    // for manual counting when recording (use only for recording)
+    this._frameCount = 0;
+
     // combine settings; a few may have null or undefined values (ex. canvas)
     this.settings = createSettings({
       main: userSettings,
@@ -171,11 +197,15 @@ export class Wrap {
       render: this.render,
       resize: this.resize,
     });
-    this.removeResize = removeResize;
     const { add: addKeydown, remove: removeKeydown } = keydownHandler({
       props: this.props,
       states: this.states,
     });
+    if (this.settings.hotkeys) {
+      addResize();
+      addKeydown();
+    }
+    this.removeResize = removeResize;
     this.removeKeydown = removeKeydown;
 
     fitCanvasToWindow({
@@ -187,44 +217,53 @@ export class Wrap {
     // render at least once
     this.render(this.props);
 
+    // return this;
+    return { settings: this.settings, states: this.states, props: this.props };
+  }
+
+  run({
+    settings,
+    states,
+    props,
+  }: {
+    settings: SketchSettingsInternal;
+    states: SketchStates;
+    props: SketchProps | WebGLProps;
+  }) {
     // animation render loop
     const loop = (timestamp: number) => {
-      if (this.firstLoopRender) {
-        this.firstLoopRenderTime = timestamp;
-        this.firstLoopRender = false;
+      // there's time delay between first render in handleResize() and first loop render, resulting in animatiom jump. this compesates for that delay
+      if (this.states.firstLoopRender) {
+        this.states.firstLoopRenderTime = timestamp;
+        this.states.firstLoopRender = false;
         window.requestAnimationFrame(loop);
         return;
       }
 
       this.states.timestamp =
-        timestamp - this.firstLoopRenderTime - this.states.pausedDuration;
+        timestamp -
+        this.states.firstLoopRenderTime -
+        this.states.pausedDuration;
 
       if (!this.states.savingFrames) {
         this.playLoop({
           loop,
-          timestamp: timestamp - this.firstLoopRenderTime,
-          settings: this.settings as SketchSettingsInternal,
-          states: this.states as SketchStates,
-          props: this.props as SketchProps | WebGLProps,
+          timestamp: timestamp - this.states.firstLoopRenderTime,
+          settings,
+          states,
+          props,
         });
       } else {
         this.recordLoop({
           loop,
           canvas: (this.props as SketchProps | WebGLProps).canvas,
-          settings: this.settings as SketchSettingsInternal,
-          states: this.states as SketchStates,
-          props: this.props as SketchProps | WebGLProps,
+          settings,
+          states,
+          props,
         });
       }
     };
     if (this.settings.animate) window.requestAnimationFrame(loop);
-
-    if (this.settings.hotkeys) {
-      addResize();
-      addKeydown();
-    }
-
-    return this;
   }
 
   async playLoop({

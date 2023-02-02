@@ -63,7 +63,7 @@ export type SketchSettings = {
   /** set it to use an existing canvas instead of using one provided by sketch-wrapper */
   canvas?: HTMLCanvasElement;
   /** [width, height] */
-  dimensions?: [number, number];
+  dimensions?: [number, number] | null;
   /** set pixel ratio */
   pixelRatio?: number;
   /** center canvas */
@@ -113,7 +113,7 @@ export interface SketchSettingsInternal {
   id: string;
   parent: HTMLElement | string;
   canvas: HTMLCanvasElement | null; // if null, new canvas will be created
-  dimensions: [number, number];
+  dimensions: [number, number] | null;
   pixelRatio: number;
   centered: boolean;
   scaleContext: boolean;
@@ -152,6 +152,8 @@ export interface SketchStates {
   lastTimestamp: number;
   frameInterval: number | null;
   timeResetted: boolean;
+  firstLoopRender: boolean;
+  firstLoopRenderTime: number;
   timeNavOffset: number;
 }
 

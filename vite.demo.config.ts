@@ -4,7 +4,7 @@ const hotReload = (): PluginOption => ({
   name: "hot-reload",
   handleHotUpdate({ server, file, modules }: HmrContext) {
     server.ws.on("ssam:wrap", (data) => {
-      console.log(data);
+      // console.log(data.props);
     });
 
     return modules;
@@ -13,4 +13,9 @@ const hotReload = (): PluginOption => ({
 
 export default defineConfig({
   plugins: [hotReload()],
+  // server: {
+  //   hmr: {
+  //     overlay: false,
+  //   },
+  // },
 });

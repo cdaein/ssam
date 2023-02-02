@@ -19,7 +19,11 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
     | WebGLRenderingContext
     | WebGL2RenderingContext;
   let gl: WebGLRenderingContext | WebGL2RenderingContext | undefined;
-  let [width, height] = settings.dimensions;
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  if (settings.dimensions) {
+    [width, height] = settings.dimensions;
+  }
   const pixelRatio = Math.max(settings.pixelRatio, 1);
 
   if (settings.canvas === undefined || settings.canvas === null) {
@@ -113,9 +117,11 @@ export const fitCanvasToWindow = ({
   settings: SketchSettingsInternal;
   props: BaseProps;
 }) => {
+  console.log(userSettings.dimensions);
+
   // resizing canvas style (when !fullscreen & centered)
   // REVIEW: this should be better done with CSS class rules.
-  if (userSettings.dimensions !== undefined && settings.centered) {
+  if (userSettings.dimensions && settings.centered) {
     const margin = 50; // px // TODO: add to settings.sketchMargin ? canvasMargin
     const canvasParent = props.canvas.parentElement!;
 

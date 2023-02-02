@@ -20,6 +20,8 @@ export const createStates = ({
     lastTimestamp: 0,
     frameInterval: settings.playFps !== null ? 1000 / settings.playFps : null,
     timeResetted: false,
+    firstLoopRender: true,
+    firstLoopRenderTime: 0,
     timeNavOffset: 0,
   };
 };

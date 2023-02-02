@@ -31,7 +31,7 @@ export const createSettings = ({
     id: Math.floor(Math.random() * 1000000).toString(),
     parent: "body",
     canvas: null,
-    dimensions: [window.innerWidth, window.innerHeight],
+    dimensions: null,
     pixelRatio: 1,
     centered: true,
     scaleContext: true,
