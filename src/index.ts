@@ -48,10 +48,6 @@ export type {
   WebGLProps,
 } from "./types/types";
 
-if (import.meta.hot) {
-  import.meta.hot.accept();
-}
-
 export const hotReload = (id: string) => {
   // need to reference id
   const oldCanvas = document.getElementById(id) as HTMLCanvasElement;
@@ -101,6 +97,13 @@ export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
     }
   } else {
     if (import.meta.hot) {
+      // import.meta.hot.dispose(() => {
+      //   //
+      // });
+      // import.meta.hot.accept(() => {
+      //   //
+      // });
+
       const { settings, states, props } = wrap;
 
       wrap.destroy();
@@ -142,9 +145,10 @@ export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
 };
 
 export class Wrap {
-  props!: SketchProps | WebGLProps;
+  userSettings!: SketchSettings;
   settings!: SketchSettingsInternal;
   states!: SketchStates;
+  props!: SketchProps | WebGLProps;
   removeResize!: () => void;
   removeKeydown!: () => void;
   unload?: () => void;
@@ -159,14 +163,16 @@ export class Wrap {
   destroy() {
     // remove any side deffects
     this.unload && this.unload();
-    window.removeEventListener("resize", this.removeResize);
-    window.removeEventListener("keydown", this.removeKeydown);
+    this.removeResize();
+    this.removeKeydown();
     // this.props.canvas.remove();
 
     console.log("destroy");
   }
 
   async setup(sketch: Sketch, userSettings: SketchSettings) {
+    this.userSettings = userSettings;
+
     // for manual counting when recording (use only for recording)
     this._frameCount = 0;
 
@@ -190,21 +196,27 @@ export class Wrap {
       return null;
     }
 
+    // FIX: with hot-reloading, listeners are not removed properly.
+    //      ex. save frame will be called multiple times per listener
     const { add: addResize, remove: removeResize } = resizeHandler({
+      wrap: this,
       props: this.props,
       userSettings,
       settings: this.settings,
       render: this.render,
       resize: this.resize,
     });
+
     const { add: addKeydown, remove: removeKeydown } = keydownHandler({
       props: this.props,
       states: this.states,
     });
+
     if (this.settings.hotkeys) {
       addResize();
       addKeydown();
     }
+    // REVIEW: bind(this)
     this.removeResize = removeResize;
     this.removeKeydown = removeKeydown;
 
@@ -425,6 +437,10 @@ export class Wrap {
       this._frameCount = 0; // reset local frameCount for next recording
     }
     return;
+  }
+
+  handleResize() {
+    // b/c of typescript undefined warning, include empty method here..
   }
 
   // REVIEW: does this have to by async method?

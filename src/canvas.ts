@@ -117,8 +117,6 @@ export const fitCanvasToWindow = ({
   settings: SketchSettingsInternal;
   props: BaseProps;
 }) => {
-  console.log(userSettings.dimensions);
-
   // resizing canvas style (when !fullscreen & centered)
   // REVIEW: this should be better done with CSS class rules.
   if (userSettings.dimensions && settings.centered) {
