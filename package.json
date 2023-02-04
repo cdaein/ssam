@@ -9,7 +9,6 @@
     "/dist"
   ],
   "scripts": {
-    "dev": "vite",
     "demo": "vite ./demo --config vite.demo.config.ts",
     "prebuild": "license-checker --exclude 'MIT, MIT OR X11, BSD, ISC' -production",
     "build": "tsc --noemit && tsup",

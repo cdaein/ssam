@@ -61,87 +61,16 @@ export const hotReload = (id: string) => {
 
 let wrap: Wrap | null;
 
-// 1. new setup
-// - create a new wrap with sketch/settings
-// - run
-// 2. hot reloaded
-// - get old wrap object
-// - get old settings/states/props
-// -
-//
-// get current wrap object if any
-// if not create a new one
-
-// get current settings, states and props
-// or get them from wrap.setup()
-
-// destory old
-// wrap.destroy();
-
-// pass all current data to new Wrap object
-// wrap = new Wrap();
-// ...
-
 export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
-  // create a new wrap if none exists
-  if (!wrap) {
-    console.log("new wrap");
-    wrap = new Wrap();
-    const result = await wrap.setup(sketch, settings);
-    if (result) {
-      wrap.run({
-        settings: result.settings,
-        states: result.states,
-        props: result.props,
-      });
-    }
-  } else {
-    if (import.meta.hot) {
-      // import.meta.hot.dispose(() => {
-      //   //
-      // });
-      // import.meta.hot.accept(() => {
-      //   //
-      // });
-
-      const { settings, states, props } = wrap;
-
-      wrap.destroy();
-      wrap.props.canvas.remove();
-      // wrap = null;
-
-      // wrap = new Wrap();
-      const result = await wrap.setup(sketch, settings as SketchSettings);
-
-      // if using old wrap values, value don't update
-      // so for now using new result value to see updates
-      if (result) {
-        wrap.run({
-          settings: result.settings,
-          states: result.states,
-          props: result.props,
-        });
-      }
-    }
+  const wrap = new Wrap();
+  const result = await wrap.setup(sketch, settings);
+  if (result) {
+    wrap.run({
+      settings: result.settings,
+      states: result.states,
+      props: result.props,
+    });
   }
-
-  try {
-    // send the current wrap object to server
-    if (import.meta.hot) {
-      import.meta.hot.send("ssam:wrap", {
-        settings: wrap.settings,
-        states: wrap.states,
-        props: {
-          time: wrap.props.time,
-          playhead: wrap.props.playhead,
-        },
-      });
-    }
-  } catch (err: any) {
-    console.error("Error:", err); // this is more descriptive
-    return null;
-  }
-  return;
 };
 
 export class Wrap {
@@ -153,6 +82,7 @@ export class Wrap {
   removeKeydown!: () => void;
   unload?: () => void;
   private _frameCount!: number;
+  private raf!: number;
 
   constructor() {
     // use ssam() function for interfacing with user. (class constructor can't use async)
@@ -175,6 +105,7 @@ export class Wrap {
 
     // for manual counting when recording (use only for recording)
     this._frameCount = 0;
+    this.raf = 0;
 
     // combine settings; a few may have null or undefined values (ex. canvas)
     this.settings = createSettings({
@@ -233,6 +164,31 @@ export class Wrap {
     return { settings: this.settings, states: this.states, props: this.props };
   }
 
+  hotReload() {
+    this.disposeCombined();
+  }
+
+  private disposeCombined() {
+    // remove canvas so it can be re-created after hot-reload
+    this.props.canvas.width = 0;
+    this.props.canvas.height = 0;
+    this.props.canvas.remove();
+
+    // remove any side deffects
+    this.unload && this.unload();
+    this.removeResize();
+    this.removeKeydown();
+    // cancel any ongoing animation
+    window.cancelAnimationFrame(this.raf);
+
+    // user clean-up
+    this.dispose();
+  }
+
+  dispose() {
+    // user provided method
+  }
+
   run({
     settings,
     states,
@@ -248,7 +204,7 @@ export class Wrap {
       if (this.states.firstLoopRender) {
         this.states.firstLoopRenderTime = timestamp;
         this.states.firstLoopRender = false;
-        window.requestAnimationFrame(loop);
+        this.raf = window.requestAnimationFrame(loop);
         return;
       }
 
@@ -275,7 +231,7 @@ export class Wrap {
         });
       }
     };
-    if (this.settings.animate) window.requestAnimationFrame(loop);
+    if (this.settings.animate) this.raf = window.requestAnimationFrame(loop);
   }
 
   async playLoop({
@@ -294,7 +250,7 @@ export class Wrap {
     // when paused, accumulate pausedDuration
     if (states.paused) {
       states.pausedDuration = timestamp - states.pausedStartTime;
-      window.requestAnimationFrame(loop);
+      this.raf = window.requestAnimationFrame(loop);
       return;
     }
 
@@ -317,7 +273,7 @@ export class Wrap {
     // throttle frame rate
     if (states.frameInterval !== null) {
       if (props.deltaTime < states.frameInterval) {
-        window.requestAnimationFrame(loop);
+        this.raf = window.requestAnimationFrame(loop);
         return;
       }
     }
@@ -336,7 +292,7 @@ export class Wrap {
       console.error(err);
       return null;
     }
-    window.requestAnimationFrame(loop);
+    this.raf = window.requestAnimationFrame(loop);
 
     return;
   }
@@ -393,7 +349,7 @@ export class Wrap {
       console.error(err);
       return null;
     }
-    window.requestAnimationFrame(loop);
+    this.raf = window.requestAnimationFrame(loop);
 
     this._frameCount += 1;
 
