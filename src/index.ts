@@ -34,6 +34,7 @@ import {
   endGifAnimRecord,
 } from "./recorders/export-frames-gif";
 import { fitCanvasToWindow } from "./canvas";
+import { getGlobalState, updateGlobalState } from "./store";
 
 export type {
   FrameFormat,
@@ -47,17 +48,6 @@ export type {
   SketchSettings,
   WebGLProps,
 } from "./types/types";
-
-export const hotReload = (id: string) => {
-  // need to reference id
-  const oldCanvas = document.getElementById(id) as HTMLCanvasElement;
-  if (oldCanvas) {
-    oldCanvas.width = 0;
-    oldCanvas.height = 0;
-    oldCanvas?.remove();
-    console.log("canvas disposed");
-  }
-};
 
 let wrap: Wrap | null;
 
@@ -83,21 +73,13 @@ export class Wrap {
   unload?: () => void;
   private _frameCount!: number;
   private raf!: number;
+  globalState!: Record<string, any>;
+  count!: number;
 
   constructor() {
     // use ssam() function for interfacing with user. (class constructor can't use async)
     // use class to hoist render function and to make it available within init
     return this;
-  }
-
-  destroy() {
-    // remove any side deffects
-    this.unload && this.unload();
-    this.removeResize();
-    this.removeKeydown();
-    // this.props.canvas.remove();
-
-    console.log("destroy");
   }
 
   async setup(sketch: Sketch, userSettings: SketchSettings) {
@@ -106,6 +88,9 @@ export class Wrap {
     // for manual counting when recording (use only for recording)
     this._frameCount = 0;
     this.raf = 0;
+
+    this.globalState = getGlobalState();
+    this.count = this.globalState.count;
 
     // combine settings; a few may have null or undefined values (ex. canvas)
     this.settings = createSettings({
@@ -120,6 +105,10 @@ export class Wrap {
       resizeProp: () => this.resize(this.props as SketchProps | WebGLProps),
     });
 
+    this.props = { ...this.props, time: this.globalState.time };
+
+    // console.log(this.globalState.time, this.props.time);
+
     try {
       await sketch(this.props);
     } catch (err: any) {
@@ -127,8 +116,6 @@ export class Wrap {
       return null;
     }
 
-    // FIX: with hot-reloading, listeners are not removed properly.
-    //      ex. save frame will be called multiple times per listener
     const { add: addResize, remove: removeResize } = resizeHandler({
       wrap: this,
       props: this.props,
@@ -158,35 +145,44 @@ export class Wrap {
     });
 
     // render at least once
-    this.render(this.props);
+    this.render({
+      ...this.props,
+      time: this.globalState.time,
+      count: this.count,
+    });
 
     // return this;
-    return { settings: this.settings, states: this.states, props: this.props };
+    return {
+      settings: this.settings,
+      states: this.states,
+      props: { ...this.props, time: this.globalState.time },
+    };
   }
 
   hotReload() {
-    this.disposeCombined();
+    this.unloadCombined();
   }
 
-  private disposeCombined() {
+  private unloadCombined() {
+    // cancel any ongoing animation
+    window.cancelAnimationFrame(this.raf);
+
+    // remove event listeners
+    this.removeResize();
+    this.removeKeydown();
+
     // remove canvas so it can be re-created after hot-reload
     this.props.canvas.width = 0;
     this.props.canvas.height = 0;
     this.props.canvas.remove();
 
-    // remove any side deffects
+    // user clean-up (remove any side deffects)
     this.unload && this.unload();
-    this.removeResize();
-    this.removeKeydown();
-    // cancel any ongoing animation
-    window.cancelAnimationFrame(this.raf);
-
-    // user clean-up
-    this.dispose();
   }
 
   dispose() {
-    // user provided method
+    updateGlobalState({ time: this.props.time, count: this.count });
+    console.log(this.globalState.time, this.props.time);
   }
 
   run({
@@ -262,6 +258,8 @@ export class Wrap {
     // 1. better dt handling
     // props.time = (states.timestamp - states.startTime) % props.duration;
     // 2. full reset each loop. but, dt is one-frame (8 or 16ms) off
+
+    // FIX: this doesn't update this.props
     props.time = states.timestamp - states.startTime + states.timeNavOffset;
 
     if (props.time >= props.duration) {
@@ -287,7 +285,8 @@ export class Wrap {
     computeLastTimestamp({ states, props });
 
     try {
-      await this.render(props);
+      await this.render({ ...props, count: this.count });
+      this.count += 1;
     } catch (err: any) {
       console.error(err);
       return null;
