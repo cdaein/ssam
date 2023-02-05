@@ -20,19 +20,20 @@ Alternatively, if you only want to install `ssam` package into your own set up:
 npm install ssam
 ```
 
+## How to
+
+See [documentation](./docs/index.md)
+
 ## Features
 
 - **TypeScript**: It can work both in JavaScript or TypeScript projects.
 - **ESM**: You can use it alongside other ESM packages.
 - **Multiple sketch modes**: It supports vanilla Canvas 2D API, WebGL context, or you can use with other Canvas libraries (Three.js, OGL, Two.js, Pts.js) as long as they support an existing canvas and context. p5.js is not supported (yet).
-- **Animation loop**: It has `playhead` prop that repeats `0..1` and makes it easy to create a seamless animation loop. Other props such as `time`, `deltaTime` are provided as well. You can also adjust frame rate for both playing and recording.
+- **Hot Reload**: Code updates will be instantly applied without a full page refresh and wthout losing the sketch states.
+- **Animation loop**: The `playhead` prop repeats `0..1` and makes it easy to create a seamless animation loop. Other props such as `time`, `frame` and `deltaTime` are provided as well. You can also adjust frame rate for both playing and exporting.
 - **Sketch settings**: Use `settings` object to reduce boilerplate code in your sketch - set up animation duration, playback frame rate, filename, etc.
-- **Sketch props**: Use props for each mode to help your coding.
+- **Sketch props**: Use props for each mode such as `context`, `width`, `height` to help your coding.
 - **File exports**: Export canvas as image, animated GIF or WebM video at various frame rates using keyboard shortcuts.
-
-## How to
-
-See [documentation](./docs/index.md)
 
 ## Example
 
@@ -76,7 +77,7 @@ const settings: SketchSettings = {
   mode: "2d",
   dimensions: [320, 320],
   pixelRatio: 1,
-  duration: 3000,
+  duration: 3_000,
   playFps: 12,
   exportFps: 12,
   frameFormat: "png",

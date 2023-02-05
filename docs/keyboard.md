@@ -8,6 +8,6 @@
 
 If you want to export an image in other ways, use the function prop, `exportFrame()`. For example, you can set the `settings.hotkeys` to `false` and add an event listener to a different keyboard shortcut.
 
-Next, check out [Extra Topics](./extra.md)
+Next, check out [Hot Reload](./hot-reload.md)
 
 Or, go back to [Documentation](./index.md).

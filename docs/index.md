@@ -5,7 +5,7 @@
 - [Sketch Settings](./settings.md)
 - [Image/Video Exports](./file-exports.md)
 - [Keyboard Shortcuts](./keyboard.md)
-- Hot Reload (not yet implemented)
+- [Hot Reload](./hot-reload.md)
 - Git Commit Snapshot (not yet implemented)
 - [Local Development Environment](./dev-env.md)
 - [Extra Topics](./extra.md)
@@ -33,7 +33,7 @@ import { ssam } from "ssam";
 
 // use wrap object to attach render/resize methods
 const sketch = ({ wrap }) => {
-  // any code that runs once when the page loads goes here
+  // any code that runs once at the start of the sketch goes here
 
   wrap.render = () => {
     // any code that runs each frame goes here
