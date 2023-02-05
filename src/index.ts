@@ -114,10 +114,14 @@ export class Wrap {
       pausedDuration: this.globalState.pausedDuration,
       timestamp: this.globalState.timestamp,
       lastTimestamp: this.globalState.lastTimestamp,
-      // frameInterval: null, // REVIEW
+      frameInterval: null, // REVIEW
       firstLoopRender: this.globalState.firstLoopRender, // REVIEW
       firstLoopRenderTime: this.globalState.firstLoopRenderTime,
     };
+
+    // FIX timestamp < startTime <== bug!!! (if so, time becomes negative)
+    console.log("setup A\t", this.states.timestamp, "\t\tstates.timestamp");
+    console.log("setup A\t", this.states.startTime, "\t\tstates.startTime");
 
     // props are just a collection of internally tracked data
     this.props = {
@@ -174,23 +178,21 @@ export class Wrap {
   }
 
   private unloadCombined() {
-    // cancel any ongoing animation
+    // cancel queued animation frame
     window.cancelAnimationFrame(this.raf);
-
     // remove event listeners
     this.removeResize();
     this.removeKeydown();
-
-    // remove canvas so it can be re-created after hot-reload
+    // remove canvas
     this.props.canvas.width = 0;
     this.props.canvas.height = 0;
     this.props.canvas.remove();
-
-    // user clean-up (remove any side deffects)
+    // user clean-up (remove any side effects)
     this.unload && this.unload();
   }
 
   dispose() {
+    // store current values to globalState right before HMR
     updateGlobalState({
       // from states
       startTime: this.states.startTime,
@@ -200,7 +202,7 @@ export class Wrap {
       timestamp: this.states.timestamp,
       lastTimestamp: this.states.lastTimestamp,
       // frameInterval: null, // REVIEW
-      // firstLoopRender: this.states.firstLoopRender, // REVIEW
+      firstLoopRender: this.states.firstLoopRender, // REVIEW
       firstLoopRenderTime: this.states.firstLoopRenderTime,
       // from props
       playhead: this.props.playhead,
@@ -227,7 +229,7 @@ export class Wrap {
         this.states.pausedDuration;
 
       if (!this.states.savingFrames) {
-        this.playLoop({ timestamp });
+        this.playLoop(timestamp);
       } else {
         this.recordLoop();
       }
@@ -236,7 +238,7 @@ export class Wrap {
       this.raf = window.requestAnimationFrame(this.loop);
   }
 
-  async playLoop({ timestamp }: { timestamp: number }) {
+  async playLoop(timestamp: number) {
     timestamp = timestamp - this.states.firstLoopRenderTime;
 
     // when paused, accumulate pausedDuration
@@ -256,17 +258,19 @@ export class Wrap {
 
     // time
     // 1. better dt handling
-    // props.time = (states.timestamp - states.startTime) % props.duration;
+    // this.props.time = (this.states.timestamp - this.states.startTime) % this.props.duration;
+
     // 2. full reset each loop. but, dt is one-frame (8 or 16ms) off
     this.props.time =
       this.states.timestamp - this.states.startTime + this.states.timeNavOffset;
 
-    // FIX: props.time is negative after hot-reload. at hot-reload,
+    // console.log(this.props.time);
+
+    // FIX: props.time jumps to negative after hot-reload.
     //      props.time = props.time - states.timestamp
     //      props.time resets itself each loop
     //      states.timestamp continues to increase
-    // =>   firstLoopRender-related, i think..
-    console.log(this.props.time, this.states.timestamp, this.states.startTime);
+    // console.log(this.props.time, this.states.timestamp, this.states.startTime);
 
     if (this.props.time >= this.props.duration) {
       resetTime({

@@ -2,7 +2,6 @@
  * time keeping
  */
 
-import { states } from "./states";
 import type {
   BaseProps,
   SketchSettings,
@@ -102,7 +101,7 @@ export const computeLastTimestamp = ({
     : states.timestamp;
 };
 
-// REVIEW: when reset delta time is always 1 frame duration more (ex. 8ms on 120fps)
+// REVIEW: when reset, delta time is always 1 frame duration more (ex. 8ms on 120fps)
 export const resetTime = ({
   settings,
   states,

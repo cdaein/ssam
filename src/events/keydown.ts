@@ -17,6 +17,7 @@ export default ({
     if (ev.key === " ") {
       ev.preventDefault();
       props.togglePlay();
+      console.log(states.paused);
     } else if ((ev.metaKey || ev.ctrlKey) && !ev.shiftKey && ev.key === "s") {
       ev.preventDefault();
       // save frame (still)
@@ -36,8 +37,8 @@ export default ({
       // a frame forward
       if (states.paused) {
         // TODO
-        // REVIEW: frame needs to wrap totalFrames
-        props.update({ frame: props.frame + 1 });
+        // REVIEW: frame needs to wrap around totalFrames
+        props.update({ frame: (props.frame + 1) % props.totalFrames });
       }
     } else if (ev.key === "ArrowLeft") {
       if (states.paused) {

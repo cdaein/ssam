@@ -14,8 +14,6 @@ const globalState: Record<string, any> = {
   frame: 0,
   time: 0,
   deltaTime: 0,
-
-  count: 0,
 };
 
 export const getGlobalState = () => {
