@@ -106,22 +106,21 @@ export class Wrap {
     });
 
     // this step is transitory
-    this.states = {
-      ...this.states,
-      startTime: this.globalState.startTime,
-      lastStartTime: this.globalState.lastStartTime,
-      pausedStartTime: this.globalState.pausedStartTime,
-      pausedDuration: this.globalState.pausedDuration,
-      timestamp: this.globalState.timestamp,
-      lastTimestamp: this.globalState.lastTimestamp,
-      frameInterval: null, // REVIEW
-      firstLoopRender: this.globalState.firstLoopRender, // REVIEW
-      firstLoopRenderTime: this.globalState.firstLoopRenderTime,
-    };
+    // this breaks the this.states reference and togglePlay() won't work
+    // this.states = {
+    //   ...this.states,
+    //   // set time values from globalState
+    // };
 
-    // FIX timestamp < startTime <== bug!!! (if so, time becomes negative)
-    console.log("setup A\t", this.states.timestamp, "\t\tstates.timestamp");
-    console.log("setup A\t", this.states.startTime, "\t\tstates.startTime");
+    this.states.startTime = this.globalState.startTime;
+    this.states.lastStartTime = this.globalState.lastStartTime;
+    this.states.pausedStartTime = this.globalState.pausedStartTime;
+    this.states.pausedDuration = this.globalState.pausedDuration;
+    this.states.timestamp = this.globalState.timestamp;
+    this.states.lastTimestamp = this.globalState.lastTimestamp;
+    //frameInterval: null // REVIEW
+    this.states.firstLoopRender = this.globalState.firstLoopRender;
+    this.states.firstLoopRenderTime = this.globalState.firstLoopRenderTime;
 
     // props are just a collection of internally tracked data
     this.props = {
@@ -129,8 +128,13 @@ export class Wrap {
       playhead: this.globalState.playhead,
       frame: this.globalState.frame,
       time: this.globalState.time,
-      // deltaTime: this.globalState.deltaTime,
+      deltaTime: this.globalState.deltaTime,
     };
+
+    // this.props.playhead = this.globalState.playhead;
+    // this.props.frame = this.globalState.frame;
+    // this.props.time = this.globalState.time;
+    // this.props.deltaTime = this.globalState.deltaTime;
 
     try {
       await sketch(this.props);
@@ -202,7 +206,7 @@ export class Wrap {
       timestamp: this.states.timestamp,
       lastTimestamp: this.states.lastTimestamp,
       // frameInterval: null, // REVIEW
-      firstLoopRender: this.states.firstLoopRender, // REVIEW
+      firstLoopRender: this.states.firstLoopRender,
       firstLoopRenderTime: this.states.firstLoopRenderTime,
       // from props
       playhead: this.props.playhead,
@@ -259,18 +263,9 @@ export class Wrap {
     // time
     // 1. better dt handling
     // this.props.time = (this.states.timestamp - this.states.startTime) % this.props.duration;
-
     // 2. full reset each loop. but, dt is one-frame (8 or 16ms) off
     this.props.time =
       this.states.timestamp - this.states.startTime + this.states.timeNavOffset;
-
-    // console.log(this.props.time);
-
-    // FIX: props.time jumps to negative after hot-reload.
-    //      props.time = props.time - states.timestamp
-    //      props.time resets itself each loop
-    //      states.timestamp continues to increase
-    // console.log(this.props.time, this.states.timestamp, this.states.startTime);
 
     if (this.props.time >= this.props.duration) {
       resetTime({
@@ -431,7 +426,7 @@ export class Wrap {
     // b/c of typescript undefined warning, include empty method here..
   }
 
-  // REVIEW: does this have to by async method?
+  // REVIEW: does this have to be async method?
   render(props: SketchProps | WebGLProps): void | Promise<void> {
     // this will be overwritten in sketch by wrap.render()
     // without this declaration, TS thinks it doesn't exist. (sketch closure)

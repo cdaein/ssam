@@ -1,5 +1,5 @@
 import { resizeCanvas } from "@daeinc/canvas";
-import { toElement, toHTMLElement } from "@daeinc/dom";
+import { toHTMLElement } from "@daeinc/dom";
 import { Wrap } from ".";
 import { createCanvas } from "./canvas";
 import { toArray } from "./helpers";
@@ -99,6 +99,7 @@ export const createProps = ({
     } as WebGLProps;
   }
 
+  // move into createFuntionProps() ??
   const update = createUpdateProp({
     canvas,
     settings,
@@ -128,7 +129,7 @@ const createFunctionProps = ({
     //   props,
     //   resizeCanvas,
     // }),
-    togglePlay: createTogglePlay({ states }),
+    togglePlay: createTogglePlay(states),
   };
 };
 
@@ -152,7 +153,7 @@ const createExportFrameProp = ({
   };
 };
 
-const createTogglePlay = ({ states }: { states: SketchStates }) => {
+const createTogglePlay = (states: SketchStates) => {
   return () => {
     states.paused = !states.paused;
     if (states.paused) {
@@ -186,7 +187,6 @@ const updatableKeys = [
   "framesFormat",
 ];
 
-// FIX: screen flicker, doesn't work when paused
 const createUpdateProp = ({
   canvas,
   settings,

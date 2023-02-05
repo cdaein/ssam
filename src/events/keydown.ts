@@ -17,7 +17,6 @@ export default ({
     if (ev.key === " ") {
       ev.preventDefault();
       props.togglePlay();
-      console.log(states.paused);
     } else if ((ev.metaKey || ev.ctrlKey) && !ev.shiftKey && ev.key === "s") {
       ev.preventDefault();
       // save frame (still)
