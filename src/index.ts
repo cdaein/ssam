@@ -157,8 +157,8 @@ export class Wrap {
       states: this.states,
     });
 
+    addResize();
     if (this.settings.hotkeys) {
-      addResize();
       addKeydown();
     }
     // REVIEW: bind(this)?
