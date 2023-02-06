@@ -1,12 +1,12 @@
 # Ssam
 
-Ssam wraps your HTML5 Canvas sketches and provides helpful features such as animation props and file exports. It is inspired by [`canvas-sketch`](https://github.com/mattdesl/canvas-sketch/).
+Ssam (쌈 as in [Korean dish](https://en.wikipedia.org/wiki/Ssam)) wraps your HTML5 Canvas sketches and provides helpful features such as animation props and file exports. It is inspired by [`canvas-sketch`](https://github.com/mattdesl/canvas-sketch/).
 
 > ⚠️ This module is in an early stage of development, and there may be unexpected bugs.
 
 ## Install
 
-The easiest and quickest way to set up a sketch with Ssam is to use `create-ssam` CLI command. You don't need to install anything (except Node.js of course) in advance. Simply run the command to set up dependencies and bundler and you can jump straight into creative coding:
+The easiest and quickest way to set up a sketch with Ssam is to use `create-ssam` CLI command. You don't need to install anything (except Node.js) in advance. Simply run the command below to set up dependencies and bundler and you can jump straight into creative coding:
 
 ```sh
 npm create ssam@latest

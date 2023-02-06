@@ -6,7 +6,7 @@
 - [Image/Video Exports](./file-exports.md)
 - [Keyboard Shortcuts](./keyboard.md)
 - [Hot Reload](./hot-reload.md)
-- Git Commit Snapshot (not yet implemented)
+- Git Commit Image Snapshot (not yet implemented)
 - [Local Development Environment](./dev-env.md)
 - [Extra Topics](./extra.md)
 
