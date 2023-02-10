@@ -34,8 +34,8 @@ export const formatFilename = ({
   suffix?: string;
 }) => {
   return filename === undefined || filename === ""
-    ? `${prefix}${formatDatetime(new Date())}${suffix}`
-    : `${prefix}${filename}${suffix}`;
+    ? `${prefix}${formatDatetime(new Date())}${suffix}`.trim()
+    : `${prefix}${filename}${suffix}`.trim();
 };
 
 /**
