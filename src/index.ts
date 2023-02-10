@@ -200,6 +200,7 @@ export class Wrap {
     });
 
     // render at least once
+    this.resize(this.props);
     this.render(this.props);
 
     return;
