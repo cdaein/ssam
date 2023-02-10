@@ -1,8 +1,3 @@
-/**
- * - class cannot have async constructor
- * - function can't handle hoisting for render() method
- */
-
 import { createProps } from "./props";
 import { createSettings } from "./settings";
 import { createStates } from "./states";
@@ -35,6 +30,7 @@ import {
 } from "./recorders/export-frames-gif";
 import { fitCanvasToWindow } from "./canvas";
 import { getGlobalState, updateGlobalState } from "./store";
+import { saveCanvasFrame } from "./recorders/export-frame";
 
 export type {
   FrameFormat,
@@ -49,7 +45,8 @@ export type {
   WebGLProps,
 } from "./types/types";
 
-let wrap: Wrap | null;
+// ws event listeners keep adding up, so if it's already added, don't add duplicates
+let hotReloading = false;
 
 export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
   const wrap = new Wrap();
@@ -70,7 +67,7 @@ export class Wrap {
   props!: SketchProps | WebGLProps;
   removeResize!: () => void;
   removeKeydown!: () => void;
-  unload?: () => void;
+  unload?: (props: SketchProps | WebGLProps) => void;
   private _frameCount!: number;
   private raf!: number;
   globalState!: Record<string, any>;
@@ -80,6 +77,36 @@ export class Wrap {
   constructor() {
     // use ssam() function for interfacing with user. (class constructor can't use async)
     // use class to hoist render function and to make it available within init
+
+    if (import.meta.hot) {
+      if (!hotReloading) {
+        import.meta.hot.on("ssam:add", (data) => {
+          console.log("add listeners back");
+        });
+        import.meta.hot.on("ssam:warn", (data) => {
+          console.warn(`${data.msg}`);
+        });
+        import.meta.hot.on("ssam:log", (data) => {
+          console.log(`${data.msg}`);
+        });
+
+        import.meta.hot.on("ssam:git-success", (data) => {
+          // console.log(`git snapshot frame exporting...`);
+          // TODO: exportFrame should use ffmpeg when developing. how to check for ffmpeg availability?
+
+          // b/c there's no way to turn off socket listeners, listeners are added only once and
+          // it always uses old canvas reference. to get correct canvas, pass around new canvas id.
+          const canvas = document.querySelector(`#${data.canvasId}`);
+          saveCanvasFrame({
+            canvas: canvas as HTMLCanvasElement,
+            states: this.states,
+            settings: this.settings,
+            hash: data.hash,
+          });
+        });
+      }
+    }
+
     return this;
   }
 
@@ -153,6 +180,7 @@ export class Wrap {
     });
 
     const { add: addKeydown, remove: removeKeydown } = keydownHandler({
+      settings: this.settings,
       props: this.props,
       states: this.states,
     });
@@ -178,6 +206,7 @@ export class Wrap {
   }
 
   hotReload() {
+    // console.log(`🔥 hot reload enabled`);
     this.unloadCombined();
   }
 
@@ -192,10 +221,14 @@ export class Wrap {
     this.props.canvas.height = 0;
     this.props.canvas.remove();
     // user clean-up (remove any side effects)
-    this.unload && this.unload();
+    this.unload && this.unload(this.props);
   }
 
   dispose() {
+    if (import.meta.hot) {
+      hotReloading = true;
+    }
+
     // store current values to globalState right before HMR
     updateGlobalState({
       // from states
@@ -421,6 +454,10 @@ export class Wrap {
     }
     return;
   }
+
+  // private _exportFrame({ canvas }: { canvas: HTMLCanvasElement }) {
+  //   //
+  // }
 
   handleResize() {
     // b/c of typescript undefined warning, include empty method here..

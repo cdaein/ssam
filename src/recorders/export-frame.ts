@@ -4,8 +4,6 @@ import { formatFilename } from "../helpers";
 /**
  * save a single frame of canvas
  *
- * TODO: support other file formats - png(default), jpg/jpeg, webp, gif
- *
  * REVIEW: to keep everything all in one function,
  * there's a bit awkward early return when initing recorder.
  * if this becomes an issue in other part of program,
@@ -16,10 +14,12 @@ export const saveCanvasFrame = ({
   canvas,
   states,
   settings,
+  hash,
 }: {
   canvas: HTMLCanvasElement;
   states: SketchStates;
   settings: SketchSettingsInternal;
+  hash?: string;
 }) => {
   let { filename, prefix, suffix, frameFormat } = settings;
 
@@ -31,7 +31,7 @@ export const saveCanvasFrame = ({
     link.download = `${formatFilename({
       filename,
       prefix,
-      suffix,
+      suffix: hash ? `${suffix}-${hash}` : suffix,
     })}.${format}`;
     link.href = dataURL;
     link.click();

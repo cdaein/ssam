@@ -1,3 +1,4 @@
+import { formatFilename } from "../helpers";
 import type {
   SketchLoop,
   SketchProps,
@@ -7,9 +8,11 @@ import type {
 } from "../types/types";
 
 export default ({
+  settings,
   props,
   states,
 }: {
+  settings: SketchSettingsInternal;
   props: SketchProps | WebGLProps;
   states: SketchStates;
 }) => {
@@ -30,8 +33,19 @@ export default ({
         states.captureDone = true;
       }
     } else if ((ev.metaKey || ev.ctrlKey) && ev.key === "k") {
-      console.log("git commit is not yet implemented");
-      // TODO: if in dev server, send the message to the server to git-commit.
+      if (import.meta.hot) {
+        const { filename, prefix, suffix } = settings;
+        const filenameFormatted = `${formatFilename({
+          filename,
+          prefix,
+          suffix,
+        })}`;
+        import.meta.hot.send("ssam:git", {
+          canvasId: props.canvas.id,
+          filename: filenameFormatted,
+          format: "png",
+        });
+      }
     } else if (ev.key === "ArrowRight") {
       // a frame forward
       if (states.paused) {
