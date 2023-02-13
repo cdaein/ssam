@@ -32,8 +32,9 @@ export default ({
       } else {
         states.captureDone = true;
       }
-    } else if ((ev.metaKey || ev.ctrlKey) && ev.key === "k") {
+    } else if ((ev.metaKey || ev.ctrlKey) && !ev.shiftKey && ev.key === "k") {
       if (import.meta.hot) {
+        // git commit snapshot (image)
         const { filename, prefix, suffix } = settings;
         const filenameFormatted = `${formatFilename({
           filename,
@@ -44,6 +45,21 @@ export default ({
           canvasId: props.canvas.id,
           filename: filenameFormatted,
           format: "png",
+        });
+      }
+    } else if ((ev.metaKey || ev.ctrlKey) && ev.shiftKey && ev.key === "k") {
+      if (import.meta.hot) {
+        // git commit snapshot (video)
+        const { filename, prefix, suffix } = settings;
+        const filenameFormatted = `${formatFilename({
+          filename,
+          prefix,
+          suffix,
+        })}`;
+        import.meta.hot.send("ssam:git", {
+          canvasId: props.canvas.id,
+          filename: filenameFormatted,
+          format: "webm",
         });
       }
     } else if (ev.key === "ArrowRight") {

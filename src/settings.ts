@@ -28,7 +28,8 @@ export const createSettings = ({
     title: "Sketch",
     background: "#333",
     // canvas
-    id: "ssam-canvas-" + Math.floor(Math.random() * 100000).toString(),
+    // id: "ssam-canvas-" + Math.floor(Math.random() * 100000).toString(),
+    id: "ssam-canvas",
     parent: "body",
     canvas: null,
     dimensions: null,

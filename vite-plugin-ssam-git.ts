@@ -42,6 +42,8 @@ export const gitSnapshot = () => ({
 
       const { canvasId, filename, format } = data;
 
+      // TODO: depending on the format received, export png or webm
+
       // 1. check if "git init"ed
       execPromise(`git status --porcelain`)
         .then((value) => {

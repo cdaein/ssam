@@ -218,8 +218,8 @@ export class Wrap {
     this.removeResize();
     this.removeKeydown();
     // remove canvas
-    this.props.canvas.width = 0;
-    this.props.canvas.height = 0;
+    // this.props.canvas.width = 0;
+    // this.props.canvas.height = 0;
     this.props.canvas.remove();
     // user clean-up (remove any side effects)
     this.unload && this.unload(this.props);
