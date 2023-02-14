@@ -22,7 +22,7 @@ npm install ssam
 
 ## How to
 
-See [documentation](./docs/index.md)
+See [documentation](https://github.com/cdaein/ssam/wiki)
 
 ## Features
 
