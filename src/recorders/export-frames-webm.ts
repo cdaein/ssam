@@ -22,13 +22,18 @@ export const setupWebMRecord = ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
 }) => {
+  if (!("VideoEncoder" in window)) {
+    console.log("The browser does not support WebCodecs");
+    return;
+  }
+
   // const { framesFormat: format } = settings;
   const format = "webm";
 
   muxer = new WebMMuxer({
     target: "buffer",
     video: {
-      codec: "V_VP9", // TODO: need to check browser support first (ie. Firefox)
+      codec: "V_VP9", // TODO: check for codec support
       width: canvas.width,
       height: canvas.height,
       frameRate: settings.exportFps,
@@ -66,6 +71,10 @@ export const exportWebM = async ({
   settings: SketchSettingsInternal;
   props: BaseProps;
 }) => {
+  if (!("VideoEncoder" in window)) {
+    return;
+  }
+
   if (!states.captureDone) {
     // record frame
     encodeVideoFrame({ canvas, settings, states, props });
@@ -111,7 +120,10 @@ export const endWebMRecord = async ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
 }) => {
-  // end record
+  if (!("VideoEncoder" in window)) {
+    return;
+  }
+
   // const { framesFormat: format } = settings;
   const format = "webm";
 

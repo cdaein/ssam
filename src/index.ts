@@ -22,7 +22,7 @@ import {
   setupWebMRecord,
   exportWebM,
   endWebMRecord,
-} from "./recorders/export-frames.webm";
+} from "./recorders/export-frames-webm";
 import {
   setupGifAnimRecord,
   exportGifAnim,
@@ -221,6 +221,7 @@ export class Wrap {
     // this.props.canvas.width = 0;
     // this.props.canvas.height = 0;
     this.props.canvas.remove();
+    // this.props.canvas = null;
     // user clean-up (remove any side effects)
     this.unload && this.unload(this.props);
   }
@@ -354,22 +355,22 @@ export class Wrap {
           props: this.props,
         });
 
-      this.settings.framesFormat.forEach((format) => {
+      for (const format of this.settings.framesFormat) {
         if (format !== "webm" && format !== "gif") {
           throw new Error(`${format} export is not supported`);
         }
         if (format === "webm") {
           setupWebMRecord({
-            canvas: this.props.canvas,
+            canvas: this.props.canvas!,
             settings: this.settings,
           });
         } else if (format === "gif") {
           setupGifAnimRecord({
-            canvas: this.props.canvas,
+            canvas: this.props.canvas!,
             settings: this.settings,
           });
         }
-      });
+      }
 
       this.states.captureReady = true;
       this.props.recording = true;
@@ -435,7 +436,10 @@ export class Wrap {
     if (this.states.captureDone) {
       this.settings.framesFormat.forEach((format) => {
         if (format === "webm") {
-          endWebMRecord({ canvas: this.props.canvas, settings: this.settings });
+          endWebMRecord({
+            canvas: this.props.canvas,
+            settings: this.settings,
+          });
         } else if (format === "gif") {
           endGifAnimRecord({
             canvas: this.props.canvas,
