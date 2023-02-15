@@ -91,11 +91,9 @@ export class Wrap {
         });
 
         import.meta.hot.on("ssam:git-success", (data) => {
-          // console.log(`git snapshot frame exporting...`);
           // TODO: exportFrame should use ffmpeg when developing. how to check for ffmpeg availability?
-
-          // b/c there's no way to turn off socket listeners, listeners are added only once and
-          // it always uses old canvas reference. to get correct canvas, pass around new canvas id.
+          // there's no way to turn off socket listeners, they have to be added only once, and
+          // they always use old canvas ref. to get correct canvas, pass around new canvas id.
           const canvas = document.querySelector(`#${data.canvasId}`);
           saveCanvasFrame({
             canvas: canvas as HTMLCanvasElement,
@@ -207,7 +205,6 @@ export class Wrap {
   }
 
   hotReload() {
-    // console.log(`🔥 hot reload enabled`);
     this.unloadCombined();
   }
 
@@ -221,7 +218,6 @@ export class Wrap {
     // this.props.canvas.width = 0;
     // this.props.canvas.height = 0;
     this.props.canvas.remove();
-    // this.props.canvas = null;
     // user clean-up (remove any side effects)
     this.unload && this.unload(this.props);
   }

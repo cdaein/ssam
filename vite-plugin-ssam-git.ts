@@ -15,7 +15,6 @@
  */
 
 import { ViteDevServer } from "vite";
-
 import { exec } from "child_process";
 import kleur from "kleur";
 
@@ -40,16 +39,12 @@ export const gitSnapshot = () => ({
         `[ssam]`
       )}`;
 
-      const { canvasId, filename, format } = data;
-
-      // TODO: depending on the format received, export png or webm
-
       // 1. check if "git init"ed
       execPromise(`git status --porcelain`)
-        .then((value) => {
+        .then(() => {
           // REVIEW: can commit message contain its own hash?
           // 2. add all changes and commit
-          return execPromise(`git add . && git commit -am ${filename}`);
+          return execPromise(`git add . && git commit -am ${data.filename}`);
         })
         .then((value) => {
           {
@@ -65,7 +60,7 @@ export const gitSnapshot = () => ({
           {
             // 4. send commit hash back to ssam
             client.send("ssam:git-success", {
-              canvasId,
+              ...data,
               hash: (hash as string).trim(),
             });
           }
