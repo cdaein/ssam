@@ -42,8 +42,8 @@ export default ({
           suffix,
         })}`;
         import.meta.hot.send("ssam:git", {
+          commitMessage: filenameFormatted,
           canvasId: props.canvas.id,
-          filename: filenameFormatted,
           format: "png",
         });
       }
@@ -57,8 +57,8 @@ export default ({
           suffix,
         })}`;
         import.meta.hot.send("ssam:git", {
+          commitMessage: filenameFormatted,
           canvasId: props.canvas.id,
-          filename: filenameFormatted,
           format: "webm",
         });
       }

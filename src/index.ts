@@ -80,9 +80,9 @@ export class Wrap {
 
     if (import.meta.hot) {
       if (!hotReloading) {
-        import.meta.hot.on("ssam:add", (data) => {
-          console.log("add listeners back");
-        });
+        // import.meta.hot.on("ssam:add", (data) => {
+        //   console.log("add listeners back");
+        // });
         import.meta.hot.on("ssam:warn", (data) => {
           console.warn(`${data.msg}`);
         });
@@ -92,7 +92,7 @@ export class Wrap {
 
         import.meta.hot.on("ssam:git-success", (data) => {
           // TODO: exportFrame should use ffmpeg when developing. how to check for ffmpeg availability?
-          // there's no way to turn off socket listeners, they have to be added only once, and
+          // there's no way to turn off socket listeners, so they have to be added only once, and
           // they always use old canvas ref. to get correct canvas, pass around new canvas id.
           const canvas = document.querySelector(`#${data.canvasId}`);
           saveCanvasFrame({
