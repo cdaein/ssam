@@ -23,7 +23,7 @@ export const setupWebMRecord = ({
   settings: SketchSettingsInternal;
 }) => {
   if (!("VideoEncoder" in window)) {
-    console.log("The browser does not support WebCodecs");
+    console.warn("The browser does not support WebCodecs");
     return;
   }
 
@@ -106,11 +106,7 @@ export const encodeVideoFrame = ({
   const totalFrames = Math.floor(
     (settings.exportFps * settings.duration) / 1000
   );
-  console.log(
-    `%crecording frame... %c${props.frame + 1} of ${totalFrames}`,
-    `color:black`,
-    `color:#9aa`
-  );
+  console.log(`recording (webm) frame... ${props.frame + 1} of ${totalFrames}`);
 };
 
 export const endWebMRecord = async ({

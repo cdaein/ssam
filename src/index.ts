@@ -344,6 +344,15 @@ export class Wrap {
   }
 
   async recordLoop() {
+    if (
+      !("VideoEncoder" in window) &&
+      this.settings.framesFormat.length === 1 &&
+      this.settings.framesFormat.includes("webm")
+    ) {
+      // if 'webm' is not supported and only format
+      this.resetAfterRecord();
+    }
+
     // TODO: what if duration is not set?
     if (!this.states.captureReady) {
       // reset time only if looping (duration set)
@@ -448,16 +457,18 @@ export class Wrap {
         }
       });
 
-      this.states.captureReady = false;
-      this.states.captureDone = false;
-      this.states.savingFrames = false;
-      this.states.timeResetted = true; // playLoop should start fresh
-
-      this.props.recording = false;
-
-      this._frameCount = 0; // reset local frameCount for next recording
+      this.resetAfterRecord();
     }
     return;
+  }
+
+  resetAfterRecord() {
+    this.states.captureReady = false;
+    this.states.captureDone = false;
+    this.states.savingFrames = false;
+    this.states.timeResetted = true; // playLoop should start fresh
+    this.props.recording = false;
+    this._frameCount = 0; // reset local frameCount for next recording
   }
 
   // private _exportFrame({ canvas }: { canvas: HTMLCanvasElement }) {

@@ -22,7 +22,6 @@ export const setupGifAnimRecord = ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
 }) => {
-  // const { framesFormat: format } = settings;
   const format = "gif";
 
   gif = GIFEncoder();
@@ -109,11 +108,7 @@ export const exportGifAnim = ({
   const totalFrames = Math.floor(
     (settings.exportFps * settings.duration) / 1000
   );
-  console.log(
-    `%crecording frame... %c${props.frame + 1} of ${totalFrames}`,
-    `color:black`,
-    `color:#9aa`
-  );
+  console.log(`recording (gif) frame... ${props.frame + 1} of ${totalFrames}`);
 };
 
 export const endGifAnimRecord = ({
@@ -123,7 +118,6 @@ export const endGifAnimRecord = ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
 }) => {
-  // const { framesFormat: format } = settings;
   const format = "gif";
 
   gif.finish();
