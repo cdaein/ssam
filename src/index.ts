@@ -91,7 +91,7 @@ export class Wrap {
         });
 
         import.meta.hot.on("ssam:git-success", (data) => {
-          // TODO: exportFrame should use ffmpeg when developing. how to check for ffmpeg availability?
+          // TODO: exportFrame should use node.js or ffmpeg when developing. how to check for availability?
           // there's no way to turn off socket listeners, so they have to be added only once, and
           // they always use old canvas ref. to get correct canvas, pass around new canvas id.
           const canvas = document.querySelector(`#${data.canvasId}`);
