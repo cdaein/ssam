@@ -218,6 +218,12 @@ export class Wrap {
     // this.props.canvas.width = 0;
     // this.props.canvas.height = 0;
     this.props.canvas.remove();
+    // lose webgl context
+    if (this.settings.mode === "webgl" || this.settings.mode === "webgl2") {
+      (this.props as WebGLProps).gl
+        .getExtension("WEBGL_lose_context")
+        ?.loseContext();
+    }
     // user clean-up (remove any side effects)
     this.unload && this.unload(this.props);
   }
