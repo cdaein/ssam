@@ -17,7 +17,7 @@ const sketch = ({ wrap, p5 }) => {
   };
 
   wrap.init = () => {
-    // similar to p5.setup() with some differences.
+    // similar to p5.setup() with some differences. see below
   };
 
   wrap.render = () => {
@@ -31,17 +31,17 @@ const sketch = ({ wrap, p5 }) => {
 };
 
 const settings = {
-  mode: "p5", // set the mode for p5 2d sketches. use "p5-webgl" for p5 webgl sketches.
+  mode: "2d", // use "webgl" for p5 webgl sketches.
   p5: p5, // also, pass the imported p5 library to the settings
 };
 ```
 
 ## `wrap.init()`
 
-This is similar to `p5.setup()`, but Ssam creates and sets up the canvas internally,so there are a few things you have to do a bit differently.
+This is similar to `p5.setup()`, but Ssam creates and sets up the canvas internally, so there are a few things you have to do a bit differently.
 
 ```js
-// Ssam creates a canvas so don't use this method. Instead, use settings.dimensions and mode
+// Ssam creates a canvas so don't use this method. Instead, use settings.dimensions and settings.mode
 p5.createCanvas(500, 500, p5.P2D);
 // Use settings.playFps and settings.exportFps instead.
 p5.frameRate(60);

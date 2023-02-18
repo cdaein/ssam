@@ -39,8 +39,8 @@
     "pts": "^0.11.3",
     "tsup": "^6.6.3",
     "typescript": "^4.9.5",
-    "vite": "^4.1.1",
-    "vite-plugin-ssam-git": "^0.0.3"
+    "vite": "^4.1.2",
+    "vite-plugin-ssam-git": "^0.0.4"
   },
   "repository": {
     "type": "git",

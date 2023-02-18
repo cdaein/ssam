@@ -80,9 +80,6 @@ export class Wrap {
 
     if (import.meta.hot) {
       if (!hotReloading) {
-        // import.meta.hot.on("ssam:add", (data) => {
-        //   console.log("add listeners back");
-        // });
         import.meta.hot.on("ssam:warn", (data) => {
           console.warn(`${data.msg}`);
         });
@@ -91,7 +88,7 @@ export class Wrap {
         });
 
         import.meta.hot.on("ssam:git-success", (data) => {
-          // TODO: exportFrame should use node.js or ffmpeg when developing. how to check for availability?
+          // TODO: exportFrame should use node.js or ffmpeg when developing. (through vite plugin)
           // there's no way to turn off socket listeners, so they have to be added only once, and
           // they always use old canvas ref. to get correct canvas, pass around new canvas id.
           const canvas = document.querySelector(`#${data.canvasId}`);
@@ -215,8 +212,6 @@ export class Wrap {
     this.removeResize();
     this.removeKeydown();
     // remove canvas
-    // this.props.canvas.width = 0;
-    // this.props.canvas.height = 0;
     this.props.canvas.remove();
     // lose webgl context
     if (this.settings.mode === "webgl" || this.settings.mode === "webgl2") {
@@ -419,24 +414,22 @@ export class Wrap {
           props: this.props,
         });
       } else if (format === "gif") {
-        {
-          let context: any; // REVIEW
-          if (this.settings.mode === "2d") {
-            context = (this.props as SketchProps).context;
-          } else if (
-            this.settings.mode === "webgl" ||
-            this.settings.mode === "webgl2"
-          ) {
-            context = (this.props as WebGLProps).gl;
-          }
-          exportGifAnim({
-            canvas: this.props.canvas,
-            context,
-            settings: this.settings,
-            states: this.states,
-            props: this.props,
-          });
+        let context:
+          | CanvasRenderingContext2D
+          | WebGLRenderingContext
+          | WebGL2RenderingContext;
+        if (this.settings.mode === "2d") {
+          context = (this.props as SketchProps).context;
+        } else {
+          context = (this.props as WebGLProps).gl;
         }
+        exportGifAnim({
+          canvas: this.props.canvas,
+          context,
+          settings: this.settings,
+          states: this.states,
+          props: this.props,
+        });
       }
     });
 
@@ -472,10 +465,6 @@ export class Wrap {
     this.props.recording = false;
     this._frameCount = 0; // reset local frameCount for next recording
   }
-
-  // private _exportFrame({ canvas }: { canvas: HTMLCanvasElement }) {
-  //   //
-  // }
 
   handleResize() {
     // b/c of typescript undefined warning, include empty method here..
