@@ -19,11 +19,9 @@ export const setupMp4Record = ({
   settings: SketchSettingsInternal;
 }) => {
   if (import.meta.hot) {
-    // check for ffmpeg availability
     const { filename, prefix, suffix } = settings;
     const format = "mp4";
 
-    // TODO: find a way to handle buffer frames first in the plugin
     import.meta.hot.send("ssam:ffmpeg", {
       filename: formatFilename({ filename, prefix, suffix }),
       format,
@@ -78,7 +76,6 @@ export const encodeVideoFrame = ({
       (settings.exportFps * settings.duration) / 1000
     );
     const msg = `recording (mp4) frame... ${props.frame + 1} of ${totalFrames}`;
-    // console.log(msg);
     import.meta.hot.send("ssam:ffmpeg-newframe", {
       image: canvas.toDataURL(),
       msg,

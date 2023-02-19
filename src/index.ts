@@ -79,6 +79,8 @@ export class Wrap {
   globalState!: Record<string, any>;
   count!: number;
   loop!: (timestamp: number) => void;
+  // ffmpeg plugin has requested a new frame
+  private _frameRequested!: boolean;
 
   constructor() {
     // use ssam() function for interfacing with user. (class constructor can't use async)
@@ -105,6 +107,11 @@ export class Wrap {
             hash: data.hash,
           });
         });
+
+        import.meta.hot.on("ssam:ffmpeg-reqframe", () => {
+          this._frameRequested = true;
+          this._frameCount += 1;
+        });
       }
     }
 
@@ -115,6 +122,7 @@ export class Wrap {
     this.userSettings = userSettings;
 
     // for manual counting when recording (use only for recording)
+    this._frameRequested = true;
     this._frameCount = 0;
     this.raf = 0;
 
@@ -418,7 +426,11 @@ export class Wrap {
     }
     this.raf = window.requestAnimationFrame(this.loop);
 
-    this._frameCount += 1;
+    // if mp4, frame counting increments when new frame is requested by plugin
+    if (!this.settings.framesFormat.includes("mp4")) {
+      this._frameCount += 1;
+      console.log("automatic frame counting");
+    }
 
     // save frames
     this.settings.framesFormat.forEach((format) => {
@@ -437,12 +449,17 @@ export class Wrap {
           props: this.props,
         });
       } else if (format === "mp4") {
-        exportMp4({
-          canvas: this.props.canvas,
-          settings: this.settings,
-          states: this.states,
-          props: this.props,
-        });
+        // send a new frame to server only when requested
+        // plugin needs some time to process incoming frame
+        if (this._frameRequested) {
+          exportMp4({
+            canvas: this.props.canvas,
+            settings: this.settings,
+            states: this.states,
+            props: this.props,
+          });
+          this._frameRequested = false;
+        }
       } else if (format === "webm") {
         exportWebM({
           canvas: this.props.canvas,
