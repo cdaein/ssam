@@ -3,6 +3,7 @@ import { createSettings } from "./settings";
 import { createStates } from "./states";
 import {
   Sketch,
+  SketchContext,
   SketchLoop,
   SketchProps,
   SketchSettings,
@@ -31,6 +32,11 @@ import {
 import { fitCanvasToWindow } from "./canvas";
 import { getGlobalState, updateGlobalState } from "./store";
 import { saveCanvasFrame } from "./recorders/export-frame";
+import {
+  endMp4Record,
+  exportMp4,
+  setupMp4Record,
+} from "./recorders/export-frames-mp4";
 
 export type {
   FrameFormat,
@@ -341,6 +347,10 @@ export class Wrap {
   }
 
   async recordLoop() {
+    // TODO: combine format check/handling
+    // - dev environment or production? (ffmpeg/mp4, node/sequence not available)
+    // - supported format? (gif, mp4, webm)
+    // - webm supported browser?
     if (
       !("VideoEncoder" in window) &&
       this.settings.framesFormat.length === 1 &&
@@ -362,17 +372,23 @@ export class Wrap {
         });
 
       for (const format of this.settings.framesFormat) {
-        if (format !== "webm" && format !== "gif") {
+        if (!["gif", "mp4", "webm"].includes(format)) {
+          // REVIEW: instead of throwing error, handle more gracefully
           throw new Error(`${format} export is not supported`);
         }
-        if (format === "webm") {
-          setupWebMRecord({
-            canvas: this.props.canvas!,
+        if (format === "gif") {
+          setupGifAnimRecord({
+            canvas: this.props.canvas,
             settings: this.settings,
           });
-        } else if (format === "gif") {
-          setupGifAnimRecord({
-            canvas: this.props.canvas!,
+        } else if (format === "mp4") {
+          setupMp4Record({
+            canvas: this.props.canvas,
+            settings: this.settings,
+          });
+        } else if (format === "webm") {
+          setupWebMRecord({
+            canvas: this.props.canvas,
             settings: this.settings,
           });
         }
@@ -406,18 +422,8 @@ export class Wrap {
 
     // save frames
     this.settings.framesFormat.forEach((format) => {
-      if (format === "webm") {
-        exportWebM({
-          canvas: this.props.canvas,
-          settings: this.settings,
-          states: this.states,
-          props: this.props,
-        });
-      } else if (format === "gif") {
-        let context:
-          | CanvasRenderingContext2D
-          | WebGLRenderingContext
-          | WebGL2RenderingContext;
+      if (format === "gif") {
+        let context: SketchContext;
         if (this.settings.mode === "2d") {
           context = (this.props as SketchProps).context;
         } else {
@@ -426,6 +432,20 @@ export class Wrap {
         exportGifAnim({
           canvas: this.props.canvas,
           context,
+          settings: this.settings,
+          states: this.states,
+          props: this.props,
+        });
+      } else if (format === "mp4") {
+        exportMp4({
+          canvas: this.props.canvas,
+          settings: this.settings,
+          states: this.states,
+          props: this.props,
+        });
+      } else if (format === "webm") {
+        exportWebM({
+          canvas: this.props.canvas,
           settings: this.settings,
           states: this.states,
           props: this.props,
@@ -446,6 +466,11 @@ export class Wrap {
           });
         } else if (format === "gif") {
           endGifAnimRecord({
+            canvas: this.props.canvas,
+            settings: this.settings,
+          });
+        } else if (format === "mp4") {
+          endMp4Record({
             canvas: this.props.canvas,
             settings: this.settings,
           });

@@ -1,12 +1,15 @@
+/**
+ * mp4 recording will only work when
+ * 1. dev mode (import.meta.hot)
+ * 2. ffmpeg is available on local machine
+ */
+
+import { formatFilename } from "../helpers";
 import type {
   SketchStates,
   SketchSettingsInternal,
   BaseProps,
 } from "../types/types";
-// import { downloadBlob } from "../helpers";
-
-let videoEncoder: VideoEncoder | null = null;
-let lastKeyframe: number | null = null;
 
 export const setupMp4Record = ({
   canvas,
@@ -15,42 +18,24 @@ export const setupMp4Record = ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
 }) => {
-  // TODO: instead, check for ffmpeg availability (vite plugin should send a warning)
-  // if (!("VideoEncoder" in window)) {
-  //   console.warn("The browser does not support WebCodecs");
-  //   return;
-  // }
+  if (import.meta.hot) {
+    // check for ffmpeg availability
+    const { filename, prefix, suffix } = settings;
+    const format = "mp4";
 
-  const format = "mp4";
+    // TODO: find a way to handle buffer frames first in the plugin
+    import.meta.hot.send("ssam:ffmpeg", {
+      filename: formatFilename({ filename, prefix, suffix }),
+      format,
+      fps: settings.exportFps,
+    });
 
-  // muxer = new WebMMuxer({
-  //   target: "buffer",
-  //   video: {
-  //     codec: "V_VP9", // TODO: check for codec support
-  //     width: canvas.width,
-  //     height: canvas.height,
-  //     frameRate: settings.exportFps,
-  //   },
-  // });
-
-  // videoEncoder = new VideoEncoder({
-  //   output: (chunk, meta) => muxer?.addVideoChunk(chunk, meta),
-  //   error: (e) => console.error(`WebMMuxer error: ${e}`),
-  // });
-
-  // videoEncoder.configure({
-  //   codec: "vp09.00.10.08", // TODO: look at other codecs
-  //   width: canvas.width,
-  //   height: canvas.height,
-  //   bitrate: 10_000_000, // REVIEW: 1e7 = 10 Mbps (keep high. needs mp4 convert again)
-  // });
-
-  lastKeyframe = -Infinity;
-
-  canvas.style.outline = `3px solid red`;
-  canvas.style.outlineOffset = `-3px`;
-
-  console.log(`recording (${format}) started`);
+    canvas.style.outline = `3px solid red`;
+    canvas.style.outlineOffset = `-3px`;
+  } else {
+    console.warn(`mp4 recording is only availabe on dev environment`);
+    return;
+  }
 };
 
 export const exportMp4 = async ({
@@ -67,6 +52,8 @@ export const exportMp4 = async ({
   // if (!("VideoEncoder" in window)) {
   //   return;
   // }
+
+  // TODO: use promise(await) to make sure it's okay to move to next frame
 
   if (!states.captureDone) {
     // record frame
@@ -85,21 +72,18 @@ export const encodeVideoFrame = ({
   states: SketchStates;
   props: BaseProps;
 }) => {
-  // timestamp unit is micro-seconds!!
-  const frame = new VideoFrame(canvas, { timestamp: props.time * 1000 });
-
-  // add video keyframe every 2 seconds (2000ms)
-  const needsKeyframe = props.time - lastKeyframe! >= 2000;
-  if (needsKeyframe) lastKeyframe = props.time;
-
-  videoEncoder?.encode(frame, { keyFrame: needsKeyframe });
-  frame.close();
-
-  // TODO: this should be in settings, states or props
-  const totalFrames = Math.floor(
-    (settings.exportFps * settings.duration) / 1000
-  );
-  console.log(`recording (webm) frame... ${props.frame + 1} of ${totalFrames}`);
+  if (import.meta.hot) {
+    // TODO: this should be in settings, states or props
+    const totalFrames = Math.floor(
+      (settings.exportFps * settings.duration) / 1000
+    );
+    const msg = `recording (mp4) frame... ${props.frame + 1} of ${totalFrames}`;
+    // console.log(msg);
+    import.meta.hot.send("ssam:ffmpeg-newframe", {
+      image: canvas.toDataURL(),
+      msg,
+    });
+  }
 };
 
 export const endMp4Record = async ({
@@ -113,18 +97,16 @@ export const endMp4Record = async ({
   //   return;
   // }
 
-  const format = "mp4";
+  if (import.meta.hot) {
+    const format = "mp4";
 
-  await videoEncoder?.flush();
-  // const buffer = muxer?.finalize();
+    canvas.style.outline = "none";
+    canvas.style.outlineOffset = `0 `;
 
-  // downloadBlob(new Blob([buffer!], { type: "video/webm" }), settings, format);
-
-  // muxer = null;
-  videoEncoder = null;
-
-  canvas.style.outline = "none";
-  canvas.style.outlineOffset = `0 `;
-
-  console.log(`recording (${format}) complete`);
+    const msg = `recording (${format}) complete`;
+    // console.log(msg);
+    import.meta.hot.send("ssam:ffmpeg-done", {
+      msg,
+    });
+  }
 };
