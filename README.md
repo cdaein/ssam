@@ -35,7 +35,7 @@ See [documentation](https://github.com/cdaein/ssam/wiki)
 - **Animation loop**: The `playhead` prop repeats `0..1` and makes it easy to create a seamless animation loop. Other props such as `time`, `frame` and `deltaTime` are provided as well. You can also adjust frame rate for both playing and exporting.
 - **Sketch settings**: Use `settings` object to reduce boilerplate code in your sketch - set up animation duration, playback frame rate, filename, etc.
 - **Sketch props**: Use props for each mode such as `context`, `width`, `height` to help your coding.
-- **File exports**: Export canvas as image, animated GIF or WebM video at various frame rates using keyboard shortcuts.
+- **File exports**: Export canvas as image, animated GIF or MP4/WebM video at various frame rates using keyboard shortcuts.
 
 ## Example
 
