@@ -31,8 +31,8 @@ export type SketchMode = "2d" | "webgl" | "webgl2";
 export type FrameFormat = "png" | "jpg" | "jpeg" | "webp";
 
 // video or image sequence
-// export type FramesFormat = "mp4" | "png" | "jpg" | "jpeg" | "gif" | "webm";
-export type FramesFormat = "gif" | "webm";
+// export type FramesFormat = "gif" | "jpg" | "jpeg" | "mp4" | "png" | "webm";
+export type FramesFormat = "gif" | "mp4" | "webm";
 
 /** GIF encoding options */
 export type GifOptions = {
@@ -200,6 +200,11 @@ export interface BaseProps {
 }
 
 // REVIEW: separate updatable/writable props (during life of a sketch), and fixed/readable props
+
+export type SketchContext =
+  | CanvasRenderingContext2D
+  | WebGLRenderingContext
+  | WebGL2RenderingContext;
 
 /**
  * to use with canvas with 2d sketches

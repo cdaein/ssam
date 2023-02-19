@@ -1,5 +1,6 @@
 import {
   BaseProps,
+  SketchContext,
   SketchSettings,
   SketchSettingsInternal,
 } from "./types/types";
@@ -14,10 +15,7 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
   }
 
   let canvas: HTMLCanvasElement;
-  let context:
-    | CanvasRenderingContext2D
-    | WebGLRenderingContext
-    | WebGL2RenderingContext;
+  let context: SketchContext;
   let gl: WebGLRenderingContext | WebGL2RenderingContext | undefined;
   let width = window.innerWidth;
   let height = window.innerHeight;
