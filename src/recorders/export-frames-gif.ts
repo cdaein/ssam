@@ -6,7 +6,7 @@ import {
   snapColorsToPalette,
 } from "gifenc";
 import type { Encoder } from "gifenc";
-import { downloadBlob } from "../helpers";
+import { downloadBlob, outlineElement } from "../helpers";
 import {
   BaseProps,
   SketchSettingsInternal,
@@ -26,8 +26,7 @@ export const setupGifAnimRecord = ({
 
   gif = GIFEncoder();
 
-  canvas.style.outline = `3px solid red`;
-  canvas.style.outlineOffset = `-3px`;
+  outlineElement(canvas, true);
 
   console.log(`recording (${format}) started`);
 };
@@ -126,8 +125,7 @@ export const endGifAnimRecord = ({
 
   downloadBlob(new Blob([buffer], { type: "image/gif" }), settings, format);
 
-  canvas.style.outline = "none";
-  canvas.style.outlineOffset = `0 `;
+  outlineElement(canvas, false);
 
   console.log(`recording (${format}) complete`);
 };

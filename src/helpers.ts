@@ -63,6 +63,16 @@ export const formatDatetime = (date: Date) => {
   return formatted;
 };
 
+export const outlineElement = (el: HTMLElement, on: boolean) => {
+  if (on) {
+    el.style.outline = `3px solid red`;
+    el.style.outlineOffset = `-3px`;
+  } else {
+    el.style.outline = "none";
+    el.style.outlineOffset = `0`;
+  }
+};
+
 export const toArray = (value: any) => {
   // convert to array format
   if (!Array.isArray(value)) {

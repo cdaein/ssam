@@ -9,7 +9,7 @@ import type {
   BaseProps,
 } from "../types/types";
 import WebMMuxer from "webm-muxer";
-import { downloadBlob } from "../helpers";
+import { downloadBlob, outlineElement } from "../helpers";
 
 let muxer: WebMMuxer | null = null;
 let videoEncoder: VideoEncoder | null = null;
@@ -54,8 +54,7 @@ export const setupWebMRecord = ({
 
   lastKeyframe = -Infinity;
 
-  canvas.style.outline = `3px solid red`;
-  canvas.style.outlineOffset = `-3px`;
+  outlineElement(canvas, true);
 
   console.log(`recording (${format}) started`);
 };
@@ -131,8 +130,7 @@ export const endWebMRecord = async ({
   muxer = null;
   videoEncoder = null;
 
-  canvas.style.outline = "none";
-  canvas.style.outlineOffset = `0 `;
+  outlineElement(canvas, false);
 
   console.log(`recording (${format}) complete`);
 };
