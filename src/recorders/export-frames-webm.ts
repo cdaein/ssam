@@ -16,11 +16,11 @@ let videoEncoder: VideoEncoder | null = null;
 let lastKeyframe: number | null = null;
 
 export const setupWebMRecord = ({
-  canvas,
   settings,
+  props,
 }: {
-  canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
+  props: BaseProps;
 }) => {
   if (!("VideoEncoder" in window)) {
     console.warn("The browser does not support WebCodecs");
@@ -34,8 +34,8 @@ export const setupWebMRecord = ({
     target: "buffer",
     video: {
       codec: "V_VP9", // TODO: check for codec support
-      width: canvas.width,
-      height: canvas.height,
+      width: props.canvas.width,
+      height: props.canvas.height,
       frameRate: settings.exportFps,
     },
   });
@@ -47,14 +47,12 @@ export const setupWebMRecord = ({
 
   videoEncoder.configure({
     codec: "vp09.00.10.08", // TODO: look at other codecs
-    width: canvas.width,
-    height: canvas.height,
+    width: props.canvas.width,
+    height: props.canvas.height,
     bitrate: 10_000_000, // REVIEW: 1e7 = 10 Mbps (keep high. needs mp4 convert again)
   });
 
   lastKeyframe = -Infinity;
-
-  outlineElement(canvas, true);
 
   console.log(`recording (${format}) started`);
 };
@@ -62,11 +60,9 @@ export const setupWebMRecord = ({
 export const exportWebM = async ({
   canvas,
   settings,
-  states,
   props,
 }: {
   canvas: HTMLCanvasElement;
-  states: SketchStates;
   settings: SketchSettingsInternal;
   props: BaseProps;
 }) => {
@@ -74,21 +70,17 @@ export const exportWebM = async ({
     return;
   }
 
-  if (!states.captureDone) {
-    // record frame
-    encodeVideoFrame({ canvas, settings, states, props });
-  }
+  // record frame
+  encodeVideoFrame({ canvas, settings, props });
 };
 
 export const encodeVideoFrame = ({
   canvas,
   settings,
-  states,
   props,
 }: {
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
-  states: SketchStates;
   props: BaseProps;
 }) => {
   // timestamp unit is micro-seconds!!
@@ -101,18 +93,14 @@ export const encodeVideoFrame = ({
   videoEncoder?.encode(frame, { keyFrame: needsKeyframe });
   frame.close();
 
-  // TODO: this should be in settings, states or props
-  const totalFrames = Math.floor(
-    (settings.exportFps * settings.duration) / 1000
+  console.log(
+    `recording (webm) frame... ${props.frame} of ${settings.exportTotalFrames}`
   );
-  console.log(`recording (webm) frame... ${props.frame + 1} of ${totalFrames}`);
 };
 
 export const endWebMRecord = async ({
-  canvas,
   settings,
 }: {
-  canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
 }) => {
   if (!("VideoEncoder" in window)) {
@@ -129,8 +117,6 @@ export const endWebMRecord = async ({
 
   muxer = null;
   videoEncoder = null;
-
-  outlineElement(canvas, false);
 
   console.log(`recording (${format}) complete`);
 };

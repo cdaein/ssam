@@ -44,6 +44,8 @@ export type GifOptions = {
   // knownColors?: string[]
 };
 
+export type RecordState = "inactive" | "start" | "in-progress" | "end";
+
 /**
  * User provided settings. all optional properties must either come from user. If not, it will be filled internally with default settings.
  */
@@ -142,8 +144,9 @@ export interface SketchStates {
   playMode: "play" | "record"; // REVIEW: "play:time", "play:frame" do i need this? or just use savingFrames:boolean?
   savingFrame: boolean;
   savingFrames: boolean;
-  captureReady: boolean;
-  captureDone: boolean;
+  // captureReady: boolean;
+  // captureDone: boolean;
+  recordState: RecordState;
   startTime: number;
   lastStartTime: number;
   pausedStartTime: number;

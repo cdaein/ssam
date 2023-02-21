@@ -29,8 +29,13 @@ export default ({
       // save frames (video)
       if (!states.savingFrames) {
         states.savingFrames = true;
+        states.recordState = "start";
       } else {
-        states.captureDone = true;
+        states.recordState = "end";
+
+        // should ask to update savingFrames but not here
+        // b/c need to endRecord() first
+        // states.savingFrames = false;
       }
     } else if ((ev.metaKey || ev.ctrlKey) && !ev.shiftKey && ev.key === "k") {
       if (import.meta.hot) {
@@ -67,17 +72,18 @@ export default ({
       if (states.paused) {
         // TODO
         // REVIEW: frame needs to wrap around totalFrames
-        props.update({ frame: (props.frame + 1) % props.totalFrames });
+        // props.update({ frame: (props.frame + 1) % props.totalFrames });
       }
     } else if (ev.key === "ArrowLeft") {
       if (states.paused) {
         // TODO
-        props.update({ frame: props.frame - 1 });
+        // props.update({ frame: props.frame - 1 });
       }
-    } else if (ev.key === "t") {
-      // TEST
-      states.timeResetted = true;
     }
+    // else if (ev.key === "t") {
+    // TEST
+    // states.timeResetted = true;
+    // }
   };
 
   const add = () => {

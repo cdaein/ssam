@@ -4,7 +4,7 @@
  * 2. ffmpeg is available on local machine
  */
 
-import { formatFilename } from "../helpers";
+import { formatFilename, outlineElement } from "../helpers";
 import type {
   SketchStates,
   SketchSettingsInternal,
@@ -12,26 +12,21 @@ import type {
 } from "../types/types";
 
 export const setupMp4Record = ({
-  canvas,
   settings,
 }: {
-  canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
 }) => {
   if (import.meta.hot) {
     const { filename, prefix, suffix } = settings;
-    const format = "mp4";
 
     import.meta.hot.send("ssam:ffmpeg", {
       filename: formatFilename({ filename, prefix, suffix }),
-      format,
+      format: "mp4",
       fps: settings.exportFps,
+      totalFrames: settings.exportTotalFrames,
     });
-
-    canvas.style.outline = `3px solid red`;
-    canvas.style.outlineOffset = `-3px`;
   } else {
-    console.warn(`mp4 recording is only availabe on dev environment`);
+    console.warn(`mp4 recording is only availabe in dev environment`);
     return;
   }
 };
@@ -39,11 +34,9 @@ export const setupMp4Record = ({
 export const exportMp4 = async ({
   canvas,
   settings,
-  states,
   props,
 }: {
   canvas: HTMLCanvasElement;
-  states: SketchStates;
   settings: SketchSettingsInternal;
   props: BaseProps;
 }) => {
@@ -51,31 +44,20 @@ export const exportMp4 = async ({
   //   return;
   // }
 
-  // TODO: use promise(await) to make sure it's okay to move to next frame
-
-  if (!states.captureDone) {
-    // record frame
-    encodeVideoFrame({ canvas, settings, states, props });
-  }
+  encodeVideoFrame({ canvas, settings, props });
 };
 
 export const encodeVideoFrame = ({
   canvas,
   settings,
-  states,
   props,
 }: {
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
-  states: SketchStates;
   props: BaseProps;
 }) => {
   if (import.meta.hot) {
-    // TODO: this should be in settings, states or props
-    const totalFrames = Math.floor(
-      (settings.exportFps * settings.duration) / 1000
-    );
-    const msg = `recording (mp4) frame... ${props.frame + 1} of ${totalFrames}`;
+    const msg = `recording (mp4) frame... ${props.frame} of ${settings.exportTotalFrames}`;
     import.meta.hot.send("ssam:ffmpeg-newframe", {
       image: canvas.toDataURL(),
       msg,
@@ -83,13 +65,7 @@ export const encodeVideoFrame = ({
   }
 };
 
-export const endMp4Record = async ({
-  canvas,
-  settings,
-}: {
-  canvas: HTMLCanvasElement;
-  settings: SketchSettingsInternal;
-}) => {
+export const endMp4Record = async () => {
   // if (!("VideoEncoder" in window)) {
   //   return;
   // }
@@ -97,11 +73,7 @@ export const endMp4Record = async ({
   if (import.meta.hot) {
     const format = "mp4";
 
-    canvas.style.outline = "none";
-    canvas.style.outlineOffset = `0 `;
-
     const msg = `recording (${format}) complete`;
-    // console.log(msg);
     import.meta.hot.send("ssam:ffmpeg-done", {
       msg,
     });

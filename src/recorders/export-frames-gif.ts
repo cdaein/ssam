@@ -26,73 +26,71 @@ export const setupGifAnimRecord = ({
 
   gif = GIFEncoder();
 
-  outlineElement(canvas, true);
-
   console.log(`recording (${format}) started`);
 };
 
 export const exportGifAnim = ({
-  canvas,
   context,
   settings,
-  states,
   props,
 }: {
-  canvas: HTMLCanvasElement;
   context:
     | CanvasRenderingContext2D
     | WebGLRenderingContext
     | WebGL2RenderingContext;
   settings: SketchSettingsInternal;
-  states: SketchStates;
   props: BaseProps;
 }) => {
-  if (!states.captureDone) {
-    // record frame
-    let data: Uint8ClampedArray;
-    if (settings.mode === "2d") {
-      data = (context as CanvasRenderingContext2D).getImageData(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      ).data;
+  // record frame
+  let data: Uint8ClampedArray;
+  if (settings.mode === "2d") {
+    data = (context as CanvasRenderingContext2D).getImageData(
+      0,
+      0,
+      props.canvas.width,
+      props.canvas.height
+    ).data;
 
-      const palette =
-        settings.gifOptions.palette ||
-        quantize(data, settings.gifOptions.maxColors || 256);
-      const index = applyPalette(data, palette);
-      // const index = getIndexedFrame(data, palette);
+    const palette =
+      settings.gifOptions.palette ||
+      quantize(data, settings.gifOptions.maxColors || 256);
+    const index = applyPalette(data, palette);
+    // const index = getIndexedFrame(data, palette);
 
-      const fpsInterval = 1 / settings.exportFps;
-      const delay = fpsInterval * 1000;
-      gif.writeFrame(index, canvas.width, canvas.height, { palette, delay });
+    const fpsInterval = 1 / settings.exportFps;
+    const delay = fpsInterval * 1000;
+    gif.writeFrame(index, props.canvas.width, props.canvas.height, {
+      palette,
+      delay,
+    });
+  } else {
+    // REVIEW: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/readPixels
+    let gl: WebGLRenderingContext | WebGL2RenderingContext;
+    if (settings.mode === "webgl") {
+      gl = context as WebGLRenderingContext;
     } else {
-      // REVIEW: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/readPixels
-      let gl: WebGLRenderingContext | WebGL2RenderingContext;
-      if (settings.mode === "webgl") {
-        gl = context as WebGLRenderingContext;
-      } else {
-        // webgl2
-        gl = context as WebGL2RenderingContext;
-      }
-      const pixels = new Uint8Array(
-        gl.drawingBufferWidth * gl.drawingBufferHeight * 4
-      );
-      //prettier-ignore
-      gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, 
+      // webgl2
+      gl = context as WebGL2RenderingContext;
+    }
+    const pixels = new Uint8Array(
+      gl.drawingBufferWidth * gl.drawingBufferHeight * 4
+    );
+    //prettier-ignore
+    gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, 
                     gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 
-      const palette =
-        settings.gifOptions.palette ||
-        quantize(pixels, settings.gifOptions.maxColors || 256);
-      const index = applyPalette(pixels, palette);
-      // const index = getIndexedFrame(pixels, palette);
+    const palette =
+      settings.gifOptions.palette ||
+      quantize(pixels, settings.gifOptions.maxColors || 256);
+    const index = applyPalette(pixels, palette);
+    // const index = getIndexedFrame(pixels, palette);
 
-      const fpsInterval = 1 / settings.exportFps;
-      const delay = fpsInterval * 1000;
-      gif.writeFrame(index, canvas.width, canvas.height, { palette, delay });
-    }
+    const fpsInterval = 1 / settings.exportFps;
+    const delay = fpsInterval * 1000;
+    gif.writeFrame(index, props.canvas.width, props.canvas.height, {
+      palette,
+      delay,
+    });
   }
 
   // TODO: where to put this warning?
@@ -103,18 +101,14 @@ export const exportGifAnim = ({
     );
   }
 
-  // TODO: this should be in settings, states or props
-  const totalFrames = Math.floor(
-    (settings.exportFps * settings.duration) / 1000
+  console.log(
+    `recording (gif) frame... ${props.frame} of ${settings.exportTotalFrames}`
   );
-  console.log(`recording (gif) frame... ${props.frame + 1} of ${totalFrames}`);
 };
 
 export const endGifAnimRecord = ({
-  canvas,
   settings,
 }: {
-  canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
 }) => {
   const format = "gif";
@@ -124,8 +118,6 @@ export const endGifAnimRecord = ({
   const buffer: ArrayBuffer = gif.bytesView();
 
   downloadBlob(new Blob([buffer], { type: "image/gif" }), settings, format);
-
-  outlineElement(canvas, false);
 
   console.log(`recording (${format}) complete`);
 };

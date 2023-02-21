@@ -37,6 +37,7 @@ import {
   exportMp4,
   setupMp4Record,
 } from "./recorders/export-frames-mp4";
+import { outlineElement } from "./helpers";
 
 export type {
   FrameFormat,
@@ -74,7 +75,7 @@ export class Wrap {
   removeResize!: () => void;
   removeKeydown!: () => void;
   unload?: (props: SketchProps | WebGLProps) => void;
-  private _frameCount!: number;
+  // private _frameCount!: number;
   private raf!: number;
   globalState!: Record<string, any>;
   count!: number;
@@ -110,7 +111,6 @@ export class Wrap {
 
         import.meta.hot.on("ssam:ffmpeg-reqframe", () => {
           this._frameRequested = true;
-          this._frameCount += 1;
         });
       }
     }
@@ -123,7 +123,7 @@ export class Wrap {
 
     // for manual counting when recording (use only for recording)
     this._frameRequested = true;
-    this._frameCount = 0;
+    // this._frameCount = 0;
     this.raf = 0;
 
     this.globalState = getGlobalState();
@@ -320,7 +320,6 @@ export class Wrap {
         props: this.props,
       });
     }
-    // deltaTime
     this.props.deltaTime = this.states.timestamp - this.states.lastTimestamp;
 
     // throttle frame rate
@@ -355,30 +354,30 @@ export class Wrap {
   }
 
   async recordLoop() {
-    // TODO: combine format check/handling
-    // - dev environment or production? (ffmpeg/mp4, node/sequence not available)
-    // - supported format? (gif, mp4, webm)
-    // - webm supported browser?
+    // TODO: single check/handling for all formats
     if (
       !("VideoEncoder" in window) &&
       this.settings.framesFormat.length === 1 &&
       this.settings.framesFormat.includes("webm")
     ) {
       // if 'webm' is not supported and only format
+      // TODO: find a bettery way to handle this
       this.resetAfterRecord();
     }
 
-    // TODO: what if duration is not set?
-    if (!this.states.captureReady) {
-      // reset time only if looping (duration set)
-      // REVIEW: whether to resetTime() needs more testing
-      if (this.props.duration)
+    // respond to current recordState
+    if (this.states.recordState === "start") {
+      if (this.props.duration) {
         resetTime({
           settings: this.settings,
           states: this.states,
           props: this.props,
         });
+      }
 
+      outlineElement(this.props.canvas, true);
+
+      // set up recording
       for (const format of this.settings.framesFormat) {
         if (!["gif", "mp4", "webm"].includes(format)) {
           // REVIEW: instead of throwing error, handle more gracefully
@@ -390,122 +389,118 @@ export class Wrap {
             settings: this.settings,
           });
         } else if (format === "mp4") {
-          setupMp4Record({
-            canvas: this.props.canvas,
-            settings: this.settings,
-          });
+          setupMp4Record({ settings: this.settings });
         } else if (format === "webm") {
           setupWebMRecord({
-            canvas: this.props.canvas,
             settings: this.settings,
-          });
-        }
-      }
-
-      this.states.captureReady = true;
-      this.props.recording = true;
-    }
-
-    // deltaTime
-    this.props.deltaTime = 1000 / this.settings.exportFps;
-    // time
-    this.props.time = this._frameCount * this.props.deltaTime;
-
-    computePlayhead({
-      settings: this.settings,
-      props: this.props,
-    });
-    this.props.frame = this._frameCount;
-    computeLastTimestamp({ states: this.states, props: this.props });
-
-    try {
-      await this.render(this.props);
-    } catch (err: any) {
-      console.error(err);
-      return null;
-    }
-    this.raf = window.requestAnimationFrame(this.loop);
-
-    // if mp4, frame counting increments when new frame is requested by plugin
-    if (!this.settings.framesFormat.includes("mp4")) {
-      this._frameCount += 1;
-      console.log("automatic frame counting");
-    }
-
-    // save frames
-    this.settings.framesFormat.forEach((format) => {
-      if (format === "gif") {
-        let context: SketchContext;
-        if (this.settings.mode === "2d") {
-          context = (this.props as SketchProps).context;
-        } else {
-          context = (this.props as WebGLProps).gl;
-        }
-        exportGifAnim({
-          canvas: this.props.canvas,
-          context,
-          settings: this.settings,
-          states: this.states,
-          props: this.props,
-        });
-      } else if (format === "mp4") {
-        // send a new frame to server only when requested
-        // plugin needs some time to process incoming frame
-        if (this._frameRequested) {
-          exportMp4({
-            canvas: this.props.canvas,
-            settings: this.settings,
-            states: this.states,
             props: this.props,
           });
-          this._frameRequested = false;
         }
-      } else if (format === "webm") {
-        exportWebM({
-          canvas: this.props.canvas,
-          settings: this.settings,
-          states: this.states,
-          props: this.props,
-        });
       }
-    });
 
-    if (this.props.frame >= this.settings.exportTotalFrames - 1) {
-      this.states.captureDone = true;
+      // update relevant props
+      this.props.recording = true;
+
+      // move to next recordState
+      this.states.recordState = "in-progress";
     }
+    if (this.states.recordState === "in-progress") {
+      // render frame
+      try {
+        await this.render(this.props);
+      } catch (err: any) {
+        console.error(err);
+        return null;
+      }
+      this.raf = window.requestAnimationFrame(this.loop);
 
-    if (this.states.captureDone) {
+      // update frame count (before encoding due to mp4 frame request logic)
+      if (!this.settings.framesFormat.includes("mp4")) {
+        this.props.frame += 1;
+      } else {
+        if (this._frameRequested) {
+          this.props.frame += 1;
+        }
+      }
+
+      // encode frame
       this.settings.framesFormat.forEach((format) => {
-        if (format === "webm") {
-          endWebMRecord({
-            canvas: this.props.canvas,
+        if (format === "gif") {
+          let context: SketchContext;
+          if (this.settings.mode === "2d") {
+            context = (this.props as SketchProps).context;
+          } else {
+            context = (this.props as WebGLProps).gl;
+          }
+          exportGifAnim({
+            context,
             settings: this.settings,
-          });
-        } else if (format === "gif") {
-          endGifAnimRecord({
-            canvas: this.props.canvas,
-            settings: this.settings,
+            props: this.props,
           });
         } else if (format === "mp4") {
-          endMp4Record({
+          // send a new frame to server only when requested
+          // plugin needs some time to process incoming frame
+          if (this._frameRequested) {
+            exportMp4({
+              canvas: this.props.canvas,
+              settings: this.settings,
+              props: this.props,
+            });
+            this._frameRequested = false;
+          }
+        } else if (format === "webm") {
+          exportWebM({
             canvas: this.props.canvas,
             settings: this.settings,
+            props: this.props,
           });
         }
       });
 
-      this.resetAfterRecord();
+      // update time variables
+      this.props.deltaTime = 1000 / this.settings.exportFps;
+      this.props.time = this.props.frame * this.props.deltaTime;
+      computePlayhead({
+        settings: this.settings,
+        props: this.props,
+      });
+      computeLastTimestamp({ states: this.states, props: this.props });
+
+      if (this.props.frame >= this.settings.exportTotalFrames) {
+        this.states.recordState = "end";
+      }
     }
+    if (this.states.recordState === "end") {
+      // finish recording
+      this.settings.framesFormat.forEach((format) => {
+        if (format === "gif") {
+          endGifAnimRecord({ settings: this.settings });
+        } else if (format === "mp4") {
+          endMp4Record();
+        } else if (format === "webm") {
+          endWebMRecord({ settings: this.settings });
+        }
+      });
+
+      this.raf = window.requestAnimationFrame(this.loop);
+
+      // reset recording states
+      // TODO: reset only if duration is set
+      this.resetAfterRecord();
+
+      outlineElement(this.props.canvas, false);
+    }
+
     return;
   }
 
   resetAfterRecord() {
-    this.states.captureReady = false;
-    this.states.captureDone = false;
     this.states.savingFrames = false;
+    this.states.recordState = "inactive";
     this.states.timeResetted = true; // playLoop should start fresh
+
+    this.props.frame = 0;
     this.props.recording = false;
-    this._frameCount = 0; // reset local frameCount for next recording
   }
 
   handleResize() {
