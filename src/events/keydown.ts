@@ -39,14 +39,7 @@ export default ({
     } else if ((ev.metaKey || ev.ctrlKey) && !ev.shiftKey && ev.key === "k") {
       if (import.meta.hot) {
         // git commit snapshot (image)
-        const { filename, prefix, suffix } = settings;
-        const filenameFormatted = `${formatFilename({
-          filename,
-          prefix,
-          suffix,
-        })}`;
         import.meta.hot.send("ssam:git", {
-          commitMessage: filenameFormatted,
           canvasId: props.canvas.id,
           format: "png",
         });
