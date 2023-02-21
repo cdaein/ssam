@@ -1,5 +1,37 @@
 import { FramesFormat, SketchSettingsInternal } from "./types/types";
 
+// TODO: not using it yet.
+//       check all included formats.
+//       give warning and remove anything not supported and update props.framesFormat
+// do it once when sketch is loaded, and set a flag to completely skip recordLoop()
+// - if multiple formats, remove unsupported formats. if none supported, skip recordLoop(). default to webm?
+// - dev environment or production? (ffmpeg/mp4, node/sequence not available)
+export const checkSupportedFormats = (formats: FramesFormat[]) => {
+  const supported: FramesFormat[] = [];
+
+  for (const format of formats) {
+    if (format === "gif") {
+      // gif is supported
+      supported.push("gif");
+    } else if (format === "mp4") {
+      if (import.meta.hot) {
+        // only in dev server
+        // - dev environment or production? (ffmpeg/mp4, node/sequence not available)
+        // ffmpeg must be present - need to check message "ssam:ffmpeg-nosupport"
+        supported.push("mp4");
+      }
+    } else if (format === "webm") {
+      if ("VideoEncoder" in window) {
+        // only in supported browser
+        supported.push("webm");
+      }
+    } else {
+      // not supported
+    }
+  }
+  return supported;
+};
+
 export const downloadBlob = (
   blob: Blob,
   settings: SketchSettingsInternal,
