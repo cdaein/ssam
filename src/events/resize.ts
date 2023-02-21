@@ -1,5 +1,4 @@
 import { resizeCanvas } from "@daeinc/canvas";
-import { Wrap } from "..";
 import { fitCanvasToWindow } from "../canvas";
 import type {
   SketchProps,
@@ -7,7 +6,6 @@ import type {
   SketchResize,
   SketchSettings,
   SketchSettingsInternal,
-  SketchStates,
   WebGLProps,
 } from "../types/types";
 
@@ -16,14 +14,12 @@ import type {
 // canvas style change: window resize
 // resize() return: canvas resize
 export default ({
-  wrap,
   props,
   userSettings,
   settings,
   render,
   resize,
 }: {
-  wrap: Wrap;
   props: SketchProps | WebGLProps;
   userSettings: SketchSettings;
   settings: SketchSettingsInternal;

@@ -1,6 +1,5 @@
 import { formatFilename } from "../helpers";
 import type {
-  SketchLoop,
   SketchProps,
   SketchSettingsInternal,
   SketchStates,

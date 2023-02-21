@@ -4,12 +4,8 @@
  * 2. ffmpeg is available on local machine
  */
 
-import { formatFilename, outlineElement } from "../helpers";
-import type {
-  SketchStates,
-  SketchSettingsInternal,
-  BaseProps,
-} from "../types/types";
+import { formatFilename } from "../helpers";
+import type { SketchSettingsInternal, BaseProps } from "../types/types";
 
 export const setupMp4Record = ({
   settings,

@@ -81,7 +81,7 @@ export const formatDatetime = (date: Date) => {
   date.setMinutes(date.getMinutes() - offset);
 
   const isoString = date.toISOString();
-  const [full, yyyy, mo, dd, hh, mm, ss] = isoString.match(
+  const [, yyyy, mo, dd, hh, mm, ss] = isoString.match(
     /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/
   )!;
 

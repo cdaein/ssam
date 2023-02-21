@@ -3,13 +3,9 @@
  * WebM Muxer: https://github.com/Vanilagy/webm-muxer/blob/main/demo/script.js
  */
 
-import type {
-  SketchStates,
-  SketchSettingsInternal,
-  BaseProps,
-} from "../types/types";
+import type { SketchSettingsInternal, BaseProps } from "../types/types";
 import WebMMuxer from "webm-muxer";
-import { downloadBlob, outlineElement } from "../helpers";
+import { downloadBlob } from "../helpers";
 
 let muxer: WebMMuxer | null = null;
 let videoEncoder: VideoEncoder | null = null;

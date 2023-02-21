@@ -2,26 +2,16 @@ import {
   GIFEncoder,
   quantize,
   applyPalette,
-  nearestColorIndex,
-  snapColorsToPalette,
+  // nearestColorIndex,
+  // snapColorsToPalette,
 } from "gifenc";
 import type { Encoder } from "gifenc";
-import { downloadBlob, outlineElement } from "../helpers";
-import {
-  BaseProps,
-  SketchSettingsInternal,
-  SketchStates,
-} from "../types/types";
+import { downloadBlob } from "../helpers";
+import { BaseProps, SketchSettingsInternal } from "../types/types";
 
 let gif: Encoder;
 
-export const setupGifAnimRecord = ({
-  canvas,
-  settings,
-}: {
-  canvas: HTMLCanvasElement;
-  settings: SketchSettingsInternal;
-}) => {
+export const setupGifAnimRecord = () => {
   const format = "gif";
 
   gif = GIFEncoder();

@@ -4,7 +4,6 @@ import { createStates } from "./states";
 import {
   Sketch,
   SketchContext,
-  SketchLoop,
   SketchProps,
   SketchSettings,
   SketchSettingsInternal,
@@ -180,7 +179,6 @@ export class Wrap {
     }
 
     const { add: addResize, remove: removeResize } = resizeHandler({
-      wrap: this,
       props: this.props,
       userSettings,
       settings: this.settings,
@@ -384,10 +382,7 @@ export class Wrap {
           throw new Error(`${format} export is not supported`);
         }
         if (format === "gif") {
-          setupGifAnimRecord({
-            canvas: this.props.canvas,
-            settings: this.settings,
-          });
+          setupGifAnimRecord();
         } else if (format === "mp4") {
           setupMp4Record({ settings: this.settings });
         } else if (format === "webm") {
@@ -508,13 +503,13 @@ export class Wrap {
   }
 
   // REVIEW: does this have to be async method?
-  render(props: SketchProps | WebGLProps): void | Promise<void> {
+  render(_props: SketchProps | WebGLProps): void | Promise<void> {
     // this will be overwritten in sketch by wrap.render()
     // without this declaration, TS thinks it doesn't exist. (sketch closure)
     return Promise.resolve();
   }
 
-  resize(props: SketchProps | WebGLProps) {
+  resize(_props: SketchProps | WebGLProps) {
     // same as this.render()
   }
 

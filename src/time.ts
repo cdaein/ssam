@@ -4,7 +4,6 @@
 
 import type {
   BaseProps,
-  SketchSettings,
   SketchSettingsInternal,
   SketchStates,
 } from "./types/types";
@@ -128,7 +127,7 @@ export const resetTime = ({
   states.timeResetted = false;
 };
 
-export const advanceFrame = (settings: SketchSettings) => {
-  // when recording (ie. gif), we only want to record a new frame, not duplicte in case of high refresh rate (exportFps !== playFps)
-  // (above may not be relevant anymore) but this may have usage in frame-by-frame navigation with array keys
-};
+// export const advanceFrame = (settings: SketchSettings) => {
+// when recording (ie. gif), we only want to record a new frame, not duplicte in case of high refresh rate (exportFps !== playFps)
+// (above may not be relevant anymore) but this may have usage in frame-by-frame navigation with array keys
+// };

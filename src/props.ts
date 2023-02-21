@@ -7,16 +7,13 @@ import { saveCanvasFrame } from "./recorders/export-frame";
 import {
   computeExportFps,
   computeExportTotalFrames,
-  computeFrame,
   computeFrameInterval,
   computePlayFps,
-  computePlayhead,
   computeTotalFrames,
 } from "./time";
 import type {
   BaseProps,
   SketchProps,
-  SketchSettings,
   SketchSettingsInternal,
   SketchStates,
   WebGLProps,
