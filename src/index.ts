@@ -52,7 +52,8 @@ export type {
 } from "./types/types";
 
 // ws event listeners keep adding up, so if it's already added, don't add duplicates
-let hotReloading = false;
+// this will mark if first hotReloaded was done or not
+let hotReloaded = false;
 
 export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
   const wrap = new Wrap();
@@ -74,20 +75,19 @@ export class Wrap {
   removeResize!: () => void;
   removeKeydown!: () => void;
   unload?: (props: SketchProps | WebGLProps) => void;
-  // private _frameCount!: number;
   private raf!: number;
   globalState!: Record<string, any>;
   count!: number;
   loop!: (timestamp: number) => void;
-  // ffmpeg plugin has requested a new frame
-  private _frameRequested!: boolean;
 
   constructor() {
     // use ssam() function for interfacing with user. (class constructor can't use async)
     // use class to hoist render function and to make it available within init
 
     if (import.meta.hot) {
-      if (!hotReloading) {
+      // add listeners only on first load, but not on hot reloads
+      // there's no way to turn off socket listeners, so they have to be added only once, and
+      if (!hotReloaded) {
         import.meta.hot.on("ssam:warn", (data) => {
           console.warn(`${data.msg}`);
         });
@@ -96,8 +96,6 @@ export class Wrap {
         });
 
         import.meta.hot.on("ssam:git-success", (data) => {
-          // there's no way to turn off socket listeners, so they have to be added only once, and
-          // they always use old canvas ref. to get correct canvas, pass around new canvas id.
           const canvas = document.querySelector(`#${data.canvasId}`);
           saveCanvasFrame({
             canvas: canvas as HTMLCanvasElement,
@@ -108,7 +106,11 @@ export class Wrap {
         });
 
         import.meta.hot.on("ssam:ffmpeg-reqframe", () => {
-          this._frameRequested = true;
+          // this._frameRequested = true;
+
+          this.states.frameRequested = true;
+
+          // console.log("frame requested (listener)");
         });
       }
     }
@@ -120,8 +122,7 @@ export class Wrap {
     this.userSettings = userSettings;
 
     // for manual counting when recording (use only for recording)
-    this._frameRequested = true;
-    // this._frameCount = 0;
+    // this._frameRequested = true;
     this.raf = 0;
 
     this.globalState = getGlobalState();
@@ -155,6 +156,14 @@ export class Wrap {
     //frameInterval: null // REVIEW
     this.states.firstLoopRender = this.globalState.firstLoopRender;
     this.states.firstLoopRenderTime = this.globalState.firstLoopRenderTime;
+    this.states.frameRequested = this.globalState.frameRequested; // REVIEW
+    this.states.hotReloaded = this.globalState.hotReloaded;
+    this.states.savingFrames = this.globalState.savingFrames;
+    this.states.recordState = this.globalState.recordState;
+
+    // console.log("===== set up =====");
+    // console.log("frameRequested", this.states.frameRequested);
+    // console.log("recordState", this.states.recordState);
 
     // props are just a collection of internally tracked data
     this.props = {
@@ -235,9 +244,7 @@ export class Wrap {
   }
 
   dispose() {
-    if (import.meta.hot) {
-      hotReloading = true;
-    }
+    hotReloaded = true;
 
     // store current values to globalState right before HMR
     updateGlobalState({
@@ -251,6 +258,10 @@ export class Wrap {
       // frameInterval: null, // REVIEW
       firstLoopRender: this.states.firstLoopRender,
       firstLoopRenderTime: this.states.firstLoopRenderTime,
+      frameRequested: this.states.frameRequested, // REVIEW
+      hotReloaded: this.states.hotReloaded,
+      savingFrames: this.states.savingFrames,
+      recordState: this.states.recordState,
       // from props
       playhead: this.props.playhead,
       frame: this.props.frame,
@@ -408,11 +419,19 @@ export class Wrap {
       }
       this.raf = window.requestAnimationFrame(this.loop);
 
+      // TEST
+      // console.log(
+      //   "frame requested?",
+      //   this.states.frameRequested,
+      //   "frame",
+      //   this.props.frame
+      // );
+
       // update frame count (before encoding due to mp4 frame request logic)
       if (!this.settings.framesFormat.includes("mp4")) {
         this.props.frame += 1;
       } else {
-        if (this._frameRequested) {
+        if (this.states.frameRequested) {
           this.props.frame += 1;
         }
       }
@@ -434,13 +453,12 @@ export class Wrap {
         } else if (format === "mp4") {
           // send a new frame to server only when requested
           // plugin needs some time to process incoming frame
-          if (this._frameRequested) {
-            exportMp4({
-              canvas: this.props.canvas,
-              settings: this.settings,
-              props: this.props,
-            });
-            this._frameRequested = false;
+          if (this.states.frameRequested) {
+            // console.log("send new frame", this.props.frame);
+            exportMp4({ canvas: this.props.canvas });
+
+            // FIX: this is the culprit.
+            // this.states.frameRequested = false;
           }
         } else if (format === "webm") {
           exportWebM({

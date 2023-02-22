@@ -27,26 +27,23 @@ export const saveCanvasFrame = ({
     if (format === "jpg") format = "jpeg";
     // may add additional quality to string, but will leave at default for now
     const dataURL = canvas.toDataURL(`image/${format}`);
+    const filenameFormatted = formatFilename({
+      filename,
+      prefix,
+      suffix: hash ? `${suffix}-${hash}` : suffix,
+    });
 
     if (import.meta.hot) {
       // in dev environment, use node:fs to export
       import.meta.hot.send("ssam:export", {
         image: dataURL,
-        filename: `${formatFilename({
-          filename,
-          prefix,
-          suffix: hash ? `${suffix}-${hash}` : suffix,
-        })}`,
+        filename: filenameFormatted,
         format,
       });
     } else {
       // in browser environment
       const link = document.createElement("a");
-      link.download = `${formatFilename({
-        filename,
-        prefix,
-        suffix: hash ? `${suffix}-${hash}` : suffix,
-      })}.${format}`;
+      link.download = `${filenameFormatted}.${format}`;
       link.href = dataURL;
       link.click();
     }

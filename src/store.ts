@@ -9,6 +9,10 @@ const globalState: Record<string, any> = {
   frameInterval: null,
   firstLoopRender: true,
   firstLoopRenderTime: 0,
+  frameRequested: true,
+  hotReloaded: false,
+  savingFrames: false,
+  recordState: "inactive",
   // from props
   playhead: 0,
   frame: 0,
@@ -23,7 +27,7 @@ export const getGlobalState = () => {
 export const updateGlobalState = (newState: Record<string, any>) => {
   for (const key in newState) {
     if (globalState[key] === undefined) {
-      throw new Error(`${key} is not found`);
+      throw new Error(`${key} is not found in global state`);
     }
     globalState[key] = newState[key];
   }

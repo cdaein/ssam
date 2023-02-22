@@ -141,12 +141,12 @@ export interface SketchSettingsInternal {
 
 export interface SketchStates {
   paused: boolean; // regardless of playMode, time is updating
-  playMode: "play" | "record"; // REVIEW: "play:time", "play:frame" do i need this? or just use savingFrames:boolean?
+  playMode: "play" | "record";
   savingFrame: boolean;
   savingFrames: boolean;
-  // captureReady: boolean;
-  // captureDone: boolean;
   recordState: RecordState;
+  frameRequested: boolean; // REVIEW
+  hotReloaded: boolean;
   startTime: number;
   lastStartTime: number;
   pausedStartTime: number;
@@ -274,8 +274,8 @@ export interface States {
     playMode: "play" | "record";
     savingFrame: boolean;
     savingFrames: boolean;
-    captureReady: boolean;
-    captureDone: boolean;
+    // captureReady: boolean;
+    // captureDone: boolean;
     startTime: number;
     lastStartTime: number;
     pausedStartTime: number;

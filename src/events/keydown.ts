@@ -28,13 +28,10 @@ export default ({
       // save frames (video)
       if (!states.savingFrames) {
         states.savingFrames = true;
+        states.frameRequested = true;
         states.recordState = "start";
       } else {
         states.recordState = "end";
-
-        // should ask to update savingFrames but not here
-        // b/c need to endRecord() first
-        // states.savingFrames = false;
       }
     } else if ((ev.metaKey || ev.ctrlKey) && !ev.shiftKey && ev.key === "k") {
       if (import.meta.hot) {
@@ -46,7 +43,7 @@ export default ({
       }
     } else if ((ev.metaKey || ev.ctrlKey) && ev.shiftKey && ev.key === "k") {
       if (import.meta.hot) {
-        // git commit snapshot (video)
+        // TODO: git commit snapshot (video)
         const { filename, prefix, suffix } = settings;
         const filenameFormatted = `${formatFilename({
           filename,

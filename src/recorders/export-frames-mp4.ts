@@ -5,7 +5,7 @@
  */
 
 import { formatFilename } from "../helpers";
-import type { SketchSettingsInternal, BaseProps } from "../types/types";
+import type { SketchSettingsInternal } from "../types/types";
 
 export const setupMp4Record = ({
   settings,
@@ -27,36 +27,14 @@ export const setupMp4Record = ({
   }
 };
 
-export const exportMp4 = async ({
-  canvas,
-  settings,
-  props,
-}: {
-  canvas: HTMLCanvasElement;
-  settings: SketchSettingsInternal;
-  props: BaseProps;
-}) => {
+export const exportMp4 = async ({ canvas }: { canvas: HTMLCanvasElement }) => {
   // if (!("VideoEncoder" in window)) {
   //   return;
   // }
 
-  encodeVideoFrame({ canvas, settings, props });
-};
-
-export const encodeVideoFrame = ({
-  canvas,
-  settings,
-  props,
-}: {
-  canvas: HTMLCanvasElement;
-  settings: SketchSettingsInternal;
-  props: BaseProps;
-}) => {
   if (import.meta.hot) {
-    const msg = `recording (mp4) frame... ${props.frame} of ${settings.exportTotalFrames}`;
     import.meta.hot.send("ssam:ffmpeg-newframe", {
       image: canvas.toDataURL(),
-      msg,
     });
   }
 };
@@ -67,11 +45,6 @@ export const endMp4Record = async () => {
   // }
 
   if (import.meta.hot) {
-    const format = "mp4";
-
-    const msg = `recording (${format}) complete`;
-    import.meta.hot.send("ssam:ffmpeg-done", {
-      msg,
-    });
+    import.meta.hot.send("ssam:ffmpeg-done");
   }
 };
