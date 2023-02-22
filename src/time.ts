@@ -116,8 +116,9 @@ export const resetTime = ({
   states.startTime = states.timestamp;
   props.time = 0;
   props.playhead = 0;
-  // REVIEW: why -1 ?
-  props.frame = playFps ? 0 : -1;
+  // REVIEW: can't remember why i set this to be -1. 🤷
+  // props.frame = playFps ? 0 : -1;
+  props.frame = 0;
 
   // states.lastTimestamp = 0;
   states.lastTimestamp = states.startTime - (fps ? 1000 / fps : 0);
