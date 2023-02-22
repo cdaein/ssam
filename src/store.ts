@@ -9,7 +9,7 @@ const globalState: Record<string, any> = {
   frameInterval: null,
   firstLoopRender: true,
   firstLoopRenderTime: 0,
-  frameRequested: true,
+  frameRequested: false,
   hotReloaded: false,
   savingFrames: false,
   recordState: "inactive",

@@ -52,6 +52,7 @@ export type {
 } from "./types/types";
 
 // ws event listeners keep adding up, so if it's already added, don't add duplicates
+// I wish Vite provides a way to turn it off
 // this will mark if first hotReloaded was done or not
 let hotReloaded = false;
 
@@ -86,7 +87,7 @@ export class Wrap {
 
     if (import.meta.hot) {
       // add listeners only on first load, but not on hot reloads
-      // there's no way to turn off socket listeners, so they have to be added only once, and
+      // there's no way to turn off socket listeners, so they have to be added only once
       if (!hotReloaded) {
         import.meta.hot.on("ssam:warn", (data) => {
           console.warn(`${data.msg}`);
@@ -106,11 +107,11 @@ export class Wrap {
         });
 
         import.meta.hot.on("ssam:ffmpeg-reqframe", () => {
-          // this._frameRequested = true;
-
-          this.states.frameRequested = true;
-
-          // console.log("frame requested (listener)");
+          // state that is tied to HMR need to come from global
+          // otherwise, it's not reliable
+          updateGlobalState({
+            frameRequested: true,
+          });
         });
       }
     }
@@ -124,8 +125,6 @@ export class Wrap {
     // for manual counting when recording (use only for recording)
     // this._frameRequested = true;
     this.raf = 0;
-
-    this.globalState = getGlobalState();
 
     // combine settings; a few may have null or undefined values (ex. canvas)
     this.settings = createSettings({
@@ -147,6 +146,9 @@ export class Wrap {
     //   // set time values from globalState
     // };
 
+    this.globalState = getGlobalState();
+
+    // REVIEW: some of these may not need to be stored globally
     this.states.startTime = this.globalState.startTime;
     this.states.lastStartTime = this.globalState.lastStartTime;
     this.states.pausedStartTime = this.globalState.pausedStartTime;
@@ -157,13 +159,8 @@ export class Wrap {
     this.states.firstLoopRender = this.globalState.firstLoopRender;
     this.states.firstLoopRenderTime = this.globalState.firstLoopRenderTime;
     this.states.frameRequested = this.globalState.frameRequested; // REVIEW
-    this.states.hotReloaded = this.globalState.hotReloaded;
     this.states.savingFrames = this.globalState.savingFrames;
     this.states.recordState = this.globalState.recordState;
-
-    // console.log("===== set up =====");
-    // console.log("frameRequested", this.states.frameRequested);
-    // console.log("recordState", this.states.recordState);
 
     // props are just a collection of internally tracked data
     this.props = {
@@ -173,11 +170,6 @@ export class Wrap {
       time: this.globalState.time,
       deltaTime: this.globalState.deltaTime,
     };
-
-    // this.props.playhead = this.globalState.playhead;
-    // this.props.frame = this.globalState.frame;
-    // this.props.time = this.globalState.time;
-    // this.props.deltaTime = this.globalState.deltaTime;
 
     try {
       await sketch(this.props);
@@ -259,7 +251,6 @@ export class Wrap {
       firstLoopRender: this.states.firstLoopRender,
       firstLoopRenderTime: this.states.firstLoopRenderTime,
       frameRequested: this.states.frameRequested, // REVIEW
-      hotReloaded: this.states.hotReloaded,
       savingFrames: this.states.savingFrames,
       recordState: this.states.recordState,
       // from props
@@ -419,14 +410,6 @@ export class Wrap {
       }
       this.raf = window.requestAnimationFrame(this.loop);
 
-      // TEST
-      // console.log(
-      //   "frame requested?",
-      //   this.states.frameRequested,
-      //   "frame",
-      //   this.props.frame
-      // );
-
       // update frame count (before encoding due to mp4 frame request logic)
       if (!this.settings.framesFormat.includes("mp4")) {
         this.props.frame += 1;
@@ -454,11 +437,8 @@ export class Wrap {
           // send a new frame to server only when requested
           // plugin needs some time to process incoming frame
           if (this.states.frameRequested) {
-            // console.log("send new frame", this.props.frame);
             exportMp4({ canvas: this.props.canvas });
-
-            // FIX: this is the culprit.
-            // this.states.frameRequested = false;
+            updateGlobalState({ frameRequested: false });
           }
         } else if (format === "webm") {
           exportWebM({

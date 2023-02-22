@@ -27,12 +27,10 @@
   "devDependencies": {
     "@daeinc/color": "^0.2.4",
     "@daeinc/draw": "^0.4.0",
-    "@types/ffmpeg.js": "^3.1.3",
     "@types/node": "^18.13.0",
     "@types/ogl": "npm:ogl-types@^0.0.102",
     "@types/p5": "^1.5.0",
     "animejs": "^3.2.1",
-    "ffmpeg.js": "^4.2.9003",
     "kleur": "^4.1.5",
     "license-checker": "^25.0.1",
     "ogl": "^0.0.110",
@@ -40,8 +38,8 @@
     "pts": "^0.11.3",
     "tsup": "^6.6.3",
     "typescript": "^4.9.5",
-    "vite": "^4.1.2",
-    "vite-plugin-ssam-git": "^0.0.4"
+    "vite": "^4.1.4",
+    "vite-plugin-ssam-git": "^0.1.1"
   },
   "repository": {
     "type": "git",
