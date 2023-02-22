@@ -13,7 +13,8 @@
     "prebuild": "license-checker --exclude 'MIT, MIT OR X11, BSD, ISC' -production",
     "build": "tsc --noemit && tsup",
     "build-vite": "tsc --noemit && vite build --config vite.build.config.ts",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "watch": "tsup --watch"
   },
   "author": "Daeinc",
   "license": "MIT",
