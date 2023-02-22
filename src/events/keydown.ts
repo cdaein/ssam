@@ -1,4 +1,5 @@
 import { formatFilename } from "../helpers";
+import { updateGlobalState } from "../store";
 import type {
   SketchProps,
   SketchSettingsInternal,
@@ -28,7 +29,7 @@ export default ({
       // save frames (video)
       if (!states.savingFrames) {
         states.savingFrames = true;
-        states.frameRequested = true;
+        updateGlobalState({ frameRequested: true });
         states.recordState = "start";
       } else {
         states.recordState = "end";

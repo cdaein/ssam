@@ -145,7 +145,6 @@ export interface SketchStates {
   savingFrame: boolean;
   savingFrames: boolean;
   recordState: RecordState;
-  frameRequested: boolean; // REVIEW
   hotReloaded: boolean;
   startTime: number;
   lastStartTime: number;

@@ -123,7 +123,6 @@ export class Wrap {
     this.userSettings = userSettings;
 
     // for manual counting when recording (use only for recording)
-    // this._frameRequested = true;
     this.raf = 0;
 
     // combine settings; a few may have null or undefined values (ex. canvas)
@@ -158,7 +157,6 @@ export class Wrap {
     //frameInterval: null // REVIEW
     this.states.firstLoopRender = this.globalState.firstLoopRender;
     this.states.firstLoopRenderTime = this.globalState.firstLoopRenderTime;
-    this.states.frameRequested = this.globalState.frameRequested; // REVIEW
     this.states.savingFrames = this.globalState.savingFrames;
     this.states.recordState = this.globalState.recordState;
 
@@ -250,7 +248,6 @@ export class Wrap {
       // frameInterval: null, // REVIEW
       firstLoopRender: this.states.firstLoopRender,
       firstLoopRenderTime: this.states.firstLoopRenderTime,
-      frameRequested: this.states.frameRequested, // REVIEW
       savingFrames: this.states.savingFrames,
       recordState: this.states.recordState,
       // from props
@@ -414,7 +411,7 @@ export class Wrap {
       if (!this.settings.framesFormat.includes("mp4")) {
         this.props.frame += 1;
       } else {
-        if (this.states.frameRequested) {
+        if (getGlobalState().frameRequested) {
           this.props.frame += 1;
         }
       }
@@ -436,7 +433,7 @@ export class Wrap {
         } else if (format === "mp4") {
           // send a new frame to server only when requested
           // plugin needs some time to process incoming frame
-          if (this.states.frameRequested) {
+          if (getGlobalState().frameRequested) {
             exportMp4({ canvas: this.props.canvas });
             updateGlobalState({ frameRequested: false });
           }

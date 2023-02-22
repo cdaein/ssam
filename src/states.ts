@@ -11,7 +11,6 @@ export const createStates = ({
     savingFrame: false,
     savingFrames: false,
     recordState: "inactive",
-    frameRequested: true, // REVIEW
     hotReloaded: false,
     startTime: 0,
     lastStartTime: 0,
