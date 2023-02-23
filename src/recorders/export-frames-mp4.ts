@@ -13,13 +13,30 @@ export const setupMp4Record = ({
   settings: SketchSettingsInternal;
 }) => {
   if (import.meta.hot) {
-    const { filename, prefix, suffix } = settings;
+    const {
+      filename,
+      prefix,
+      suffix,
+      exportFps,
+      dimensions,
+      exportTotalFrames,
+    } = settings;
+
+    // TODO: this is repeated in other places. refactor it.
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    if (dimensions) {
+      width = dimensions[0];
+      height = dimensions[1];
+    }
 
     import.meta.hot.send("ssam:ffmpeg", {
+      fps: exportFps,
+      width,
+      height,
+      totalFrames: exportTotalFrames,
       filename: formatFilename({ filename, prefix, suffix }),
       format: "mp4",
-      fps: settings.exportFps,
-      totalFrames: settings.exportTotalFrames,
     });
   } else {
     console.warn(`mp4 recording is only availabe in dev environment`);

@@ -26,6 +26,9 @@ export const setupWebMRecord = ({
   // const { framesFormat: format } = settings;
   const format = "webm";
 
+  // TODO: output dimensions must be multiples of 2.
+  //       how to crop canvas for recording?
+  //       webm still plays, but it can't be converted to mp4
   muxer = new WebMMuxer({
     target: "buffer",
     video: {
