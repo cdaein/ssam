@@ -54,6 +54,7 @@ export const createSettings = ({
     // sketch
     hotkeys: true,
     mode: "2d",
+    data: {},
   };
 
   const combined = Object.assign({}, defaultSettings, main);

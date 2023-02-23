@@ -74,6 +74,7 @@ export const createProps = ({
     render: renderProp,
     resize: resizeProp,
     update: () => {},
+    data: settings.data,
   };
 
   let props: SketchProps | WebGLProps;
@@ -255,14 +256,12 @@ const createUpdateProp = ({
         if (options[key] === true) {
           canvas.style.imageRendering = "pixelated";
           if (settings.mode === "2d") {
-            //@ts-ignore
-            props.context.imageSmoothingEnabled = false;
+            (props as SketchProps).context.imageSmoothingEnabled = false;
           }
         } else {
           canvas.style.imageRendering = "auto";
           if (settings.mode === "2d") {
-            //@ts-ignore
-            props.context.imageSmoothingEnabled = true;
+            (props as SketchProps).context.imageSmoothingEnabled = true;
           }
         }
       }

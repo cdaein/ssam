@@ -101,6 +101,8 @@ export type SketchSettings = {
   // sketch
   /** set to `false` to not use sketch-wrapper provided hot keys (ex. `CMD+S` for image export) */
   hotkeys?: boolean;
+  /** extra data to pass to the sketch. it is accessible via props.data */
+  data?: Record<string, any>;
 };
 
 /**
@@ -137,6 +139,7 @@ export interface SketchSettingsInternal {
   gifOptions: GifOptions;
   // sketch
   hotkeys: boolean;
+  data: Record<string, any>;
 }
 
 export interface SketchStates {
@@ -199,6 +202,7 @@ export interface BaseProps {
   resize: () => void;
   /** not yet implemented */
   update: (options: Record<string, any>) => void;
+  data: Record<string, any>;
 }
 
 // REVIEW: separate updatable/writable props (during life of a sketch), and fixed/readable props
