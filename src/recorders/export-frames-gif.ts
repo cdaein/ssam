@@ -19,7 +19,7 @@ export const setupGifAnimRecord = () => {
   console.log(`recording (${format}) started`);
 };
 
-export const exportGifAnim = ({
+export const encodeGifAnim = ({
   context,
   settings,
   props,

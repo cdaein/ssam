@@ -19,12 +19,12 @@ import {
 } from "./time";
 import {
   setupWebMRecord,
-  exportWebM,
+  encodeWebM,
   endWebMRecord,
 } from "./recorders/export-frames-webm";
 import {
   setupGifAnimRecord,
-  exportGifAnim,
+  encodeGifAnim,
   endGifAnimRecord,
 } from "./recorders/export-frames-gif";
 import { fitCanvasToWindow } from "./canvas";
@@ -32,7 +32,7 @@ import { getGlobalState, updateGlobalState } from "./store";
 import { saveCanvasFrame } from "./recorders/export-frame";
 import {
   endMp4Record,
-  exportMp4,
+  encodeMp4,
   setupMp4Record,
 } from "./recorders/export-frames-mp4";
 import { outlineElement } from "./helpers";
@@ -409,7 +409,7 @@ export class Wrap {
         }
 
         if (format === "gif") {
-          exportGifAnim({
+          encodeGifAnim({
             context:
               this.settings.mode === "2d"
                 ? (this.props as SketchProps).context
@@ -421,10 +421,10 @@ export class Wrap {
           // send a new frame to server only when requested
           // plugin needs some time to process incoming frame
           if (getGlobalState().frameRequested) {
-            exportMp4({ canvas: this.props.canvas });
+            encodeMp4({ canvas: this.props.canvas });
           }
         } else if (format === "webm") {
-          exportWebM({
+          encodeWebM({
             canvas: this.props.canvas,
             settings: this.settings,
             props: this.props,

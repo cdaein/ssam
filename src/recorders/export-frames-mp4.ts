@@ -45,7 +45,7 @@ export const setupMp4Record = ({
   }
 };
 
-export const exportMp4 = async ({ canvas }: { canvas: HTMLCanvasElement }) => {
+export const encodeMp4 = async ({ canvas }: { canvas: HTMLCanvasElement }) => {
   // if (!("VideoEncoder" in window)) {
   //   return;
   // }

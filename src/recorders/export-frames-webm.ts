@@ -56,7 +56,7 @@ export const setupWebMRecord = ({
   console.log(`recording (${format}) started`);
 };
 
-export const exportWebM = async ({
+export const encodeWebM = async ({
   canvas,
   settings,
   props,
