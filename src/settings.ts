@@ -25,7 +25,7 @@ export const createSettings = ({
   // default settings
   const defaultSettings: SketchSettingsInternal = {
     // document
-    title: "Sketch",
+    title: "",
     background: "#333",
     // canvas
     // id: "ssam-canvas-" + Math.floor(Math.random() * 100000).toString(),
@@ -75,7 +75,9 @@ export const createSettings = ({
   }
 
   // document
-  document.title = combined.title;
+  if (combined.title.length !== 0) {
+    document.title = combined.title;
+  }
   document.body.style.background = combined.background;
 
   // canvas
