@@ -1,18 +1,10 @@
-import { formatFilename } from "../helpers";
-import { updateGlobalState } from "../store";
-import type {
-  SketchProps,
-  SketchSettingsInternal,
-  SketchStates,
-  WebGLProps,
-} from "../types/types";
+import { getGlobalState, updateGlobalState } from "../store";
+import type { SketchProps, SketchStates, WebGLProps } from "../types/types";
 
 export default ({
-  settings,
   props,
   states,
 }: {
-  settings: SketchSettingsInternal;
   props: SketchProps | WebGLProps;
   states: SketchStates;
 }) => {
@@ -27,12 +19,14 @@ export default ({
     } else if ((ev.metaKey || ev.ctrlKey) && ev.shiftKey && ev.key === "s") {
       ev.preventDefault();
       // save frames (video)
-      if (!states.savingFrames) {
-        states.savingFrames = true;
-        updateGlobalState({ frameRequested: true });
-        states.recordState = "start";
+      if (!getGlobalState().savingFrames) {
+        updateGlobalState({
+          savingFrames: true,
+          frameRequested: true,
+          recordState: "start",
+        });
       } else {
-        states.recordState = "end";
+        updateGlobalState({ recordState: "end" });
       }
     } else if ((ev.metaKey || ev.ctrlKey) && !ev.shiftKey && ev.key === "k") {
       if (import.meta.hot) {
@@ -44,17 +38,12 @@ export default ({
       }
     } else if ((ev.metaKey || ev.ctrlKey) && ev.shiftKey && ev.key === "k") {
       if (import.meta.hot) {
-        // TODO: git commit snapshot (video)
-        const { filename, prefix, suffix } = settings;
-        const filenameFormatted = `${formatFilename({
-          filename,
-          prefix,
-          suffix,
-        })}`;
+        // git commit snapshot (video)
+        // 1. send git message with "mp4" format.
+        // 2. on "git-success" received, start mp4 recording
         import.meta.hot.send("ssam:git", {
-          commitMessage: filenameFormatted,
           canvasId: props.canvas.id,
-          format: "webm",
+          format: "mp4",
         });
       }
     } else if (ev.key === "ArrowRight") {

@@ -96,6 +96,16 @@ export class Wrap {
         });
 
         import.meta.hot.on("ssam:git-success", (data) => {
+          if (data.format === "mp4") {
+            if (!getGlobalState().savingFrames) {
+              updateGlobalState({
+                savingFrames: true,
+                frameRequested: true,
+                recordState: "start",
+                commitHash: data.hash,
+              });
+            }
+          }
           const canvas = document.querySelector(`#${data.canvasId}`);
           saveCanvasFrame({
             canvas: canvas as HTMLCanvasElement,
@@ -155,8 +165,6 @@ export class Wrap {
     //frameInterval: null // REVIEW
     this.states.firstLoopRender = this.globalState.firstLoopRender;
     this.states.firstLoopRenderTime = this.globalState.firstLoopRenderTime;
-    this.states.savingFrames = this.globalState.savingFrames;
-    this.states.recordState = this.globalState.recordState;
 
     // props are just a collection of internally tracked data
     this.props = {
@@ -183,7 +191,6 @@ export class Wrap {
     });
 
     const { add: addKeydown, remove: removeKeydown } = keydownHandler({
-      settings: this.settings,
       props: this.props,
       states: this.states,
     });
@@ -240,8 +247,6 @@ export class Wrap {
       // frameInterval: null, // REVIEW
       firstLoopRender: this.states.firstLoopRender,
       firstLoopRenderTime: this.states.firstLoopRenderTime,
-      savingFrames: this.states.savingFrames,
-      recordState: this.states.recordState,
       // from props
       playhead: this.props.playhead,
       frame: this.props.frame,
@@ -266,7 +271,7 @@ export class Wrap {
         this.states.firstLoopRenderTime -
         this.states.pausedDuration;
 
-      if (!this.states.savingFrames) {
+      if (!getGlobalState().savingFrames) {
         this.playLoop(timestamp);
       } else {
         this.recordLoop();
@@ -349,7 +354,7 @@ export class Wrap {
     }
 
     // respond to current recordState
-    if (this.states.recordState === "start") {
+    if (getGlobalState().recordState === "start") {
       if (this.props.duration) {
         resetTime({
           settings: this.settings,
@@ -365,7 +370,10 @@ export class Wrap {
         if (format === "gif") {
           setupGifAnimRecord();
         } else if (format === "mp4") {
-          setupMp4Record({ settings: this.settings });
+          setupMp4Record({
+            settings: this.settings,
+            hash: getGlobalState().commitHash,
+          });
         } else if (format === "webm") {
           setupWebMRecord({
             settings: this.settings,
@@ -376,9 +384,9 @@ export class Wrap {
       // update relevant props
       this.props.recording = true;
       // move to next recordState
-      this.states.recordState = "in-progress";
+      updateGlobalState({ recordState: "in-progress" });
     }
-    if (this.states.recordState === "in-progress") {
+    if (getGlobalState().recordState === "in-progress") {
       // render frame
       try {
         await this.render(this.props);
@@ -445,10 +453,10 @@ export class Wrap {
       computeLastTimestamp({ states: this.states, props: this.props });
 
       if (this.props.frame >= this.settings.exportTotalFrames) {
-        this.states.recordState = "end";
+        updateGlobalState({ recordState: "end" });
       }
     }
-    if (this.states.recordState === "end") {
+    if (getGlobalState().recordState === "end") {
       // finish recording
       this.settings.framesFormat.forEach((format) => {
         if (format === "gif") {
@@ -472,8 +480,7 @@ export class Wrap {
   }
 
   resetAfterRecord() {
-    this.states.savingFrames = false;
-    this.states.recordState = "inactive";
+    updateGlobalState({ savingFrames: false, recordState: "inactive" });
     this.states.timeResetted = true; // playLoop should start fresh
 
     this.props.frame = 0;

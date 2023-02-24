@@ -9,8 +9,10 @@ import type { SketchSettingsInternal } from "../types/types";
 
 export const setupMp4Record = ({
   settings,
+  hash,
 }: {
   settings: SketchSettingsInternal;
+  hash?: string;
 }) => {
   if (import.meta.hot) {
     const {
@@ -36,7 +38,11 @@ export const setupMp4Record = ({
       width: width * pixelRatio,
       height: height * pixelRatio,
       totalFrames: exportTotalFrames,
-      filename: formatFilename({ filename, prefix, suffix }),
+      filename: formatFilename({
+        filename,
+        prefix,
+        suffix: hash ? `${suffix}-${hash}` : suffix,
+      }),
       format: "mp4",
     });
   } else {
