@@ -1,35 +1,56 @@
+import { FRAMES_FORMATS } from "./constants";
 import { FramesFormat, SketchSettingsInternal } from "./types/types";
 
-// TODO: not using it yet.
-//       check all included formats.
-//       give warning and remove anything not supported and update props.framesFormat
-// do it once when sketch is loaded, and set a flag to completely skip recordLoop()
-// - if multiple formats, remove unsupported formats. if none supported, skip recordLoop(). default to webm?
-// - dev environment or production? (ffmpeg/mp4, node/sequence not available)
-export const checkSupportedFormats = (formats: FramesFormat[]) => {
-  const supported: FramesFormat[] = [];
+export const isGifSupported = () => {
+  // TODO: how to check?
+  return true;
+};
+export const isMp4Supported = () => {
+  // this only checks if ssam runs in dev server
+  // whether ffmpeg is installed/available will be checkec in ssam-ffmpeg plugin
+  // maybe "ssam:ffmpeg-notsupported"?
+  return import.meta.hot ? true : false;
+};
+export const isSeqSupported = () => {
+  // checks for image sequence export
+  // checks if running in dev server (node:fs is available)
+  return import.meta.hot ? true : false;
+};
+export const isWebmSupported = () => {
+  return "VideoEncoder" in window;
+};
 
-  for (const format of formats) {
-    if (format === "gif") {
-      // gif is supported
-      supported.push("gif");
-    } else if (format === "mp4") {
-      if (import.meta.hot) {
-        // only in dev server
-        // - dev environment or production? (ffmpeg/mp4, node/sequence not available)
-        // ffmpeg must be present - need to check message "ssam:ffmpeg-nosupport"
-        supported.push("mp4");
-      }
-    } else if (format === "webm") {
-      if ("VideoEncoder" in window) {
-        // only in supported browser
-        supported.push("webm");
-      }
-    } else {
-      // not supported
+// give warning and remove anything not supported and update settings.framesFormat directly
+// TODO: check sequence support
+export const checkSupportedFramesFormats = (formats: FramesFormat[]) => {
+  let removedFormat = "";
+
+  for (let i = formats.length - 1; i >= 0; i--) {
+    // 1. is any of the formats not valid? => warn and remove
+    if (!FRAMES_FORMATS.includes(formats[i])) {
+      console.warn(`"${formats[i]}" format is not supported and removed`);
+      formats.splice(i, 1);
+      continue;
+    }
+    // 2. is any of the formats not supported in browser/environment? => warn and remove
+    if (formats[i] === "gif" && !isGifSupported()) {
+      removedFormat = formats[i];
+      formats.splice(i, 1);
+    } else if (formats[i] === "mp4" && !isMp4Supported()) {
+      removedFormat = formats[i];
+      formats.splice(i, 1);
+    } else if (formats[i] === "webm" && !isWebmSupported()) {
+      removedFormat = formats[i];
+      formats.splice(i, 1);
+    }
+    if (removedFormat.length !== 0) {
+      console.warn(
+        `"${removedFormat}" format is not supported in the current browser or environment and removed`
+      );
+      removedFormat = "";
     }
   }
-  return supported;
+  return formats;
 };
 
 export const downloadBlob = (

@@ -344,15 +344,10 @@ export class Wrap {
   }
 
   async recordLoop() {
-    // TODO: single check/handling for all formats
-    if (
-      !("VideoEncoder" in window) &&
-      this.settings.framesFormat.length === 1 &&
-      this.settings.framesFormat.includes("webm")
-    ) {
-      // if 'webm' is not supported and only format
-      // TODO: find a bettery way to handle this
+    if (this.settings.framesFormat.length === 0) {
       this.resetAfterRecord();
+      this.raf = window.requestAnimationFrame(this.loop);
+      return;
     }
 
     // respond to current recordState

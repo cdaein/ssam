@@ -1,4 +1,4 @@
-import { toArray } from "./helpers";
+import { checkSupportedFramesFormats, toArray } from "./helpers";
 import {
   computeExportFps,
   computeExportTotalFrames,
@@ -49,7 +49,7 @@ export const createSettings = ({
     prefix: "",
     suffix: "",
     frameFormat: ["png"],
-    framesFormat: ["webm"],
+    framesFormat: [],
     gifOptions: {},
     // sketch
     hotkeys: true,
@@ -91,7 +91,10 @@ export const createSettings = ({
 
   // convert to array format
   combined.frameFormat = toArray(combined.frameFormat);
-  combined.framesFormat = toArray(combined.framesFormat);
+  combined.framesFormat = checkSupportedFramesFormats(
+    toArray(combined.framesFormat)
+  );
+  console.log(combined.framesFormat);
 
   return combined;
 };
