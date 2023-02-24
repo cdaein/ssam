@@ -94,7 +94,6 @@ export const createSettings = ({
   combined.framesFormat = checkSupportedFramesFormats(
     toArray(combined.framesFormat)
   );
-  console.log(combined.framesFormat);
 
   return combined;
 };

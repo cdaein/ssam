@@ -3,7 +3,6 @@ import { createSettings } from "./settings";
 import { createStates } from "./states";
 import {
   Sketch,
-  SketchContext,
   SketchProps,
   SketchSettings,
   SketchSettingsInternal,
@@ -108,7 +107,6 @@ export class Wrap {
 
         import.meta.hot.on("ssam:ffmpeg-reqframe", () => {
           // state that is tied to HMR need to come from global
-          // otherwise, it's not reliable
           updateGlobalState({
             frameRequested: true,
           });
@@ -364,10 +362,6 @@ export class Wrap {
 
       // set up recording
       for (const format of this.settings.framesFormat) {
-        if (!["gif", "mp4", "webm"].includes(format)) {
-          // REVIEW: instead of throwing error, handle more gracefully
-          throw new Error(`${format} export is not supported`);
-        }
         if (format === "gif") {
           setupGifAnimRecord();
         } else if (format === "mp4") {
@@ -379,10 +373,8 @@ export class Wrap {
           });
         }
       }
-
       // update relevant props
       this.props.recording = true;
-
       // move to next recordState
       this.states.recordState = "in-progress";
     }
@@ -397,25 +389,31 @@ export class Wrap {
       this.raf = window.requestAnimationFrame(this.loop);
 
       // update frame count (before encoding due to mp4 frame request logic)
-      if (!this.settings.framesFormat.includes("mp4")) {
-        this.props.frame += 1;
-      } else {
+      if (this.settings.framesFormat.includes("mp4")) {
         if (getGlobalState().frameRequested) {
           this.props.frame += 1;
         }
+      } else {
+        this.props.frame += 1;
       }
 
       // encode frame
-      this.settings.framesFormat.forEach((format) => {
+      for (let i = 0; i < this.settings.framesFormat.length; i++) {
+        const format = this.settings.framesFormat[i];
+
+        if (
+          this.settings.framesFormat.includes("mp4") &&
+          !getGlobalState().frameRequested
+        ) {
+          continue;
+        }
+
         if (format === "gif") {
-          let context: SketchContext;
-          if (this.settings.mode === "2d") {
-            context = (this.props as SketchProps).context;
-          } else {
-            context = (this.props as WebGLProps).gl;
-          }
           exportGifAnim({
-            context,
+            context:
+              this.settings.mode === "2d"
+                ? (this.props as SketchProps).context
+                : (this.props as WebGLProps).gl,
             settings: this.settings,
             props: this.props,
           });
@@ -424,7 +422,6 @@ export class Wrap {
           // plugin needs some time to process incoming frame
           if (getGlobalState().frameRequested) {
             exportMp4({ canvas: this.props.canvas });
-            updateGlobalState({ frameRequested: false });
           }
         } else if (format === "webm") {
           exportWebM({
@@ -433,7 +430,10 @@ export class Wrap {
             props: this.props,
           });
         }
-      });
+      }
+      // if requested and sent already, set it to false and wait for next frame
+      getGlobalState().frameRequested &&
+        updateGlobalState({ frameRequested: false });
 
       // update time variables
       this.props.deltaTime = 1000 / this.settings.exportFps;
@@ -461,7 +461,6 @@ export class Wrap {
       });
 
       this.raf = window.requestAnimationFrame(this.loop);
-
       // reset recording states
       // TODO: reset only if duration is set
       this.resetAfterRecord();
