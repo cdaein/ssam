@@ -19,6 +19,7 @@ export const setupMp4Record = ({
       suffix,
       exportFps,
       dimensions,
+      pixelRatio,
       exportTotalFrames,
     } = settings;
 
@@ -32,8 +33,8 @@ export const setupMp4Record = ({
 
     import.meta.hot.send("ssam:ffmpeg", {
       fps: exportFps,
-      width,
-      height,
+      width: width * pixelRatio,
+      height: height * pixelRatio,
       totalFrames: exportTotalFrames,
       filename: formatFilename({ filename, prefix, suffix }),
       format: "mp4",
