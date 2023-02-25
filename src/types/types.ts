@@ -146,8 +146,6 @@ export interface SketchStates {
   paused: boolean; // regardless of playMode, time is updating
   playMode: "play" | "record";
   savingFrame: boolean;
-  savingFrames: boolean;
-  recordState: RecordState;
   hotReloaded: boolean;
   startTime: number;
   lastStartTime: number;

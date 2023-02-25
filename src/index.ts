@@ -271,7 +271,7 @@ export class Wrap {
         this.states.firstLoopRenderTime -
         this.states.pausedDuration;
 
-      if (!getGlobalState().savingFrames) {
+      if (getGlobalState().savingFrames === false) {
         this.playLoop(timestamp);
       } else {
         this.recordLoop();
@@ -352,6 +352,9 @@ export class Wrap {
       this.raf = window.requestAnimationFrame(this.loop);
       return;
     }
+
+    // TODO: when mp4 recording, there's a waste of frame render until reqFrame received
+    //       instead, return early here
 
     // respond to current recordState
     if (getGlobalState().recordState === "start") {
@@ -468,7 +471,9 @@ export class Wrap {
         }
       });
 
-      this.raf = window.requestAnimationFrame(this.loop);
+      // culprit
+      // this.raf = window.requestAnimationFrame(this.loop);
+
       // reset recording states
       // TODO: reset only if duration is set
       this.resetAfterRecord();

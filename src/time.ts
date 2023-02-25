@@ -2,6 +2,7 @@
  * time keeping
  */
 
+import { getGlobalState } from "./store";
 import type {
   BaseProps,
   SketchSettingsInternal,
@@ -66,9 +67,9 @@ export const computeFrame = ({
   props: BaseProps;
 }) => {
   let { duration, playFps, exportFps, totalFrames } = settings;
-  const fps = states.savingFrames ? exportFps : playFps;
+  const fps = getGlobalState().savingFrames ? exportFps : playFps;
 
-  if (states.savingFrames) {
+  if (getGlobalState().savingFrames) {
     totalFrames = Math.floor((exportFps * duration) / 1000);
   }
 
@@ -111,7 +112,7 @@ export const resetTime = ({
   props: BaseProps;
 }) => {
   const { playFps, exportFps } = settings;
-  const fps = states.savingFrames ? exportFps : playFps;
+  const fps = getGlobalState().savingFrames ? exportFps : playFps;
 
   states.startTime = states.timestamp;
   props.time = 0;

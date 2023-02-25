@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
-import { ssamGit } from "vite-plugin-ssam-git";
+import { ssamExport } from "vite-plugin-ssam-export";
 import { ssamFfmpeg } from "vite-plugin-ssam-ffmpeg";
 
 export default defineConfig({
-  plugins: [ssamGit(), ssamFfmpeg()],
+  plugins: [ssamFfmpeg(), ssamExport()],
 });

@@ -10,7 +10,6 @@ const globalState: Record<string, any> = {
   firstLoopRender: true,
   firstLoopRenderTime: 0,
   frameRequested: false,
-  hotReloaded: false,
   savingFrames: false,
   recordState: "inactive",
   // from props

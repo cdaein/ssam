@@ -9,8 +9,6 @@ export const createStates = ({
     paused: false,
     playMode: "play",
     savingFrame: false,
-    savingFrames: false,
-    recordState: "inactive",
     hotReloaded: false,
     startTime: 0,
     lastStartTime: 0,
