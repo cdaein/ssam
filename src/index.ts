@@ -353,8 +353,14 @@ export class Wrap {
       return;
     }
 
-    // TODO: when mp4 recording, there's a waste of frame render until reqFrame received
-    //       instead, return early here
+    // when mp4 recording, if not frameRequested, wait for next frame
+    if (
+      this.settings.framesFormat.includes("mp4") &&
+      !getGlobalState().frameRequested
+    ) {
+      this.raf = window.requestAnimationFrame(this.loop);
+      return;
+    }
 
     // respond to current recordState
     if (getGlobalState().recordState === "start") {
@@ -400,13 +406,7 @@ export class Wrap {
       this.raf = window.requestAnimationFrame(this.loop);
 
       // update frame count (before encoding due to mp4 frame request logic)
-      if (this.settings.framesFormat.includes("mp4")) {
-        if (getGlobalState().frameRequested) {
-          this.props.frame += 1;
-        }
-      } else {
-        this.props.frame += 1;
-      }
+      this.props.frame += 1;
 
       // encode frame
       for (let i = 0; i < this.settings.framesFormat.length; i++) {
