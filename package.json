@@ -19,7 +19,7 @@
   "author": "Daeinc",
   "license": "MIT",
   "dependencies": {
-    "@daeinc/canvas": "^0.13.0",
+    "@daeinc/canvas": "^0.14.5",
     "@daeinc/dom": "^0.4.1",
     "gifenc": "^1.0.3",
     "webm-muxer": "^1.2.1"
@@ -40,7 +40,7 @@
     "typescript": "^4.9.5",
     "vite": "^4.1.4",
     "vite-plugin-ssam-export": "^0.1.0",
-    "vite-plugin-ssam-ffmpeg": "^0.0.6",
+    "vite-plugin-ssam-ffmpeg": "^0.0.7",
     "vite-plugin-ssam-git": "^0.1.1"
   },
   "repository": {

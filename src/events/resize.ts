@@ -52,14 +52,9 @@ export default ({
         width: window.innerWidth,
         height: window.innerHeight,
         pixelRatio: Math.max(settings.pixelRatio, 1),
+        pixelated: settings.pixelated,
         scaleContext: settings.scaleContext,
       }));
-
-      if (settings.pixelated) {
-        canvas.style.imageRendering = "pixelated";
-        if (settings.mode === "2d")
-          (props as SketchProps).context.imageSmoothingEnabled = false;
-      }
 
       // if (doResize) {
       try {

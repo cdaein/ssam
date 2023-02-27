@@ -32,9 +32,16 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
       width,
       height,
       pixelRatio,
+      pixelated: settings.pixelated,
       scaleContext: settings.scaleContext,
       attributes: settings.attributes,
-    }));
+    }) as {
+      canvas: HTMLCanvasElement;
+      context: SketchContext;
+      gl?: WebGLRenderingContext | WebGL2RenderingContext;
+      width: number;
+      height: number;
+    });
   } else {
     // use existing canvas
     canvas = settings.canvas;
@@ -48,18 +55,18 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
       width,
       height,
       pixelRatio,
+      pixelated: settings.pixelated,
       scaleContext: settings.scaleContext,
       attributes: settings.attributes,
-    }));
+    }) as {
+      context: SketchContext;
+      gl?: WebGLRenderingContext | WebGL2RenderingContext;
+      width: number;
+      height: number;
+    });
   }
 
   canvas.id = settings.id;
-
-  if (settings.pixelated) {
-    canvas.style.imageRendering = "pixelated";
-    if (settings.mode === "2d")
-      (context as CanvasRenderingContext2D).imageSmoothingEnabled = false;
-  }
 
   centerCanvasToWindow(canvas, settings);
 
