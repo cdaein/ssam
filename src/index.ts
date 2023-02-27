@@ -102,6 +102,8 @@ export class Wrap {
                 savingFrames: true,
                 frameRequested: true,
                 recordState: "start",
+                // FIX: reset commitHash after video snapshot.
+                //      otherwise, it remains for subsequent mp4 export
                 commitHash: data.hash,
               });
             }
@@ -227,6 +229,9 @@ export class Wrap {
     this.removeResize();
     this.removeKeydown();
     // remove canvas
+    // REVIEW: when there's a code error, sometimes, it ends up with multiple canvases with same id
+    // const oldCanvases = document.querySelectorAll(`#${this.settings.id}`);
+    // oldCanvases.forEach((canvas) => canvas.remove());
     this.props.canvas.remove();
     // user clean-up (remove any side effects)
     this.unload && this.unload(this.props);

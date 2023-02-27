@@ -4,7 +4,7 @@ import {
   SketchSettings,
   SketchSettingsInternal,
 } from "./types/types";
-import { createCanvas as create, resizeCanvas as resize } from "@daeinc/canvas";
+import { createCanvas as create, resizeCanvas } from "@daeinc/canvas";
 import { toHTMLElement } from "@daeinc/dom";
 
 export const createCanvas = (settings: SketchSettingsInternal) => {
@@ -42,7 +42,7 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
       toHTMLElement(settings.parent).appendChild(canvas);
     }
 
-    ({ context, gl, width, height } = resize({
+    ({ context, gl, width, height } = resizeCanvas({
       canvas,
       context: settings.mode,
       width,

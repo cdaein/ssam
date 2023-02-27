@@ -55,6 +55,12 @@ export default ({
         scaleContext: settings.scaleContext,
       }));
 
+      if (settings.pixelated) {
+        canvas.style.imageRendering = "pixelated";
+        if (settings.mode === "2d")
+          (props as SketchProps).context.imageSmoothingEnabled = false;
+      }
+
       // if (doResize) {
       try {
         resize(props);
