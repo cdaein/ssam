@@ -31,17 +31,15 @@
     "@types/ogl": "npm:ogl-types@^0.0.102",
     "@types/p5": "^1.5.0",
     "animejs": "^3.2.1",
-    "kleur": "^4.1.5",
     "license-checker": "^25.0.1",
-    "ogl": "^0.0.110",
-    "p5": "^1.5.0",
+    "ogl": "^0.0.112",
+    "p5": "^1.6.0",
     "pts": "^0.11.3",
     "tsup": "^6.6.3",
     "typescript": "^4.9.5",
     "vite": "^4.1.4",
     "vite-plugin-ssam-export": "^0.1.0",
-    "vite-plugin-ssam-ffmpeg": "^0.0.7",
-    "vite-plugin-ssam-git": "^0.1.1"
+    "vite-plugin-ssam-ffmpeg": "^0.0.7"
   },
   "repository": {
     "type": "git",
