@@ -1,6 +1,6 @@
 {
   "name": "ssam",
-  "version": "0.8.8",
+  "version": "0.8.9",
   "description": "Creative coding sketch helper",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
