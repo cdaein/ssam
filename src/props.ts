@@ -73,7 +73,7 @@ export const createProps = ({
     togglePlay,
     render: renderProp,
     resize: resizeProp,
-    update: () => {},
+    update: () => {}, // TODO: create updateProp type
     data: settings.data,
   };
 
@@ -97,14 +97,12 @@ export const createProps = ({
     } as WebGLProps;
   }
 
-  // move into createFuntionProps() ??
-  const update = createUpdateProp({
+  props.update = createUpdateProp({
     canvas,
     settings,
     states,
     props,
   });
-  props.update = update;
 
   return props;
 };
@@ -161,7 +159,8 @@ const createTogglePlay = (states: SketchStates) => {
   };
 };
 
-const updatableKeys = [
+// TODO: create UpdatableKeys type - and move to constants?
+export const updatableKeys = [
   // DOM
   "parent",
   "title",
@@ -181,11 +180,12 @@ const updatableKeys = [
   "filename",
   "prefix",
   "suffix",
+  // REVIEW: will need to check browser/env support when updating these.
   "frameFormat",
   "framesFormat",
 ];
 
-const createUpdateProp = ({
+export const createUpdateProp = ({
   canvas,
   settings,
   states,
@@ -223,6 +223,8 @@ const createUpdateProp = ({
         document.body.style.background = options[key];
       }
       // canvas
+      // REVIEW: don't directly use resizeCanvas() dep,
+      //      but use resize handler so it will also render right after
       else if (
         key === "dimensions" ||
         key === "width" ||
@@ -252,6 +254,9 @@ const createUpdateProp = ({
         props.height = height;
         props.pixelRatio =
           key === "pixelRatio" ? options[key] : props.pixelRatio;
+
+        // render right after, otherwise, canvas may disappear at low fps or paused
+        props.render();
       } else if (key === "pixelated") {
         if (options[key] === true) {
           canvas.style.imageRendering = "pixelated";
@@ -274,9 +279,10 @@ const createUpdateProp = ({
         // states.timeNavOffset = props.deltaTime;
         // props.frame = options[key] % props.totalFrames;
       } else if (key === "duration") {
-        props.duration = options[key];
         settings.duration = options[key];
         computeTotalFrames(settings);
+        computeExportTotalFrames(settings);
+        props.duration = options[key];
         props.totalFrames = settings.totalFrames;
       } else if (key === "playFps") {
         settings.playFps = options[key];

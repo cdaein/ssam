@@ -1,4 +1,4 @@
-import { createProps } from "./props";
+import { createProps, createUpdateProp } from "./props";
 import { createSettings } from "./settings";
 import { createStates } from "./states";
 import {
@@ -148,13 +148,6 @@ export class Wrap {
       resizeProp: () => this.resize(this.props as SketchProps | WebGLProps),
     });
 
-    // this step is transitory
-    // this breaks the this.states reference and togglePlay() won't work
-    // this.states = {
-    //   ...this.states,
-    //   // set time values from globalState
-    // };
-
     this.globalState = getGlobalState();
 
     // REVIEW: some of these may not need to be stored globally
@@ -168,14 +161,10 @@ export class Wrap {
     this.states.firstLoopRender = this.globalState.firstLoopRender;
     this.states.firstLoopRenderTime = this.globalState.firstLoopRenderTime;
 
-    // props are just a collection of internally tracked data
-    this.props = {
-      ...this.props,
-      playhead: this.globalState.playhead,
-      frame: this.globalState.frame,
-      time: this.globalState.time,
-      deltaTime: this.globalState.deltaTime,
-    };
+    this.props.playhead = this.globalState.playhead;
+    this.props.frame = this.globalState.frame;
+    this.props.time = this.globalState.time;
+    this.props.deltaTime = this.globalState.deltaTime;
 
     try {
       await sketch(this.props);
