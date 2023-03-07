@@ -359,6 +359,9 @@ export class Wrap {
     // respond to current recordState
     if (getGlobalState().recordState === "start") {
       if (this.props.duration) {
+        // TODO: reset only if duration is set
+        //       or don't reset at all
+        //       or give an option
         resetTime({
           settings: this.settings,
           states: this.states,
@@ -466,10 +469,10 @@ export class Wrap {
       });
 
       // culprit
-      // this.raf = window.requestAnimationFrame(this.loop);
+      window.cancelAnimationFrame(this.raf);
+      this.raf = window.requestAnimationFrame(this.loop);
 
       // reset recording states
-      // TODO: reset only if duration is set
       this.resetAfterRecord();
 
       outlineElement(this.props.canvas, false);
@@ -484,8 +487,8 @@ export class Wrap {
       recordState: "inactive",
       commitHash: "",
     });
+    // TODO: reset time/frame only if duration is set
     this.states.timeResetted = true; // playLoop should start fresh
-
     this.props.frame = 0;
     this.props.recording = false;
   }
