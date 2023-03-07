@@ -479,7 +479,11 @@ export class Wrap {
   }
 
   resetAfterRecord() {
-    updateGlobalState({ savingFrames: false, recordState: "inactive" });
+    updateGlobalState({
+      savingFrames: false,
+      recordState: "inactive",
+      commitHash: "",
+    });
     this.states.timeResetted = true; // playLoop should start fresh
 
     this.props.frame = 0;
