@@ -1,4 +1,4 @@
-import { createProps, createUpdateProp } from "./props";
+import { createProps } from "./props";
 import { createSettings } from "./settings";
 import { createStates } from "./states";
 import {
@@ -104,8 +104,6 @@ export class Wrap {
                 savingFrames: true,
                 frameRequested: true,
                 recordState: "start",
-                // FIX: reset commitHash after video snapshot.
-                //      otherwise, it remains for subsequent mp4 export
                 commitHash: data.hash,
               });
             }
@@ -363,17 +361,19 @@ export class Wrap {
     // respond to current recordState
     if (getGlobalState().recordState === "start") {
       if (this.props.duration) {
-        // TODO: reset only if duration is set
-        //       or don't reset at all
-        //       or give an option
+        // TODO: give an option not to reset time at record start.
+        //       structure is there now w/ states.recordedFrames.
+        //       but first frame may be off in computing time (record vs play)
+        //       instead of directly rendering first frame, need to adjust time
+        //       so data will snap based on exportFps and current closest value
         resetTime({
           settings: this.settings,
           states: this.states,
           props: this.props,
         });
-
-        this.preExportCombined();
       }
+
+      this.preExportCombined();
 
       outlineElement(this.props.canvas, true);
 
@@ -409,7 +409,10 @@ export class Wrap {
       this.raf = window.requestAnimationFrame(this.loop);
 
       // update frame count (before encoding due to mp4 frame request logic)
-      this.props.frame += 1;
+      // this.props.frame += 1;
+      this.props.frame =
+        (this.props.frame + 1) % this.settings.exportTotalFrames;
+      this.states.recordedFrames += 1;
 
       // encode frame
       for (let i = 0; i < this.settings.framesFormat.length; i++) {
@@ -458,7 +461,11 @@ export class Wrap {
       });
       computeLastTimestamp({ states: this.states, props: this.props });
 
-      if (this.props.frame >= this.settings.exportTotalFrames) {
+      // if (this.props.frame >= this.settings.exportTotalFrames) {
+      // updateGlobalState({ recordState: "end" });
+      // }
+
+      if (this.states.recordedFrames >= this.settings.exportTotalFrames) {
         updateGlobalState({ recordState: "end" });
       }
     }
@@ -497,6 +504,7 @@ export class Wrap {
     });
     // TODO: reset time/frame only if duration is set
     this.states.timeResetted = true; // playLoop should start fresh
+    this.states.recordedFrames = 0;
     this.props.frame = 0;
     this.props.recording = false;
   }

@@ -21,6 +21,7 @@ export const createStates = ({
     firstLoopRender: true,
     firstLoopRenderTime: 0,
     timeNavOffset: 0,
+    recordedFrames: 0,
   };
 };
 

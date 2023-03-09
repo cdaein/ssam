@@ -158,6 +158,7 @@ export interface SketchStates {
   firstLoopRender: boolean;
   firstLoopRenderTime: number;
   timeNavOffset: number;
+  recordedFrames: number;
 }
 
 /** props that are shared by all sketch modes */
