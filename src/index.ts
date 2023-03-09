@@ -218,9 +218,7 @@ export class Wrap {
     this.removeResize();
     this.removeKeydown();
     // remove canvas
-    // REVIEW: when there's a code error, sometimes, it ends up with multiple canvases with same id
-    // const oldCanvases = document.querySelectorAll(`#${this.settings.id}`);
-    // oldCanvases.forEach((canvas) => canvas.remove());
+    // REVIEW: when there's a code error, sometimes, it ends up with multiple canvases with same id but removing all old canvases will also remove new one
     this.props.canvas.remove();
     // user clean-up (remove any side effects)
     this.unload && this.unload(this.props);
@@ -228,6 +226,15 @@ export class Wrap {
 
   dispose() {
     hotReloaded = true;
+
+    // REVIEW: after hot reloading and new canvas is created,
+    //         if multiple, remove all but one to ensure one active canvas is always present
+    const canvases = document.querySelectorAll(`#${this.settings.id}`);
+    if (canvases.length > 1) {
+      for (let i = 0; i < canvases.length - 1; i++) {
+        canvases[i].remove();
+      }
+    }
 
     // store current values to globalState right before HMR
     updateGlobalState({
