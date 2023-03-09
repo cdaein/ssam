@@ -79,6 +79,8 @@ export class Wrap {
   globalState!: Record<string, any>;
   count!: number;
   loop!: (timestamp: number) => void;
+  preExport?: () => void;
+  postExport?: () => void;
 
   constructor() {
     // use ssam() function for interfacing with user. (class constructor can't use async)
@@ -352,6 +354,8 @@ export class Wrap {
       this.settings.framesFormat.includes("mp4") &&
       !getGlobalState().frameRequested
     ) {
+      // REVIEW: while recording, around frame 100, there's a very long delay hiccup
+      //         improve server-side data handling/processing
       this.raf = window.requestAnimationFrame(this.loop);
       return;
     }
@@ -367,6 +371,8 @@ export class Wrap {
           states: this.states,
           props: this.props,
         });
+
+        this.preExportCombined();
       }
 
       outlineElement(this.props.canvas, true);
@@ -475,6 +481,8 @@ export class Wrap {
       // reset recording states
       this.resetAfterRecord();
 
+      this.postExportCombined();
+
       outlineElement(this.props.canvas, false);
     }
 
@@ -495,6 +503,16 @@ export class Wrap {
 
   handleResize() {
     // b/c of typescript undefined warning, include empty method here..
+  }
+
+  preExportCombined() {
+    // run right before export starts
+    this.preExport && this.preExport();
+  }
+
+  postExportCombined() {
+    // run right after export finished
+    this.postExport && this.postExport();
   }
 
   // REVIEW: does this have to be async method?
