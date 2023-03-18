@@ -3,6 +3,7 @@ import { createSettings } from "./settings";
 import { createStates } from "./states";
 import {
   Sketch,
+  SketchContext,
   SketchProps,
   SketchSettings,
   SketchSettingsInternal,
@@ -17,16 +18,6 @@ import {
   computePlayhead,
   resetTime,
 } from "./time";
-import {
-  setupWebMRecord,
-  encodeWebM,
-  endWebMRecord,
-} from "./recorders/export-frames-webm";
-import {
-  setupGifAnimRecord,
-  encodeGifAnim,
-  endGifAnimRecord,
-} from "./recorders/export-frames-gif";
 import { fitCanvasToWindow } from "./canvas";
 import { getGlobalState, updateGlobalState } from "./store";
 import { saveCanvasFrame } from "./recorders/export-frame";
@@ -81,6 +72,42 @@ export class Wrap {
   loop!: (timestamp: number) => void;
   preExport?: () => void;
   postExport?: () => void;
+  setupGifAnimRecord!: () => Promise<void>;
+  encodeGifAnim!: ({
+    context,
+    settings,
+    props,
+  }: {
+    context: SketchContext;
+    settings: SketchSettingsInternal;
+    props: SketchProps | WebGLProps;
+  }) => void;
+  endGifAnimRecord!: ({
+    settings,
+  }: {
+    settings: SketchSettingsInternal;
+  }) => void;
+  setupWebMRecord!: ({
+    settings,
+    props,
+  }: {
+    settings: SketchSettingsInternal;
+    props: SketchProps | WebGLProps;
+  }) => void;
+  encodeWebM!: ({
+    canvas,
+    settings,
+    props,
+  }: {
+    canvas: HTMLCanvasElement;
+    settings: SketchSettingsInternal;
+    props: SketchProps | WebGLProps;
+  }) => Promise<void>;
+  endWebMRecord!: ({
+    settings,
+  }: {
+    settings: SketchSettingsInternal;
+  }) => Promise<void>;
 
   constructor() {
     // use ssam() function for interfacing with user. (class constructor can't use async)
@@ -147,6 +174,23 @@ export class Wrap {
       renderProp: () => this.render(this.props as SketchProps | WebGLProps),
       resizeProp: () => this.resize(this.props as SketchProps | WebGLProps),
     });
+
+    // dynamic import of export libraries
+    if (this.settings.framesFormat.includes("gif")) {
+      const { setupGifAnimRecord, encodeGifAnim, endGifAnimRecord } =
+        await import("./recorders/export-frames-gif");
+      this.setupGifAnimRecord = setupGifAnimRecord;
+      this.encodeGifAnim = encodeGifAnim;
+      this.endGifAnimRecord = endGifAnimRecord;
+    }
+    if (this.settings.framesFormat.includes("webm")) {
+      const { setupWebMRecord, encodeWebM, endWebMRecord } = await import(
+        "./recorders/export-frames-webm"
+      );
+      this.setupWebMRecord = setupWebMRecord;
+      this.encodeWebM = encodeWebM;
+      this.endWebMRecord = endWebMRecord;
+    }
 
     this.globalState = getGlobalState();
 
@@ -387,14 +431,14 @@ export class Wrap {
       // set up recording
       for (const format of this.settings.framesFormat) {
         if (format === "gif") {
-          setupGifAnimRecord();
+          this.setupGifAnimRecord();
         } else if (format === "mp4") {
           setupMp4Record({
             settings: this.settings,
             hash: getGlobalState().commitHash,
           });
         } else if (format === "webm") {
-          setupWebMRecord({
+          this.setupWebMRecord({
             settings: this.settings,
             props: this.props,
           });
@@ -433,7 +477,7 @@ export class Wrap {
         }
 
         if (format === "gif") {
-          encodeGifAnim({
+          this.encodeGifAnim({
             context:
               this.settings.mode === "2d"
                 ? (this.props as SketchProps).context
@@ -448,7 +492,7 @@ export class Wrap {
             encodeMp4({ canvas: this.props.canvas });
           }
         } else if (format === "webm") {
-          encodeWebM({
+          this.encodeWebM({
             canvas: this.props.canvas,
             settings: this.settings,
             props: this.props,
@@ -480,11 +524,11 @@ export class Wrap {
       // finish recording
       this.settings.framesFormat.forEach((format) => {
         if (format === "gif") {
-          endGifAnimRecord({ settings: this.settings });
+          this.endGifAnimRecord({ settings: this.settings });
         } else if (format === "mp4") {
           endMp4Record();
         } else if (format === "webm") {
-          endWebMRecord({ settings: this.settings });
+          this.endWebMRecord({ settings: this.settings });
         }
       });
 
