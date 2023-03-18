@@ -1,7 +1,7 @@
 import {
+  applyPalette,
   GIFEncoder,
   quantize,
-  applyPalette,
   // nearestColorIndex,
   // snapColorsToPalette,
 } from "gifenc";
@@ -10,9 +10,16 @@ import { downloadBlob } from "../helpers";
 import { BaseProps, SketchSettingsInternal } from "../types/types";
 
 let gif: Encoder;
+// let quantize: any;
+// let applyPalette: any;
 
-export const setupGifAnimRecord = () => {
+export const setupGifAnimRecord = async () => {
   const format = "gif";
+
+  // const gifenc = await import("gifenc");
+  // gif = gifenc.GIFEncoder();
+  // quantize = gifenc.quantize;
+  // applyPalette = gifenc.applyPalette;
 
   gif = GIFEncoder();
 
@@ -66,8 +73,15 @@ export const encodeGifAnim = ({
       gl.drawingBufferWidth * gl.drawingBufferHeight * 4
     );
     //prettier-ignore
-    gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, 
-                    gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+    gl.readPixels(
+      0,
+      0,
+      gl.drawingBufferWidth,
+      gl.drawingBufferHeight,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      pixels,
+    );
 
     const palette =
       settings.gifOptions.palette ||

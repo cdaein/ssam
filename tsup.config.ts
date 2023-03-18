@@ -10,5 +10,5 @@ export default defineConfig({
   clean: true,
   treeshake: true,
   // minify: true,
-  external: ["p5"],
+  external: ["p5", "gifenc"],
 });

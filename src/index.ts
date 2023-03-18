@@ -416,9 +416,9 @@ export class Wrap {
       this.raf = window.requestAnimationFrame(this.loop);
 
       // update frame count (before encoding due to mp4 frame request logic)
-      // this.props.frame += 1;
-      this.props.frame =
-        (this.props.frame + 1) % this.settings.exportTotalFrames;
+      this.props.frame += 1;
+      // this.props.frame =
+      // (this.props.frame + 1) % this.settings.exportTotalFrames;
       this.states.recordedFrames += 1;
 
       // encode frame
