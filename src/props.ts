@@ -181,8 +181,8 @@ export const updatableKeys = [
   "prefix",
   "suffix",
   // REVIEW: will need to check browser/env support when updating these.
-  "frameFormat",
-  "framesFormat",
+  // "frameFormat",
+  // "framesFormat",
 ];
 
 export const createUpdateProp = ({
