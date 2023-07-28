@@ -64,6 +64,7 @@ export const computePrevFrame = ({
   states: SketchStates;
   props: BaseProps;
 }) => {
+  // call before updating props.frame to a new value
   updateGlobalState({ prevFrame: props.frame });
   states.prevFrame = props.frame;
 };
@@ -110,10 +111,22 @@ export const computeLoopCount = ({
   const prevFrame = getGlobalState().prevFrame;
 
   if (settings.numLoops > 1) {
-    props.loopCount =
-      prevFrame !== null && prevFrame > props.frame
-        ? (props.loopCount + 1) % settings.numLoops
-        : props.loopCount;
+    /**
+     * REVIEW: needs improvement
+     * the condition to check whether it's a new loop is different for when playing and recording due to (i think):
+     * - first play frame is rendered in setup, not in playLoop.
+     * - prevFrame===frame (0===0) situation
+     * - playLoop and recordLoop has different order of function calls so values are updated in different order.
+     * - right after recording, playLoop starts with all values resetted, thus, wrong value for prevFrame.
+     */
+    const newLoop = getGlobalState().savingFrames
+      ? prevFrame > props.frame
+      : prevFrame >= props.frame;
+
+    if (prevFrame !== null && newLoop) {
+      props.loopCount = (props.loopCount + 1) % settings.numLoops;
+      updateGlobalState({ loopCount: props.loopCount }); // do i need this? is globalState.loopCount ever used?
+    }
   }
 };
 

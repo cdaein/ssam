@@ -361,10 +361,6 @@ export class Wrap {
       resetTime({ settings, states, props });
     }
 
-    // update prevFrame before resetTime() call. otherwise, prevFrame & frame both becomes 0
-    // NOTE: when playLoop() starts right after recording, prevFrame===frame===0, which is not ideal.
-    computePrevFrame({ states, props });
-
     // time
     // 1. better dt handling
     // this.props.time = (this.states.timestamp - this.states.startTime) % this.props.duration;
@@ -391,6 +387,10 @@ export class Wrap {
     // update lastTimestamp for deltaTime calculation
     computeLastTimestamp({ states, props });
 
+    // update prevFrame before resetTime() call. otherwise, prevFrame & frame both becomes 0
+    // NOTE: when playLoop() starts right after recording, prevFrame===frame===0, which is not ideal.
+    computePrevFrame({ states, props });
+
     try {
       await this.render(props);
     } catch (err: any) {
@@ -403,7 +403,12 @@ export class Wrap {
   }
 
   async recordLoop() {
-    const { settings, states, props } = this;
+    const {
+      settings,
+      states,
+      props,
+      props: { canvas },
+    } = this;
 
     if (settings.framesFormat.length === 0) {
       console.warn(`no framesFormat found.`);
@@ -440,7 +445,7 @@ export class Wrap {
 
       this.preExportCombined();
 
-      outlineElement(props.canvas, true);
+      outlineElement(canvas, true);
 
       // set up recording
       for (const format of settings.framesFormat) {
@@ -495,35 +500,23 @@ export class Wrap {
           // send a new frame to server only when requested
           // plugin needs some time to process incoming frame
           if (getGlobalState().frameRequested) {
-            encodeMp4({ canvas: props.canvas });
+            encodeMp4({ canvas });
           }
         } else if (format === "webm") {
-          this.encodeWebM({
-            canvas: props.canvas,
-            settings,
-            states,
-            props,
-          });
+          this.encodeWebM({ canvas, settings, states, props });
         } else if (format === "png") {
-          encodePngSeq({ canvas: props.canvas, settings, states });
+          encodePngSeq({ canvas, settings, states });
         }
       }
       // if requested and sent already, set it to false and wait for next frame
       getGlobalState().frameRequested &&
         updateGlobalState({ frameRequested: false });
 
-      // NOTE: had to move the section below after encoding due to incorrect counting in webm encoding.
-      // update prevFrame before resetTime() call. otherwise, prevFrame & frame both becomes 0
-      computePrevFrame({ states, props });
-
       // update frame count (before encoding due to mp4 frame request logic)
       props.frame += 1;
-      props.frame %= props.totalFrames;
-      // this.props.frame =
-      // (this.props.frame + 1) % this.settings.exportTotalFrames;
+      // compute export total frames per loop
+      props.frame %= Math.floor(settings.exportTotalFrames / settings.numLoops);
       states.recordedFrames += 1;
-
-      const prevFrame = getGlobalState().prevFrame;
 
       computeLoopCount({ settings, props });
 
@@ -533,9 +526,9 @@ export class Wrap {
       computePlayhead({ settings, props });
       computeLastTimestamp({ states, props });
 
-      // if (this.props.frame >= this.settings.exportTotalFrames) {
-      // updateGlobalState({ recordState: "end" });
-      // }
+      // NOTE: had to move the section below after encoding due to incorrect counting in webm encoding.
+      // update prevFrame before resetTime() call. otherwise, prevFrame & frame both becomes 0
+      computePrevFrame({ states, props });
 
       if (states.recordedFrames >= settings.exportTotalFrames) {
         updateGlobalState({ recordState: "end" });
@@ -564,7 +557,7 @@ export class Wrap {
 
       this.postExportCombined();
 
-      outlineElement(props.canvas, false);
+      outlineElement(canvas, false);
     }
 
     return;
