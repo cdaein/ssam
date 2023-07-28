@@ -29,6 +29,11 @@ import {
   setupMp4Record,
 } from "./recorders/export-frames-mp4";
 import { outlineElement } from "./helpers";
+import {
+  encodePngSeq,
+  endPngSeqRecord,
+  setupPngSeqRecord,
+} from "./recorders/export-frames-png";
 
 export type {
   FrameFormat,
@@ -401,6 +406,7 @@ export class Wrap {
     const { settings, states, props } = this;
 
     if (settings.framesFormat.length === 0) {
+      console.warn(`no framesFormat found.`);
       this.resetAfterRecord();
       this.raf = window.requestAnimationFrame(this.loop);
       return;
@@ -439,14 +445,14 @@ export class Wrap {
       // set up recording
       for (const format of settings.framesFormat) {
         if (format === "gif") {
+          // REVIEW: why some export fn have this. ? can't remember..
           this.setupGifAnimRecord();
         } else if (format === "mp4") {
-          setupMp4Record({
-            settings,
-            hash: getGlobalState().commitHash,
-          });
+          setupMp4Record({ settings, hash: getGlobalState().commitHash });
         } else if (format === "webm") {
           this.setupWebMRecord({ settings, props });
+        } else if (format === "png") {
+          setupPngSeqRecord({ settings, hash: getGlobalState().commitHash });
         }
       }
       // update relevant props
@@ -498,6 +504,8 @@ export class Wrap {
             states,
             props,
           });
+        } else if (format === "png") {
+          encodePngSeq({ canvas: props.canvas, settings, states });
         }
       }
       // if requested and sent already, set it to false and wait for next frame
@@ -542,6 +550,8 @@ export class Wrap {
           endMp4Record();
         } else if (format === "webm") {
           this.endWebMRecord({ settings });
+        } else if (format === "png") {
+          endPngSeqRecord();
         }
       });
 

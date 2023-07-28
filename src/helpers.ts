@@ -21,7 +21,6 @@ export const isWebmSupported = () => {
 };
 
 // give warning and remove anything not supported and update settings.framesFormat directly
-// TODO: check sequence support
 export const checkSupportedFramesFormats = (formats: FramesFormat[]) => {
   let removedFormat = "";
 
@@ -33,13 +32,12 @@ export const checkSupportedFramesFormats = (formats: FramesFormat[]) => {
       continue;
     }
     // 2. is any of the formats not supported in browser/environment? => warn and remove
-    if (formats[i] === "gif" && !isGifSupported()) {
-      removedFormat = formats[i];
-      formats.splice(i, 1);
-    } else if (formats[i] === "mp4" && !isMp4Supported()) {
-      removedFormat = formats[i];
-      formats.splice(i, 1);
-    } else if (formats[i] === "webm" && !isWebmSupported()) {
+    if (
+      (formats[i] === "gif" && !isGifSupported()) ||
+      (formats[i] === "mp4" && !isMp4Supported()) ||
+      (formats[i] === "webm" && !isWebmSupported()) ||
+      (formats[i] === "png" && !isSeqSupported())
+    ) {
       removedFormat = formats[i];
       formats.splice(i, 1);
     }

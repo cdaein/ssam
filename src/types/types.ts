@@ -31,8 +31,8 @@ export type SketchMode = "2d" | "webgl" | "webgl2";
 export type FrameFormat = "png" | "jpg" | "jpeg" | "webp";
 
 // video or image sequence
-// export type FramesFormat = "gif" | "jpg" | "jpeg" | "mp4" | "png" | "webm";
-export type FramesFormat = "gif" | "mp4" | "webm";
+// export type FramesFormat = "jpg" | "jpeg" | "png";
+export type FramesFormat = "gif" | "mp4" | "webm" | "png";
 
 /** GIF encoding options */
 export type GifOptions = {
