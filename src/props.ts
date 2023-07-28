@@ -18,6 +18,7 @@ import type {
   SketchStates,
   WebGLProps,
 } from "./types/types";
+import { updateGlobalState } from "./store";
 
 type CanvasProps = {
   canvas: HTMLCanvasElement;
@@ -177,6 +178,7 @@ export const updatableKeys = [
   "duration",
   "playFps",
   "exportFps",
+  "numLoops",
   // file export
   "filename",
   "prefix",
@@ -297,6 +299,11 @@ export const createUpdateProp = ({
         computeExportFps(settings);
         computeExportTotalFrames(settings);
         props.exportFps = settings.exportFps;
+      } else if (key === "numLoops") {
+        settings[key] = options[key];
+        updateGlobalState({ loopCount: 0 });
+        props.loopCount = 0;
+        // REVIEW: do i also need to reset prevFrame & frame?
       }
       // file export
       else if (key === "filename" || key === "prefix" || key === "suffix") {
