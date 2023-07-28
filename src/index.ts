@@ -279,6 +279,8 @@ export class Wrap {
   }
 
   dispose() {
+    const { states, props } = this;
+
     hotReloaded = true;
 
     // REVIEW: after hot reloading and new canvas is created,
@@ -293,40 +295,40 @@ export class Wrap {
     // store current values to globalState right before HMR
     updateGlobalState({
       // from states
-      startTime: this.states.startTime,
-      lastStartTime: this.states.lastStartTime,
-      pausedStartTime: this.states.pausedStartTime,
-      pausedDuration: this.states.pausedDuration,
-      timestamp: this.states.timestamp,
-      lastTimestamp: this.states.lastTimestamp,
+      startTime: states.startTime,
+      lastStartTime: states.lastStartTime,
+      pausedStartTime: states.pausedStartTime,
+      pausedDuration: states.pausedDuration,
+      timestamp: states.timestamp,
+      lastTimestamp: states.lastTimestamp,
       // frameInterval: null, // REVIEW
-      firstLoopRender: this.states.firstLoopRender,
-      firstLoopRenderTime: this.states.firstLoopRenderTime,
-      prevFrame: this.states.prevFrame,
+      firstLoopRender: states.firstLoopRender,
+      firstLoopRenderTime: states.firstLoopRenderTime,
+      prevFrame: states.prevFrame,
       // from props
-      playhead: this.props.playhead,
-      frame: this.props.frame,
-      time: this.props.time,
-      deltaTime: this.props.deltaTime,
-      loopCount: this.props.loopCount,
+      playhead: props.playhead,
+      frame: props.frame,
+      time: props.time,
+      deltaTime: props.deltaTime,
+      loopCount: props.loopCount,
     });
   }
 
   run() {
+    const { states } = this;
+
     // animation render loop
     this.loop = (timestamp: number) => {
       // there's time delay between first render in handleResize() and first loop render, resulting in animation jump. this compensates for that delay
-      if (this.states.firstLoopRender) {
-        this.states.firstLoopRenderTime = timestamp;
-        this.states.firstLoopRender = false;
+      if (states.firstLoopRender) {
+        states.firstLoopRenderTime = timestamp;
+        states.firstLoopRender = false;
         this.raf = window.requestAnimationFrame(this.loop);
         return;
       }
 
-      this.states.timestamp =
-        timestamp -
-        this.states.firstLoopRenderTime -
-        this.states.pausedDuration;
+      states.timestamp =
+        timestamp - states.firstLoopRenderTime - states.pausedDuration;
 
       if (getGlobalState().savingFrames === false) {
         this.playLoop(timestamp);
@@ -339,69 +341,52 @@ export class Wrap {
   }
 
   async playLoop(timestamp: number) {
-    timestamp = timestamp - this.states.firstLoopRenderTime;
+    const { settings, states, props } = this;
+
+    timestamp = timestamp - states.firstLoopRenderTime;
 
     // when paused, accumulate pausedDuration
-    if (this.states.paused) {
-      this.states.pausedDuration = timestamp - this.states.pausedStartTime;
+    if (states.paused) {
+      states.pausedDuration = timestamp - states.pausedStartTime;
       this.raf = window.requestAnimationFrame(this.loop);
       return;
     }
 
     if (this.states.timeResetted) {
-      resetTime({
-        settings: this.settings,
-        states: this.states,
-        props: this.props,
-      });
+      resetTime({ settings, states, props });
     }
 
     // update prevFrame before resetTime() call. otherwise, prevFrame & frame both becomes 0
-    computePrevFrame({ states: this.states, props: this.props });
+    computePrevFrame({ states, props });
 
     // time
     // 1. better dt handling
     // this.props.time = (this.states.timestamp - this.states.startTime) % this.props.duration;
     // 2. full reset each loop. but, dt is one-frame (8 or 16ms) off
-    this.props.time =
-      this.states.timestamp - this.states.startTime + this.states.timeNavOffset;
+    props.time = states.timestamp - states.startTime + states.timeNavOffset;
 
-    if (this.props.time >= this.props.duration) {
-      resetTime({
-        settings: this.settings,
-        states: this.states,
-        props: this.props,
-      });
+    if (props.time >= props.duration) {
+      resetTime({ settings, states, props });
     }
-    this.props.deltaTime = this.states.timestamp - this.states.lastTimestamp;
+    props.deltaTime = states.timestamp - states.lastTimestamp;
 
     // throttle frame rate
-    if (this.states.frameInterval !== null) {
-      if (this.props.deltaTime < this.states.frameInterval) {
+    if (states.frameInterval !== null) {
+      if (props.deltaTime < states.frameInterval) {
         this.raf = window.requestAnimationFrame(this.loop);
         return;
       }
     }
 
     // the calling order matters
-    computePlayhead({
-      settings: this.settings,
-      props: this.props,
-    });
-    computeFrame({
-      settings: this.settings,
-      states: this.states,
-      props: this.props,
-    });
-    computeLoopCount({
-      settings: this.settings,
-      props: this.props,
-    });
+    computePlayhead({ settings, props });
+    computeFrame({ settings, states, props });
+    computeLoopCount({ settings, props });
     // update lastTimestamp for deltaTime calculation
-    computeLastTimestamp({ states: this.states, props: this.props });
+    computeLastTimestamp({ states, props });
 
     try {
-      await this.render(this.props);
+      await this.render(props);
     } catch (err: any) {
       console.error(err);
       return null;
@@ -412,7 +397,9 @@ export class Wrap {
   }
 
   async recordLoop() {
-    if (this.settings.framesFormat.length === 0) {
+    const { settings, states, props } = this;
+
+    if (settings.framesFormat.length === 0) {
       this.resetAfterRecord();
       this.raf = window.requestAnimationFrame(this.loop);
       return;
@@ -420,7 +407,7 @@ export class Wrap {
 
     // when mp4 recording, if not frameRequested, wait for next frame
     if (
-      this.settings.framesFormat.includes("mp4") &&
+      settings.framesFormat.includes("mp4") &&
       !getGlobalState().frameRequested
     ) {
       // REVIEW: while recording, around frame 100, there's a very long delay hiccup
@@ -431,53 +418,45 @@ export class Wrap {
 
     // respond to current recordState
     if (getGlobalState().recordState === "start") {
-      if (this.props.duration) {
+      if (props.duration) {
         // TODO: give an option not to reset time at record start.
         //       structure is there now w/ states.recordedFrames.
         //       but first frame may be off in computing time (record vs play)
         //       instead of directly rendering first frame, need to adjust time
         //       so data will snap based on exportFps and current closest value
-        resetTime({
-          settings: this.settings,
-          states: this.states,
-          props: this.props,
-        });
+        resetTime({ settings, states, props });
         // REVIEW: include below to resetTime()?
         updateGlobalState({ prevFrame: null });
-        this.states.prevFrame = null;
-
-        this.props.loopCount = 0;
+        states.prevFrame = null;
+        props.loopCount = 0;
       }
 
       this.preExportCombined();
 
-      outlineElement(this.props.canvas, true);
+      outlineElement(props.canvas, true);
 
       // set up recording
-      for (const format of this.settings.framesFormat) {
+      for (const format of settings.framesFormat) {
         if (format === "gif") {
           this.setupGifAnimRecord();
         } else if (format === "mp4") {
           setupMp4Record({
-            settings: this.settings,
+            settings,
             hash: getGlobalState().commitHash,
           });
         } else if (format === "webm") {
-          this.setupWebMRecord({
-            settings: this.settings,
-            props: this.props,
-          });
+          this.setupWebMRecord({ settings, props });
         }
       }
       // update relevant props
-      this.props.recording = true;
+      props.recording = true;
       // move to next recordState
       updateGlobalState({ recordState: "in-progress" });
     }
     if (getGlobalState().recordState === "in-progress") {
       // render frame
       try {
-        await this.render(this.props);
+        await this.render(props);
       } catch (err: any) {
         console.error(err);
         return null;
@@ -485,11 +464,11 @@ export class Wrap {
       this.raf = window.requestAnimationFrame(this.loop);
 
       // encode frame
-      for (let i = 0; i < this.settings.framesFormat.length; i++) {
-        const format = this.settings.framesFormat[i];
+      for (let i = 0; i < settings.framesFormat.length; i++) {
+        const format = settings.framesFormat[i];
 
         if (
-          this.settings.framesFormat.includes("mp4") &&
+          settings.framesFormat.includes("mp4") &&
           !getGlobalState().frameRequested
         ) {
           continue;
@@ -498,25 +477,25 @@ export class Wrap {
         if (format === "gif") {
           this.encodeGifAnim({
             context:
-              this.settings.mode === "2d"
-                ? (this.props as SketchProps).context
-                : (this.props as WebGLProps).gl,
-            settings: this.settings,
-            states: this.states,
-            props: this.props,
+              settings.mode === "2d"
+                ? (props as SketchProps).context
+                : (props as WebGLProps).gl,
+            settings,
+            states,
+            props,
           });
         } else if (format === "mp4") {
           // send a new frame to server only when requested
           // plugin needs some time to process incoming frame
           if (getGlobalState().frameRequested) {
-            encodeMp4({ canvas: this.props.canvas });
+            encodeMp4({ canvas: props.canvas });
           }
         } else if (format === "webm") {
           this.encodeWebM({
-            canvas: this.props.canvas,
-            settings: this.settings,
-            states: this.states,
-            props: this.props,
+            canvas: props.canvas,
+            settings,
+            states,
+            props,
           });
         }
       }
@@ -526,46 +505,43 @@ export class Wrap {
 
       // NOTE: had to move the section below after encoding due to incorrect counting in webm encoding.
       // update prevFrame before resetTime() call. otherwise, prevFrame & frame both becomes 0
-      computePrevFrame({ states: this.states, props: this.props });
+      computePrevFrame({ states, props });
 
       // update frame count (before encoding due to mp4 frame request logic)
-      this.props.frame += 1;
-      this.props.frame %= this.props.totalFrames;
+      props.frame += 1;
+      props.frame %= props.totalFrames;
       // this.props.frame =
       // (this.props.frame + 1) % this.settings.exportTotalFrames;
-      this.states.recordedFrames += 1;
+      states.recordedFrames += 1;
 
       const prevFrame = getGlobalState().prevFrame;
       // console.log(prevFrame, this.props.frame); //TEST
 
-      computeLoopCount({ settings: this.settings, props: this.props });
+      computeLoopCount({ settings, props });
 
       // update time variables
-      this.props.deltaTime = 1000 / this.settings.exportFps;
-      this.props.time = this.props.frame * this.props.deltaTime;
-      computePlayhead({
-        settings: this.settings,
-        props: this.props,
-      });
-      computeLastTimestamp({ states: this.states, props: this.props });
+      props.deltaTime = 1000 / settings.exportFps;
+      props.time = props.frame * props.deltaTime;
+      computePlayhead({ settings, props });
+      computeLastTimestamp({ states, props });
 
       // if (this.props.frame >= this.settings.exportTotalFrames) {
       // updateGlobalState({ recordState: "end" });
       // }
 
-      if (this.states.recordedFrames >= this.settings.exportTotalFrames) {
+      if (states.recordedFrames >= settings.exportTotalFrames) {
         updateGlobalState({ recordState: "end" });
       }
     }
     if (getGlobalState().recordState === "end") {
       // finish recording
-      this.settings.framesFormat.forEach((format) => {
+      settings.framesFormat.forEach((format) => {
         if (format === "gif") {
-          this.endGifAnimRecord({ settings: this.settings });
+          this.endGifAnimRecord({ settings });
         } else if (format === "mp4") {
           endMp4Record();
         } else if (format === "webm") {
-          this.endWebMRecord({ settings: this.settings });
+          this.endWebMRecord({ settings });
         }
       });
 
@@ -578,7 +554,7 @@ export class Wrap {
 
       this.postExportCombined();
 
-      outlineElement(this.props.canvas, false);
+      outlineElement(props.canvas, false);
     }
 
     return;
