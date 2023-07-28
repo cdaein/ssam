@@ -65,6 +65,7 @@ export const computePrevFrame = ({
   props: BaseProps;
 }) => {
   updateGlobalState({ prevFrame: props.frame });
+  states.prevFrame = props.frame;
 };
 
 export const computeFrame = ({
@@ -108,9 +109,9 @@ export const computeLoopCount = ({
 }) => {
   const prevFrame = getGlobalState().prevFrame;
 
-  if (settings.numLoops !== 0) {
+  if (settings.numLoops > 1) {
     props.loopCount =
-      prevFrame !== null && prevFrame >= props.frame
+      prevFrame !== null && prevFrame > props.frame
         ? (props.loopCount + 1) % settings.numLoops
         : props.loopCount;
   }

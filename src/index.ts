@@ -357,6 +357,7 @@ export class Wrap {
     }
 
     // update prevFrame before resetTime() call. otherwise, prevFrame & frame both becomes 0
+    // NOTE: when playLoop() starts right after recording, prevFrame===frame===0, which is not ideal.
     computePrevFrame({ states, props });
 
     // time
@@ -515,7 +516,6 @@ export class Wrap {
       states.recordedFrames += 1;
 
       const prevFrame = getGlobalState().prevFrame;
-      // console.log(prevFrame, this.props.frame); //TEST
 
       computeLoopCount({ settings, props });
 
@@ -565,12 +565,17 @@ export class Wrap {
       savingFrames: false,
       recordState: "inactive",
       commitHash: "",
+      prevFrame: null,
+      loopCount: 0,
     });
     // TODO: reset time/frame only if duration is set
     this.states.timeResetted = true; // playLoop should start fresh
     this.states.recordedFrames = 0;
     this.props.frame = 0;
     this.props.recording = false;
+    // doesn't do anything, because playLoop() updates prevFrame anyways
+    this.states.prevFrame = null;
+    this.props.loopCount = 0;
   }
 
   handleResize() {
