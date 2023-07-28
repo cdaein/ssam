@@ -85,6 +85,8 @@ export type SketchSettings = {
   exportFps?: number;
   /** set animation loop duration in milliseconds */
   duration?: number;
+  /** how many times to loop (repeat). the default is `1` */
+  numLoops?: number;
   // out file
   /** set export file name. if not set, sketch-wrapper uses datetime string */
   filename?: string;
@@ -106,7 +108,7 @@ export type SketchSettings = {
 };
 
 /**
- * Settings that are used internally for development.
+ * Settings that are used internally for development and not exposed to users. ie. exportTotalFrames
  */
 export interface SketchSettingsInternal {
   // document
@@ -130,6 +132,7 @@ export interface SketchSettingsInternal {
   duration: number;
   totalFrames: number;
   exportTotalFrames: number;
+  numLoops: number;
   // out file
   filename: string;
   prefix: string;
@@ -159,6 +162,7 @@ export interface SketchStates {
   firstLoopRenderTime: number;
   timeNavOffset: number;
   recordedFrames: number;
+  prevFrame: number | null; // first frame doesn't have prevFrame, so it's set to null
 }
 
 /** props that are shared by all sketch modes */
@@ -186,6 +190,8 @@ export interface BaseProps {
   duration: number;
   /** number of total frames over duration */
   totalFrames: number;
+  /** the current loop count. it is based on `numLoop` in the settings. it increases by `1` and resets back to `0`. `duration` setting is required. */
+  loopCount: number;
   /** play fps */
   playFps: number | null;
   /** export fps */

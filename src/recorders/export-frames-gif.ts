@@ -7,7 +7,11 @@ import {
 } from "gifenc";
 import type { Encoder } from "gifenc";
 import { downloadBlob } from "../helpers";
-import { BaseProps, SketchSettingsInternal } from "../types/types";
+import {
+  BaseProps,
+  SketchSettingsInternal,
+  SketchStates,
+} from "../types/types";
 
 let gif: Encoder;
 // let quantize: any;
@@ -29,6 +33,7 @@ export const setupGifAnimRecord = async () => {
 export const encodeGifAnim = ({
   context,
   settings,
+  states,
   props,
 }: {
   context:
@@ -36,6 +41,7 @@ export const encodeGifAnim = ({
     | WebGLRenderingContext
     | WebGL2RenderingContext;
   settings: SketchSettingsInternal;
+  states: SketchStates;
   props: BaseProps;
 }) => {
   // record frame
@@ -106,7 +112,7 @@ export const encodeGifAnim = ({
   }
 
   console.log(
-    `recording (gif) frame... ${props.frame} of ${settings.exportTotalFrames}`
+    `recording (gif) frame... ${states.recordedFrames} of ${settings.exportTotalFrames}`
   );
 };
 

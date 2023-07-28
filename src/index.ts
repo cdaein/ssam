@@ -15,7 +15,9 @@ import keydownHandler from "./events/keydown";
 import {
   computeFrame,
   computeLastTimestamp,
+  computeLoopCount,
   computePlayhead,
+  computePrevFrame,
   resetTime,
 } from "./time";
 import { fitCanvasToWindow } from "./canvas";
@@ -76,10 +78,12 @@ export class Wrap {
   encodeGifAnim!: ({
     context,
     settings,
+    states,
     props,
   }: {
     context: SketchContext;
     settings: SketchSettingsInternal;
+    states: SketchStates;
     props: SketchProps | WebGLProps;
   }) => void;
   endGifAnimRecord!: ({
@@ -97,10 +101,12 @@ export class Wrap {
   encodeWebM!: ({
     canvas,
     settings,
+    states,
     props,
   }: {
     canvas: HTMLCanvasElement;
     settings: SketchSettingsInternal;
+    states: SketchStates;
     props: SketchProps | WebGLProps;
   }) => Promise<void>;
   endWebMRecord!: ({
@@ -204,11 +210,13 @@ export class Wrap {
     //frameInterval: null // REVIEW
     this.states.firstLoopRender = this.globalState.firstLoopRender;
     this.states.firstLoopRenderTime = this.globalState.firstLoopRenderTime;
+    this.states.prevFrame = this.globalState.prevFrame;
 
     this.props.playhead = this.globalState.playhead;
     this.props.frame = this.globalState.frame;
     this.props.time = this.globalState.time;
     this.props.deltaTime = this.globalState.deltaTime;
+    this.props.loopCount = this.globalState.loopCount;
 
     try {
       await sketch(this.props);
@@ -244,7 +252,9 @@ export class Wrap {
       props: this.props,
     });
 
-    // render at least once
+    // render at least once. this is the first frame.
+    // REVIEW: loop() render doesn't run the first frame b/c of frame throttling code.
+    //         user should be okay, but handling/updating data from very first frame is a bit tricky.
     this.resize(this.props);
     this.render(this.props);
 
@@ -292,18 +302,20 @@ export class Wrap {
       // frameInterval: null, // REVIEW
       firstLoopRender: this.states.firstLoopRender,
       firstLoopRenderTime: this.states.firstLoopRenderTime,
+      prevFrame: this.states.prevFrame,
       // from props
       playhead: this.props.playhead,
       frame: this.props.frame,
       time: this.props.time,
       deltaTime: this.props.deltaTime,
+      loopCount: this.props.loopCount,
     });
   }
 
   run() {
     // animation render loop
     this.loop = (timestamp: number) => {
-      // there's time delay between first render in handleResize() and first loop render, resulting in animatiom jump. this compesates for that delay
+      // there's time delay between first render in handleResize() and first loop render, resulting in animation jump. this compensates for that delay
       if (this.states.firstLoopRender) {
         this.states.firstLoopRenderTime = timestamp;
         this.states.firstLoopRender = false;
@@ -344,6 +356,9 @@ export class Wrap {
       });
     }
 
+    // update prevFrame before resetTime() call. otherwise, prevFrame & frame both becomes 0
+    computePrevFrame({ states: this.states, props: this.props });
+
     // time
     // 1. better dt handling
     // this.props.time = (this.states.timestamp - this.states.startTime) % this.props.duration;
@@ -368,6 +383,7 @@ export class Wrap {
       }
     }
 
+    // the calling order matters
     computePlayhead({
       settings: this.settings,
       props: this.props,
@@ -375,6 +391,10 @@ export class Wrap {
     computeFrame({
       settings: this.settings,
       states: this.states,
+      props: this.props,
+    });
+    computeLoopCount({
+      settings: this.settings,
       props: this.props,
     });
     // update lastTimestamp for deltaTime calculation
@@ -422,6 +442,11 @@ export class Wrap {
           states: this.states,
           props: this.props,
         });
+        // REVIEW: include below to resetTime()?
+        updateGlobalState({ prevFrame: null });
+        this.states.prevFrame = null;
+
+        this.props.loopCount = 0;
       }
 
       this.preExportCombined();
@@ -459,12 +484,6 @@ export class Wrap {
       }
       this.raf = window.requestAnimationFrame(this.loop);
 
-      // update frame count (before encoding due to mp4 frame request logic)
-      this.props.frame += 1;
-      // this.props.frame =
-      // (this.props.frame + 1) % this.settings.exportTotalFrames;
-      this.states.recordedFrames += 1;
-
       // encode frame
       for (let i = 0; i < this.settings.framesFormat.length; i++) {
         const format = this.settings.framesFormat[i];
@@ -483,6 +502,7 @@ export class Wrap {
                 ? (this.props as SketchProps).context
                 : (this.props as WebGLProps).gl,
             settings: this.settings,
+            states: this.states,
             props: this.props,
           });
         } else if (format === "mp4") {
@@ -495,6 +515,7 @@ export class Wrap {
           this.encodeWebM({
             canvas: this.props.canvas,
             settings: this.settings,
+            states: this.states,
             props: this.props,
           });
         }
@@ -502,6 +523,22 @@ export class Wrap {
       // if requested and sent already, set it to false and wait for next frame
       getGlobalState().frameRequested &&
         updateGlobalState({ frameRequested: false });
+
+      // NOTE: had to move the section below after encoding due to incorrect counting in webm encoding.
+      // update prevFrame before resetTime() call. otherwise, prevFrame & frame both becomes 0
+      computePrevFrame({ states: this.states, props: this.props });
+
+      // update frame count (before encoding due to mp4 frame request logic)
+      this.props.frame += 1;
+      this.props.frame %= this.props.totalFrames;
+      // this.props.frame =
+      // (this.props.frame + 1) % this.settings.exportTotalFrames;
+      this.states.recordedFrames += 1;
+
+      const prevFrame = getGlobalState().prevFrame;
+      // console.log(prevFrame, this.props.frame); //TEST
+
+      computeLoopCount({ settings: this.settings, props: this.props });
 
       // update time variables
       this.props.deltaTime = 1000 / this.settings.exportFps;

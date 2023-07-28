@@ -2,7 +2,7 @@
  * time keeping
  */
 
-import { getGlobalState } from "./store";
+import { getGlobalState, updateGlobalState } from "./store";
 import type {
   BaseProps,
   SketchSettingsInternal,
@@ -31,8 +31,8 @@ export const computeTotalFrames = (settings: SketchSettingsInternal) => {
   // userSettings doesn't have totalFrames, but internally, both will be computed.
   // when both are Infinity, animation will continue to run,
   // time/frame updates, playhead doesn't.
-  // REVIEW: use ceil()?
   if (settings.playFps !== null && settings.duration !== Infinity) {
+    // REVIEW: use ceil()?
     settings.totalFrames = Math.floor(
       (settings.playFps * settings.duration) / 1000
     );
@@ -41,7 +41,7 @@ export const computeTotalFrames = (settings: SketchSettingsInternal) => {
 export const computeExportTotalFrames = (settings: SketchSettingsInternal) => {
   if (settings.exportFps !== null && settings.duration !== Infinity) {
     settings.exportTotalFrames = Math.floor(
-      (settings.exportFps * settings.duration) / 1000
+      (settings.exportFps * settings.duration * settings.numLoops) / 1000
     );
   }
 };
@@ -55,6 +55,16 @@ export const computePlayhead = ({
 }) => {
   const { duration } = settings;
   props.playhead = duration !== Infinity ? props.time / duration : 0;
+};
+
+export const computePrevFrame = ({
+  states,
+  props,
+}: {
+  states: SketchStates;
+  props: BaseProps;
+}) => {
+  updateGlobalState({ prevFrame: props.frame });
 };
 
 export const computeFrame = ({
@@ -86,6 +96,23 @@ export const computeFrame = ({
     } else {
       props.frame += 1;
     }
+  }
+};
+
+export const computeLoopCount = ({
+  settings,
+  props,
+}: {
+  settings: SketchSettingsInternal;
+  props: BaseProps;
+}) => {
+  const prevFrame = getGlobalState().prevFrame;
+
+  if (settings.numLoops !== 0) {
+    props.loopCount =
+      prevFrame !== null && prevFrame >= props.frame
+        ? (props.loopCount + 1) % settings.numLoops
+        : props.loopCount;
   }
 };
 

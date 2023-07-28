@@ -44,6 +44,7 @@ export const createSettings = ({
     duration: Infinity,
     totalFrames: Infinity,
     exportTotalFrames: Infinity,
+    numLoops: 1,
     // file
     filename: "",
     prefix: "",
@@ -88,6 +89,11 @@ export const createSettings = ({
   computeExportFps(combined);
   computeTotalFrames(combined);
   computeExportTotalFrames(combined);
+
+  if (combined.numLoops <= 0) {
+    console.warn(`settings.numLoops cannot be 0 or less. it is now set to 1.`);
+    combined.numLoops = 1;
+  }
 
   // convert to array format
   combined.frameFormat = toArray(combined.frameFormat);

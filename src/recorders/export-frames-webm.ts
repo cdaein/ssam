@@ -3,7 +3,11 @@
  * WebM Muxer: https://github.com/Vanilagy/webm-muxer/blob/main/demo/script.js
  */
 
-import type { SketchSettingsInternal, BaseProps } from "../types/types";
+import type {
+  SketchSettingsInternal,
+  BaseProps,
+  SketchStates,
+} from "../types/types";
 import WebMMuxer from "webm-muxer";
 import { downloadBlob } from "../helpers";
 
@@ -40,7 +44,7 @@ export const setupWebMRecord = ({
   });
 
   videoEncoder = new VideoEncoder({
-    output: (chunk, meta) => muxer?.addVideoChunk(chunk, meta),
+    output: (chunk, meta) => muxer?.addVideoChunk(chunk, meta!),
     error: (e) => console.error(`WebMMuxer error: ${e}`),
   });
 
@@ -59,10 +63,12 @@ export const setupWebMRecord = ({
 export const encodeWebM = async ({
   canvas,
   settings,
+  states,
   props,
 }: {
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
+  states: SketchStates;
   props: BaseProps;
 }) => {
   if (!("VideoEncoder" in window)) {
@@ -70,20 +76,24 @@ export const encodeWebM = async ({
   }
 
   // record frame
-  encodeVideoFrame({ canvas, settings, props });
+  encodeVideoFrame({ canvas, settings, states, props });
 };
 
 export const encodeVideoFrame = ({
   canvas,
   settings,
+  states,
   props,
 }: {
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
+  states: SketchStates;
   props: BaseProps;
 }) => {
-  // timestamp unit is micro-seconds!!
-  const frame = new VideoFrame(canvas, { timestamp: props.time * 1000 });
+  // NOTE: timestamp unit is micro-seconds!!
+  const frame = new VideoFrame(canvas, {
+    timestamp: props.time * 1000 + props.loopCount * 1000 * 1000,
+  });
 
   // add video keyframe every 2 seconds (2000ms)
   const needsKeyframe = props.time - lastKeyframe! >= 2000;
@@ -93,7 +103,7 @@ export const encodeVideoFrame = ({
   frame.close();
 
   console.log(
-    `recording (webm) frame... ${props.frame} of ${settings.exportTotalFrames}`
+    `recording (webm) frame... ${states.recordedFrames} of ${settings.exportTotalFrames}`
   );
 };
 

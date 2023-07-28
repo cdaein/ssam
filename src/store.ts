@@ -12,11 +12,13 @@ const globalState: Record<string, any> = {
   frameRequested: false,
   savingFrames: false,
   recordState: "inactive",
+  prevFrame: null,
   // from props
   playhead: 0,
   frame: 0,
   time: 0,
   deltaTime: 0,
+  loopCount: 0,
   // extra
   commitHash: "",
 };

@@ -22,11 +22,12 @@ export const createStates = ({
     firstLoopRenderTime: 0,
     timeNavOffset: 0,
     recordedFrames: 0,
+    prevFrame: null,
   };
 };
 
 // ===============================================
-// not used at the moment
+// REVIEW: NOT USED at the moment
 // TODO: consolidate all wrapper data into a single source of truth
 export const states: States = {
   settings: {
