@@ -192,6 +192,8 @@ export interface BaseProps {
   totalFrames: number;
   /** the current loop count. it is based on `numLoop` in the settings. it increases by `1` and resets back to `0`. `duration` setting is required. */
   loopCount: number;
+  /** the number of loops to repeat in the sketch that is defined in `settings` or it may have been updated by `update()` function prop. */
+  numLoops: number;
   /** play fps */
   playFps: number | null;
   /** export fps */

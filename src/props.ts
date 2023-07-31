@@ -68,6 +68,7 @@ export const createProps = ({
     duration: settings.duration,
     totalFrames: settings.totalFrames,
     loopCount: 0,
+    numLoops: settings.numLoops,
     playFps: settings.playFps,
     exportFps: settings.exportFps,
     recording: false,
