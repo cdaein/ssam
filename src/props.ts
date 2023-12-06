@@ -18,7 +18,7 @@ import type {
   SketchStates,
   WebGLProps,
 } from "./types/types";
-import { updateGlobalState } from "./store";
+import { getGlobalState, updateGlobalState } from "./store";
 
 type CanvasProps = {
   canvas: HTMLCanvasElement;
@@ -47,7 +47,7 @@ export const createProps = ({
   ) as CanvasProps;
 
   // function props
-  const { exportFrame, togglePlay } = createFunctionProps({
+  const { exportFrame, exportFrames, togglePlay } = createFunctionProps({
     canvas,
     settings,
     states,
@@ -73,6 +73,7 @@ export const createProps = ({
     exportFps: settings.exportFps,
     recording: false,
     exportFrame,
+    exportFrames,
     togglePlay,
     render: renderProp,
     resize: resizeProp,
@@ -121,6 +122,7 @@ const createFunctionProps = ({
 }) => {
   return {
     exportFrame: createExportFrameProp({ canvas, settings, states }),
+    exportFrames: createExportFramesProp(),
     // update: createUpdateProp({
     //   canvas,
     //   settings,
@@ -149,6 +151,20 @@ const createExportFrameProp = ({
       settings,
       states,
     });
+  };
+};
+
+const createExportFramesProp = () => {
+  return () => {
+    if (!getGlobalState().savingFrames) {
+      updateGlobalState({
+        savingFrames: true,
+        frameRequested: true,
+        recordState: "start",
+      });
+    } else {
+      updateGlobalState({ recordState: "end" });
+    }
   };
 };
 

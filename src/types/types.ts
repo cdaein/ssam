@@ -200,8 +200,10 @@ export interface BaseProps {
   exportFps: number;
   /** true if recording in progress */
   recording: boolean;
-  /** call to export canvas as image */
+  /** export canvas as image */
   exportFrame: () => void;
+  /** Export canvas as frames or video in the format(s) specified in `settings.framesFormat`. Calling it again while recording will end the recording. */
+  exportFrames: () => void;
   /** call to play or pause sketch */
   togglePlay: () => void;
   /** call without any props for rendering-on-demand. it will call sketch's returned function. good for manually advancing animation frame-by-frame. */
