@@ -19,15 +19,7 @@ export default ({
     } else if ((ev.metaKey || ev.ctrlKey) && ev.shiftKey && ev.key === "s") {
       ev.preventDefault();
       // save frames (video)
-      if (!getGlobalState().savingFrames) {
-        updateGlobalState({
-          savingFrames: true,
-          frameRequested: true,
-          recordState: "start",
-        });
-      } else {
-        updateGlobalState({ recordState: "end" });
-      }
+      props.exportFrames();
     } else if ((ev.metaKey || ev.ctrlKey) && !ev.shiftKey && ev.key === "k") {
       if (import.meta.hot) {
         // git commit snapshot (image)
