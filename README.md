@@ -28,7 +28,7 @@ See [documentation](https://github.com/cdaein/ssam/wiki)
 
 - **TypeScript**: It can work both in JavaScript or TypeScript projects.
 - **ESM**: You can use it alongside other ESM packages.
-- **Vitejs**: Vitejs is modern and fast. You can extend the config to add funtionality. Ssam also has a few of its own plugins.
+- **Vitejs**: Vitejs is modern and fast. You can extend the config to add functionality. Ssam also has a few of its own plugins.
 - **Multiple sketch modes**: It supports vanilla Canvas 2D API, WebGL context, or you can use with other Canvas libraries (Three.js, OGL, Two.js, Pts.js, etc.) as long as they support an existing canvas. p5.js is not supported (yet).
 - **Hot Reload**: Code updates will be instantly applied without a full page refresh and wthout losing the sketch states.
 - **Git snapshot**: Commit your code to git and export a frame with the same hash for an easy archiving and retrieval.
