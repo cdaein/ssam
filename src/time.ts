@@ -11,7 +11,7 @@ import type {
 
 export const computeFrameInterval = (
   settings: SketchSettingsInternal,
-  states: SketchStates
+  states: SketchStates,
 ) => {
   states.frameInterval =
     settings.playFps !== null ? 1000 / settings.playFps : null;
@@ -34,14 +34,14 @@ export const computeTotalFrames = (settings: SketchSettingsInternal) => {
   if (settings.playFps !== null && settings.duration !== Infinity) {
     // REVIEW: use ceil()?
     settings.totalFrames = Math.floor(
-      (settings.playFps * settings.duration) / 1000
+      (settings.playFps * settings.duration) / 1000,
     );
   }
 };
 export const computeExportTotalFrames = (settings: SketchSettingsInternal) => {
   if (settings.exportFps !== null && settings.duration !== Infinity) {
     settings.exportTotalFrames = Math.floor(
-      (settings.exportFps * settings.duration * settings.numLoops) / 1000
+      (settings.exportFps * settings.duration * settings.numLoops) / 1000,
     );
   }
 };
@@ -119,9 +119,14 @@ export const computeLoopCount = ({
      * - playLoop and recordLoop has different order of function calls so values are updated in different order.
      * - right after recording, playLoop starts with all values resetted, thus, wrong value for prevFrame.
      */
-    const newLoop = getGlobalState().savingFrames
-      ? prevFrame > props.frame
-      : prevFrame >= props.frame;
+    // const newLoop = getGlobalState().savingFrames
+    //   ? prevFrame > props.frame
+    //   : prevFrame >= props.frame;
+
+    // above condition doesn't work: due to time-based counting, some frames are omitted (or same frame value is repeated).
+    // ex. { prevFrame: 1, frame: 3} => { prevFrame: 3, frame: 3 } WRONG CONDITION
+    // so, just check if frame is resetted to 0.
+    const newLoop = props.frame === 0;
 
     if (prevFrame !== null && newLoop) {
       props.loopCount = (props.loopCount + 1) % settings.numLoops;
