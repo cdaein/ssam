@@ -103,7 +103,9 @@ export const encodeVideoFrame = ({
   frame.close();
 
   console.log(
-    `recording (webm) frame... ${states.recordedFrames} of ${settings.exportTotalFrames}`
+    `recording (webm) frame... ${states.recordedFrames + 1} of ${
+      settings.exportTotalFrames
+    }`,
   );
 };
 

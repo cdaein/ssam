@@ -51,7 +51,7 @@ export const encodeGifAnim = ({
       0,
       0,
       props.canvas.width,
-      props.canvas.height
+      props.canvas.height,
     ).data;
 
     const palette =
@@ -76,7 +76,7 @@ export const encodeGifAnim = ({
       gl = context as WebGL2RenderingContext;
     }
     const pixels = new Uint8Array(
-      gl.drawingBufferWidth * gl.drawingBufferHeight * 4
+      gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
     );
     //prettier-ignore
     gl.readPixels(
@@ -107,12 +107,14 @@ export const encodeGifAnim = ({
   //       should i automatically clamp fps AND duration?
   if (settings.exportFps > 50) {
     console.warn(
-      "clamping fps to 50, which is the maximum for GIF. animation duration will be inaccurate."
+      "clamping fps to 50, which is the maximum for GIF. animation duration will be inaccurate.",
     );
   }
 
   console.log(
-    `recording (gif) frame... ${states.recordedFrames} of ${settings.exportTotalFrames}`
+    `recording (gif) frame... ${states.recordedFrames + 1} of ${
+      settings.exportTotalFrames
+    }`,
   );
 };
 
