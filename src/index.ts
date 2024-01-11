@@ -419,11 +419,10 @@ export class Wrap {
 
     // when mp4 recording, if not frameRequested, wait for next frame
     if (
-      settings.framesFormat.includes("mp4") &&
+      (settings.framesFormat.includes("mp4") ||
+        settings.framesFormat.includes("png")) &&
       !getGlobalState().frameRequested
     ) {
-      // REVIEW: while recording, around frame 100, there's a very long delay hiccup
-      //         improve server-side data handling/processing
       this.raf = window.requestAnimationFrame(this.loop);
       return;
     }
@@ -479,12 +478,14 @@ export class Wrap {
       for (let i = 0; i < settings.framesFormat.length; i++) {
         const format = settings.framesFormat[i];
 
-        if (
-          settings.framesFormat.includes("mp4") &&
-          !getGlobalState().frameRequested
-        ) {
-          continue;
-        }
+        // if (
+        //   settings.framesFormat.includes("mp4") &&
+        //   !getGlobalState().frameRequested
+        // ) {
+        //   // this never runs
+        //   console.log("========== frame is NOT requested so continue");
+        //   // continue;
+        // }
 
         if (format === "gif") {
           this.encodeGifAnim({
@@ -497,7 +498,7 @@ export class Wrap {
             props,
           });
         } else if (format === "mp4") {
-          // send a new frame to server only when requested
+          // send a new frame to server only when requested.
           // plugin needs some time to process incoming frame
           if (getGlobalState().frameRequested) {
             encodeMp4({ canvas });
