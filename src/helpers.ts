@@ -43,7 +43,7 @@ export const checkSupportedFramesFormats = (formats: FramesFormat[]) => {
     }
     if (removedFormat.length !== 0) {
       console.warn(
-        `"${removedFormat}" format is not supported in the current browser or environment and removed`
+        `"${removedFormat}" format is not supported in the current browser or environment and removed`,
       );
       removedFormat = "";
     }
@@ -54,7 +54,7 @@ export const checkSupportedFramesFormats = (formats: FramesFormat[]) => {
 export const downloadBlob = (
   blob: Blob,
   settings: SketchSettingsInternal,
-  format: FramesFormat
+  format: FramesFormat,
 ) => {
   const { filename, prefix, suffix } = settings;
   const url = window.URL.createObjectURL(blob);
@@ -100,15 +100,18 @@ export const formatDatetime = (date: Date) => {
   date.setMinutes(date.getMinutes() - offset);
   const isoString = date.toISOString();
   const [, yyyy, mo, dd, hh, mm, ss] = isoString.match(
-    /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/
+    /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/,
   )!;
   return `${yyyy}.${mo}.${dd}-${hh}.${mm}.${ss}`;
 };
 
 export const outlineElement = (el: HTMLElement, on: boolean) => {
   if (on) {
-    el.style.outline = `3px solid red`;
-    el.style.outlineOffset = `-3px`;
+    const len =
+      Math.min(parseInt(el.style.width, 10), parseInt(el.style.height, 10)) ||
+      800;
+    el.style.outline = `${len * 0.005}px solid red`;
+    el.style.outlineOffset = `-${len * 0.005}px`;
   } else {
     el.style.outline = "none";
     el.style.outlineOffset = `0`;
