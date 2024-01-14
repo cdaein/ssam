@@ -383,7 +383,7 @@ export class Wrap {
     // the calling order matters
     computePlayhead({ settings, props });
     computeFrame({ settings, states, props });
-    computeLoopCount({ settings, props });
+    // computeLoopCount({ settings, props });
     // update lastTimestamp for deltaTime calculation
     computeLastTimestamp({ states, props });
 
@@ -397,6 +397,14 @@ export class Wrap {
       console.error(err);
       return null;
     }
+
+    // NOTE: moving here from computeFrame() due to frame resetting to 1, not 0.
+    if (settings.duration !== Infinity) {
+      if (settings.playFps === null) {
+        props.frame += 1;
+      }
+    }
+
     this.raf = window.requestAnimationFrame(this.loop);
 
     return;

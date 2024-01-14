@@ -90,7 +90,9 @@ export const computeFrame = ({
     if (fps !== null) {
       props.frame = Math.floor(props.playhead * totalFrames);
     } else {
-      props.frame += 1;
+      // REVIEW: updating frame in the main playLoop *after* render call.
+      //   otherwise, it resets to 1, not 0.
+      // props.frame += 1;
     }
   } else {
     if (fps !== null) {
@@ -101,6 +103,7 @@ export const computeFrame = ({
   }
 };
 
+// REVIEW: not used atm. just count loop when resetTime() b/c that's been working fine.
 export const computeLoopCount = ({
   settings,
   props,
@@ -169,6 +172,11 @@ export const resetTime = ({
 
   // states.lastTimestamp = 0;
   states.lastTimestamp = states.startTime - (fps ? 1000 / fps : 0);
+
+  if (settings.numLoops > 1) {
+    props.loopCount = (props.loopCount + 1) % settings.numLoops;
+    updateGlobalState({ loopCount: props.loopCount }); // do i need this? is globalState.loopCount ever used?
+  }
 
   // console.log(states.timestamp, states.lastTimestamp);
 
