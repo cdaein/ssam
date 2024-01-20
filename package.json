@@ -22,7 +22,7 @@
     "@daeinc/canvas": "^0.14.5",
     "@daeinc/dom": "^0.4.1",
     "gifenc": "^1.0.3",
-    "webm-muxer": "^1.2.1"
+    "webm-muxer": "^4.0.1"
   },
   "devDependencies": {
     "@daeinc/color": "^0.2.4",

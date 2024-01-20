@@ -8,10 +8,10 @@ import type {
   BaseProps,
   SketchStates,
 } from "../types/types";
-import WebMMuxer from "webm-muxer";
+import { ArrayBufferTarget, Muxer } from "webm-muxer";
 import { downloadBlob } from "../helpers";
 
-let muxer: WebMMuxer | null = null;
+let muxer = new Muxer({ target: new ArrayBufferTarget() });
 let videoEncoder: VideoEncoder | null = null;
 let lastKeyframe: number | null = null;
 
@@ -33,8 +33,8 @@ export const setupWebMRecord = ({
   // TODO: output dimensions must be multiples of 2.
   //       how to crop canvas for recording?
   //       webm still plays, but it can't be converted to mp4
-  muxer = new WebMMuxer({
-    target: "buffer",
+  muxer = new Muxer({
+    target: new ArrayBufferTarget(),
     video: {
       codec: "V_VP9", // TODO: check for codec support
       width: props.canvas.width,
@@ -44,7 +44,7 @@ export const setupWebMRecord = ({
   });
 
   videoEncoder = new VideoEncoder({
-    output: (chunk, meta) => muxer?.addVideoChunk(chunk, meta!),
+    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta!),
     error: (e) => console.error(`WebMMuxer error: ${e}`),
   });
 
@@ -122,11 +122,13 @@ export const endWebMRecord = async ({
   const format = "webm";
 
   await videoEncoder?.flush();
-  const buffer = muxer?.finalize();
+  muxer.finalize();
+
+  const { buffer } = muxer.target; // Buffer contains final WebM
 
   downloadBlob(new Blob([buffer!], { type: "video/webm" }), settings, format);
 
-  muxer = null;
+  muxer = new Muxer({ target: new ArrayBufferTarget() });
   videoEncoder = null;
 
   console.log(`recording (${format}) complete`);
