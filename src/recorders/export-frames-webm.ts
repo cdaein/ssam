@@ -11,7 +11,7 @@ import type {
 import { ArrayBufferTarget, Muxer } from "webm-muxer";
 import { downloadBlob } from "../helpers";
 
-let muxer = new Muxer({ target: new ArrayBufferTarget() });
+let muxer: Muxer<ArrayBufferTarget> | null = null;
 let videoEncoder: VideoEncoder | null = null;
 let lastKeyframe: number | null = null;
 
@@ -44,7 +44,7 @@ export const setupWebMRecord = ({
   });
 
   videoEncoder = new VideoEncoder({
-    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta!),
+    output: (chunk, meta) => muxer?.addVideoChunk(chunk, meta!),
     error: (e) => console.error(`WebMMuxer error: ${e}`),
   });
 
@@ -122,13 +122,13 @@ export const endWebMRecord = async ({
   const format = "webm";
 
   await videoEncoder?.flush();
-  muxer.finalize();
+  muxer?.finalize();
 
-  const { buffer } = muxer.target; // Buffer contains final WebM
+  const { buffer } = muxer?.target as ArrayBufferTarget; // Buffer contains final WebM
 
   downloadBlob(new Blob([buffer!], { type: "video/webm" }), settings, format);
 
-  muxer = new Muxer({ target: new ArrayBufferTarget() });
+  muxer = null;
   videoEncoder = null;
 
   console.log(`recording (${format}) complete`);
