@@ -1,5 +1,10 @@
 import { FRAMES_FORMATS } from "./constants";
-import { FramesFormat, SketchSettingsInternal } from "./types/types";
+import {
+  FramesFormat,
+  FramesFormatObj,
+  FramesFormatStr,
+  SketchSettingsInternal,
+} from "./types/types";
 
 export const isGifSupported = () => {
   // TODO: how to check?
@@ -16,8 +21,12 @@ export const isSeqSupported = () => {
   // checks if running in dev server (node:fs is available)
   return import.meta.hot ? true : false;
 };
-export const isWebmSupported = () => {
+export const isVideoEncoderSupported = () => {
   return "VideoEncoder" in window;
+};
+
+export const isObject = (v: unknown) => {
+  return typeof v === "object" && !Array.isArray(v) && v !== null;
 };
 
 // give warning and remove anything not supported and update settings.framesFormat directly
@@ -25,20 +34,28 @@ export const checkSupportedFramesFormats = (formats: FramesFormat[]) => {
   let removedFormat = "";
 
   for (let i = formats.length - 1; i >= 0; i--) {
+    const format = formats[i];
+
+    // 1. the format is object (in the case of mp4-browser or webm)?
+    let formatName = isObject(format)
+      ? (format as FramesFormatObj<"mp4-browser" | "webm">).format
+      : (format as FramesFormatStr);
+
     // 1. is any of the formats not valid? => warn and remove
-    if (!FRAMES_FORMATS.includes(formats[i])) {
-      console.warn(`"${formats[i]}" format is not supported and removed`);
+    if (!FRAMES_FORMATS.includes(formatName)) {
+      console.warn(`"${format}" is not supported and removed`);
       formats.splice(i, 1);
       continue;
     }
     // 2. is any of the formats not supported in browser/environment? => warn and remove
     if (
-      (formats[i] === "gif" && !isGifSupported()) ||
-      (formats[i] === "mp4" && !isMp4Supported()) ||
-      (formats[i] === "webm" && !isWebmSupported()) ||
-      (formats[i] === "png" && !isSeqSupported())
+      (format === "gif" && !isGifSupported()) ||
+      (format === "mp4" && !isMp4Supported()) ||
+      (format === "mp4-browser" && !isVideoEncoderSupported()) ||
+      (format === "webm" && !isVideoEncoderSupported()) ||
+      (format === "png" && !isSeqSupported())
     ) {
-      removedFormat = formats[i];
+      removedFormat = format;
       formats.splice(i, 1);
     }
     if (removedFormat.length !== 0) {

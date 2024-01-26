@@ -2,6 +2,7 @@ import { createProps } from "./props";
 import { createSettings } from "./settings";
 import { createStates } from "./states";
 import {
+  FramesFormatObj,
   Sketch,
   SketchContext,
   SketchProps,
@@ -28,7 +29,7 @@ import {
   encodeMp4,
   setupMp4Record,
 } from "./recorders/export-frames-mp4";
-import { outlineElement } from "./helpers";
+import { isObject, outlineElement } from "./helpers";
 import {
   encodePngSeq,
   endPngSeqRecord,
@@ -119,6 +120,31 @@ export class Wrap {
   }: {
     settings: SketchSettingsInternal;
   }) => Promise<void>;
+  setupMp4BrowserRecord!: ({
+    settings,
+    states,
+    props,
+  }: {
+    settings: SketchSettingsInternal;
+    states: SketchStates;
+    props: SketchProps | WebGLProps;
+  }) => void;
+  encodeMp4Browser!: ({
+    canvas,
+    settings,
+    states,
+    props,
+  }: {
+    canvas: HTMLCanvasElement;
+    settings: SketchSettingsInternal;
+    states: SketchStates;
+    props: SketchProps | WebGLProps;
+  }) => void;
+  endMp4BrowserRecord!: ({
+    settings,
+  }: {
+    settings: SketchSettingsInternal;
+  }) => Promise<void>;
 
   constructor() {
     // use ssam() function for interfacing with user. (class constructor can't use async)
@@ -194,13 +220,32 @@ export class Wrap {
       this.encodeGifAnim = encodeGifAnim;
       this.endGifAnimRecord = endGifAnimRecord;
     }
-    if (this.settings.framesFormat.includes("webm")) {
+    if (
+      this.settings.framesFormat.includes("webm") ||
+      this.settings.framesFormat.find(
+        (v) => isObject(v) && (v as FramesFormatObj<"webm">).format === "webm",
+      )
+    ) {
       const { setupWebMRecord, encodeWebM, endWebMRecord } = await import(
         "./recorders/export-frames-webm"
       );
       this.setupWebMRecord = setupWebMRecord;
       this.encodeWebM = encodeWebM;
       this.endWebMRecord = endWebMRecord;
+    }
+    if (
+      this.settings.framesFormat.includes("mp4-browser") ||
+      this.settings.framesFormat.find(
+        (v) =>
+          isObject(v) &&
+          (v as FramesFormatObj<"mp4-browser">).format === "mp4-browser",
+      )
+    ) {
+      const { setupMp4BrowserRecord, encodeMp4Browser, endMp4BrowserRecord } =
+        await import("./recorders/export-frames-mp4-browser");
+      this.setupMp4BrowserRecord = setupMp4BrowserRecord;
+      this.encodeMp4Browser = encodeMp4Browser;
+      this.endMp4BrowserRecord = endMp4BrowserRecord;
     }
 
     this.globalState = getGlobalState();
@@ -455,16 +500,24 @@ export class Wrap {
       outlineElement(canvas, true);
 
       // set up recording
+      // REVIEW: this test is getting too long
       for (const format of settings.framesFormat) {
         if (format === "gif") {
-          // REVIEW: why some export fn have this. ? can't remember..
           this.setupGifAnimRecord();
         } else if (format === "mp4") {
           setupMp4Record({ settings, hash: getGlobalState().commitHash });
+        } else if (format === "mp4-browser") {
+          this.setupMp4BrowserRecord({ settings, states, props });
         } else if (format === "webm") {
           this.setupWebMRecord({ settings, props });
         } else if (format === "png") {
           setupPngSeqRecord({ settings, hash: getGlobalState().commitHash });
+        } else if (isObject(format)) {
+          if (format.format === "mp4-browser") {
+            this.setupMp4BrowserRecord({ settings, states, props });
+          } else if (format.format === "webm") {
+            this.setupWebMRecord({ settings, props });
+          }
         }
       }
       // update relevant props
@@ -511,10 +564,18 @@ export class Wrap {
           if (getGlobalState().frameRequested) {
             encodeMp4({ canvas });
           }
+        } else if (format === "mp4-browser") {
+          this.encodeMp4Browser({ canvas, settings, states, props });
         } else if (format === "webm") {
           this.encodeWebM({ canvas, settings, states, props });
         } else if (format === "png") {
           encodePngSeq({ canvas, settings, states });
+        } else if (isObject(format)) {
+          if (format.format === "mp4-browser") {
+            this.encodeMp4Browser({ canvas, settings, states, props });
+          } else if (format.format === "webm") {
+            this.encodeWebM({ canvas, settings, states, props });
+          }
         }
       }
       // if requested and sent already, set it to false and wait for next frame
@@ -550,10 +611,18 @@ export class Wrap {
           this.endGifAnimRecord({ settings });
         } else if (format === "mp4") {
           endMp4Record();
+        } else if (format === "mp4-browser") {
+          this.endMp4BrowserRecord({ settings });
         } else if (format === "webm") {
           this.endWebMRecord({ settings });
         } else if (format === "png") {
           endPngSeqRecord();
+        } else if (isObject(format)) {
+          if (format.format === "mp4-browser") {
+            this.endMp4BrowserRecord({ settings });
+          } else if (format.format === "webm") {
+            this.endWebMRecord({ settings });
+          }
         }
       });
 
