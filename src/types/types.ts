@@ -5,7 +5,7 @@ import type p5 from "p5";
 export type Sketch = (props: SketchProps | WebGLProps) => Promise<void> | void;
 
 export type SketchRender = (
-  props: SketchProps | WebGLProps
+  props: SketchProps | WebGLProps,
 ) => Promise<void> | void;
 
 // export type SketchRender =
@@ -32,7 +32,7 @@ export type FrameFormat = "png" | "jpg" | "jpeg" | "webp";
 
 // video or image sequence
 // export type FramesFormat = "jpg" | "jpeg" | "png";
-export type FramesFormat = "gif" | "mp4" | "webm" | "png";
+export type FramesFormat = "gif" | "mp4" | "mp4-browser" | "webm" | "png";
 
 /** GIF encoding options */
 export type GifOptions = {

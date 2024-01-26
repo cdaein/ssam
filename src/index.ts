@@ -34,6 +34,11 @@ import {
   endPngSeqRecord,
   setupPngSeqRecord,
 } from "./recorders/export-frames-png";
+import {
+  encodeMp4Browser,
+  endMp4BrowserRecord,
+  setupMp4BrowserRecord,
+} from "./recorders/export-frames-mp4-browser";
 
 export type {
   FrameFormat,
@@ -458,9 +463,12 @@ export class Wrap {
       for (const format of settings.framesFormat) {
         if (format === "gif") {
           // REVIEW: why some export fn have this. ? can't remember..
+          // => await import script
           this.setupGifAnimRecord();
         } else if (format === "mp4") {
           setupMp4Record({ settings, hash: getGlobalState().commitHash });
+        } else if (format === "mp4-browser") {
+          setupMp4BrowserRecord({ settings, states, props });
         } else if (format === "webm") {
           this.setupWebMRecord({ settings, props });
         } else if (format === "png") {
@@ -511,6 +519,10 @@ export class Wrap {
           if (getGlobalState().frameRequested) {
             encodeMp4({ canvas });
           }
+        } else if (format === "mp4-browser") {
+          // REVIEW: should i also "await import" like webm or gif?
+
+          encodeMp4Browser({ canvas, settings, states, props });
         } else if (format === "webm") {
           this.encodeWebM({ canvas, settings, states, props });
         } else if (format === "png") {
@@ -550,6 +562,8 @@ export class Wrap {
           this.endGifAnimRecord({ settings });
         } else if (format === "mp4") {
           endMp4Record();
+        } else if (format === "mp4-browser") {
+          endMp4BrowserRecord({ settings });
         } else if (format === "webm") {
           this.endWebMRecord({ settings });
         } else if (format === "png") {
