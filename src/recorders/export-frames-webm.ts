@@ -7,9 +7,10 @@ import type {
   SketchSettingsInternal,
   BaseProps,
   SketchStates,
+  FramesFormatObj,
 } from "../types/types";
 import { ArrayBufferTarget, Muxer } from "webm-muxer";
-import { downloadBlob } from "../helpers";
+import { downloadBlob, isObject } from "../helpers";
 
 let muxer = new Muxer({ target: new ArrayBufferTarget() });
 let videoEncoder: VideoEncoder | null = null;
@@ -27,8 +28,16 @@ export const setupWebMRecord = ({
     return;
   }
 
-  // const { framesFormat: format } = settings;
+  const framesFormat = settings.framesFormat[0] as FramesFormatObj<"webm">;
   const format = "webm";
+
+  // default values
+  // TODO: support more codecs
+  const codecStrings: ["V_VP9", string] = ["V_VP9", "vp09.00.10.08"];
+  if (isObject(framesFormat)) {
+    codecStrings[0] = framesFormat.codecStrings[0];
+    codecStrings[1] = framesFormat.codecStrings[1];
+  }
 
   // TODO: output dimensions must be multiples of 2.
   //       how to crop canvas for recording?
@@ -36,7 +45,7 @@ export const setupWebMRecord = ({
   muxer = new Muxer({
     target: new ArrayBufferTarget(),
     video: {
-      codec: "V_VP9", // TODO: check for codec support
+      codec: codecStrings[0],
       width: props.canvas.width,
       height: props.canvas.height,
       frameRate: settings.exportFps,
@@ -49,10 +58,10 @@ export const setupWebMRecord = ({
   });
 
   videoEncoder.configure({
-    codec: "vp09.00.10.08", // TODO: look at other codecs
+    codec: codecStrings[1],
     width: props.canvas.width,
     height: props.canvas.height,
-    bitrate: 10_000_000, // REVIEW: 1e7 = 10 Mbps (keep high. needs mp4 convert again)
+    bitrate: 10_000_000, // 1e7 = 10 Mbps (keep high. needs mp4 convert again)
   });
 
   lastKeyframe = -Infinity;

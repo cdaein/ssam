@@ -30,9 +30,23 @@ export type SketchMode = "2d" | "webgl" | "webgl2";
 // gif is not supported by default
 export type FrameFormat = "png" | "jpg" | "jpeg" | "webp";
 
+// if mp4-browser or webm, it can pass codec string
+export type FramesFormatObj<Format> = Format extends "mp4-browser"
+  ? {
+      format: Format;
+      codecStrings: ["avc" | "av1", string];
+    }
+  : {
+      format: Format;
+      codecStrings: ["V_VP9", string];
+    };
+
+export type FramesFormatStr = "gif" | "mp4" | "mp4-browser" | "webm" | "png";
+
 // video or image sequence
-// export type FramesFormat = "jpg" | "jpeg" | "png";
-export type FramesFormat = "gif" | "mp4" | "mp4-browser" | "webm" | "png";
+export type FramesFormat =
+  | FramesFormatStr
+  | FramesFormatObj<"mp4-browser" | "webm">;
 
 /** GIF encoding options */
 export type GifOptions = {
