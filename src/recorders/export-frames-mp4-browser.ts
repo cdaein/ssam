@@ -109,10 +109,11 @@ export const encodeVideoFrame = ({
   states: SketchStates;
   props: BaseProps;
 }) => {
-  // NOTE: timestamp unit is micro-seconds!!
+  // NOTE: timestamp unit is in micro-seconds!!
   const frame = new VideoFrame(canvas, {
-    timestamp: props.time * 1000 + props.loopCount * 1e6,
+    timestamp: props.time * 1e3 + props.duration * props.loopCount * 1e3,
     duration: 1e6 / props.exportFps, // this ensures the last frame duration & correct fps
+    // duration: props.deltaTime * 1e3, // keep it as a fallback option just in case
   });
 
   // add video keyframe every 2 seconds (2000ms)
