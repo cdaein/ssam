@@ -33,11 +33,27 @@ export type FrameFormat = "png" | "jpg" | "jpeg" | "webp";
 // if mp4-browser or webm, it can pass codec string
 export type FramesFormatObj<Format> = Format extends "mp4-browser"
   ? {
+      /**
+       * Render mp4 video in browser using WebCodecs API. Browser support varies.
+       */
       format: Format;
+      /**
+       * Specify which codec to use.
+       * See [Mp4-Muxer](https://github.com/Vanilagy/mp4-muxer) for options
+       *
+       * @default
+       * ["avc", "avc1.4d002a"]
+       */
       codecStrings: ["avc" | "av1", string];
     }
   : {
       format: Format;
+      /**
+       * Specity which codec to use.
+       * See [WebM-Muxer](https://github.com/Vanilagy/webm-muxer) for options.
+       * @default
+       * ["V_VP9", "vp09.00.10.08"]
+       */
       codecStrings: ["V_VP9", string];
     };
 
@@ -64,60 +80,76 @@ export type RecordState = "inactive" | "start" | "in-progress" | "end";
  * User provided settings. all optional properties must either come from user. If not, it will be filled internally with default settings.
  */
 export type SketchSettings = {
-  // document
-  /** set HTML webpage title. it is placed inside `<title>` tag and displayed on top of browser window */
+  /** Set HTML webpage title. it replaces the `<title>` tag and is displayed on top of browser window */
   title?: string;
-  /** set background color of HTML page. uses CSS color string. ex. `#aaa` */
+  /**
+   * Set background color of HTML page. uses CSS color string. ex. `"#aaa"`
+   * @default "#333"
+   */
   background?: string;
-  // canvas
-  /** set sketch mode to use or integrate with other libraries */
+  /** Set sketch mode to use for either 2d or 3d sketches. */
   mode?: SketchMode;
-  /** canvas id */
+  /** Set the HTML5 Canvas element's id attribute. */
   id?: string;
-  /** set canvas parent either as `HTMLElement` object or string selector. ex. `div#app` */
+  /**
+   * Set canvas parent either as `HTMLElement` object or string selector. ex. `div#app`
+   * @default "body"
+   */
   parent?: HTMLElement | string;
-  /** set it to use an existing canvas instead of using one provided by sketch-wrapper */
+  /** Set it to use an existing canvas instead of using one provided by Ssam. */
   canvas?: HTMLCanvasElement;
-  /** [width, height] */
+  /** Set the dimensions of canvas: `[width, height]`. Set it to `null` to use fullscreen canvas. */
   dimensions?: [number, number] | null;
-  /** set pixel ratio */
+  /** Set pixel ratio */
   pixelRatio?: number;
-  /** center canvas */
+  /** Center canvas */
   centered?: boolean;
-  /** scale context to account for pixelRatio */
+  /** Scale context to account for pixelRatio */
   scaleContext?: boolean;
-  /** not yet implemented */
+  /**
+   * When `true`, it sets the following options:
+   * ```javascript
+   * canvas.style.imageRendering = "pixelated";
+   * ctx.imageSmoothingEnabled = false;
+   * ```
+   */
   pixelated?: boolean;
-  /** context attributes for 2d or webgl canvas */
+  /** You can add context attributes for 2d or webgl canvas */
   attributes?: CanvasRenderingContext2DSettings | WebGLContextAttributes;
-  // animation
-  /** set to `true` to play animation */
+  /**
+   * Set to `false` for static sketches
+   * @default true
+   */
   animate?: boolean;
-  /** set plackback frame rate */
+  /** Set plackback frame rate */
   playFps?: number;
-  /** set export frame rate for videos. (doesn't work yet) */
+  /**
+   * Set export frame rate for videos.
+   * @default 60
+   */
   exportFps?: number;
-  /** set animation loop duration in milliseconds */
+  /** Set animation loop duration in milliseconds */
   duration?: number;
-  /** how many times to loop (repeat). the default is `1` */
+  /**
+   * How many times to loop (repeat).
+   * @default 1
+   */
   numLoops?: number;
-  // out file
-  /** set export file name. if not set, sketch-wrapper uses datetime string */
+  /** Set export file name. By default, Ssam uses datetime string */
   filename?: string;
-  /** set prefix to file name */
+  /** Set prefix to file name */
   prefix?: string;
-  /** set suffix to file name */
+  /** Set suffix to file name */
   suffix?: string;
-  /** set file format for image export (ie. png, jpeg). you can also use array to export multiple formats at the same time. ex. ["webp", "png"] */
+  /** Set file format for image export (ie. `png`, `jpg`). you can also use an array to export multiple formats at the same time. ex. `["webp", "png"]` */
   frameFormat?: FrameFormat | FrameFormat[];
-  /** set file format for video/sequence export (ie. webm, gif). you can also use array to export multiple formats at the same time. ex. ["gif", "webm"] */
+  /** Set file format for video/sequence export (ie. `webm`, `gif`, `mp4-browser`). you can also use an array to export multiple formats at the same time. ex. `["gif", "webm"]` */
   framesFormat?: FramesFormat | FramesFormat[];
   /** GIF export options. */
   gifOptions?: GifOptions;
-  // sketch
-  /** set to `false` to not use sketch-wrapper provided hot keys (ex. `CMD+S` for image export) */
+  /** Set to `false` to not use Ssam-provided hot keys (ex. `CMD+S` for image export) */
   hotkeys?: boolean;
-  /** extra data to pass to the sketch. it is accessible via props.data */
+  /** Send extra data to the sketch. it is accessible via `props.data` */
   data?: Record<string, any>;
 };
 
@@ -184,47 +216,52 @@ export interface BaseProps {
   wrap: Wrap;
   /** `HTMLCanvasElement` */
   canvas: HTMLCanvasElement;
-  /** canvas width. may be different from canvas.width due to pixel ratio scaling */
+  /** Canvas width. may be different from canvas.width due to pixel ratio scaling */
   width: number;
-  /** canvas height. may be different from canvas.height due to pixel ratio scaling */
+  /** Canvas height. may be different from canvas.height due to pixel ratio scaling */
   height: number;
-  /** try `window.devicePixelRatio` to get the high resolution if your display supports */
+  /** Try `window.devicePixelRatio` to get the high resolution if your display supports */
   pixelRatio: number;
   // animation
   // animate: boolean;
-  /** when `settings.duration` is set, playhead will repeat 0..1 over duration */
+  /** When `settings.duration` is set, `playhead` will repeat 0..1 over duration */
   playhead: number;
-  /** frame count. starting at `0` */
+  /** Frame count. starts at `0` */
   frame: number;
-  /** elapsed time. when it reaches `duration`, it will reset to `0` */
+  /** Elapsed time. when it reaches `duration`, it will reset to `0` */
   time: number;
-  /** time it took between renders in milliseconds */
+  /** Time it took between renders in milliseconds */
   deltaTime: number;
-  /** animation duration in milliseconds. when it reaches the end, it will loop back to the beginning */
+  /** Animation duration in milliseconds. when it reaches the end, it will loop back to the beginning */
   duration: number;
-  /** number of total frames over duration */
+  /** Number of total frames over duration */
   totalFrames: number;
-  /** the current loop count. it is based on `numLoop` in the settings. it increases by `1` and resets back to `0`. `duration` setting is required. */
+  /** The current loop count. it is based on `numLoop` in the settings. it increases by `1` and resets back to `0`. `duration` setting is required. */
   loopCount: number;
-  /** the number of loops to repeat in the sketch that is defined in `settings` or it may have been updated by `update()` function prop. */
+  /** The number of loops to repeat in the sketch that is defined in `settings` or it may have been updated by `update()` function prop. */
   numLoops: number;
-  /** play fps */
+  /** Playback frame rate */
   playFps: number | null;
-  /** export fps */
+  /** Export frame rate */
   exportFps: number;
-  /** true if recording in progress */
+  /** `true` if recording in progress */
   recording: boolean;
-  /** export canvas as image */
+  /** Call to export canvas as image in the format(s) specified in `settings.frameFormat`*/
   exportFrame: () => void;
-  /** Export canvas as frames or video in the format(s) specified in `settings.framesFormat`. Calling it again while recording will end the recording. */
+  /** Call to export canvas as frames or video in the format(s) specified in `settings.framesFormat`. Calling it again while recording will end the current recording. */
   exportFrames: () => void;
-  /** call to play or pause sketch */
+  /** Call to play or pause sketch */
   togglePlay: () => void;
-  /** call without any props for rendering-on-demand. it will call sketch's returned function. good for manually advancing animation frame-by-frame. */
+  /** Call without any props for rendering-on-demand. it will call sketch's returned function. good for manually advancing animation frame-by-frame. */
   render: () => void;
   resize: () => void;
-  /** not yet implemented */
+  /**
+   * Some sketch settings can be updated within sketch by calling `update()` with key/value pair.
+   * @example
+   * update({ duration: 4_000 })
+   */
   update: (options: Record<string, any>) => void;
+  /** Extra data sent from `settings.data`. */
   data: Record<string, any>;
 }
 
