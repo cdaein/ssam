@@ -340,16 +340,15 @@ export class Wrap {
       import.meta.hot.off("ssam:ffmpeg-reqframe", ssamFfmpegReqframeCallback);
       import.meta.hot.off("ssam:git-success", this.gitCb);
 
-      // REVIEW: after hot reloading and new canvas is created,
-      //         if multiple, remove all but one to ensure one active canvas is always present
-      // this won't solve errors that create erroneous canvas without any id.
-      // but i can't just remove them all b/c the canvas may not be part of ssam and still part of the app.
-      const canvases = document.querySelectorAll(`#${this.settings.id}`);
-      if (canvases.length > 1) {
-        for (let i = 0; i < canvases.length - 1; i++) {
-          canvases[i].remove();
-        }
-      }
+      // keep only a single canvas and remove all the other old ones.
+      // REVIEW: doesn't seem to do anything now?
+
+      // const canvases = document.querySelectorAll(`#${this.settings.id}`);
+      // if (canvases.length > 1) {
+      //   for (let i = 0; i < canvases.length - 1; i++) {
+      //     canvases[i].remove();
+      //   }
+      // }
     }
 
     // store current values to globalState right before HMR
