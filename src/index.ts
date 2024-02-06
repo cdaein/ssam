@@ -63,7 +63,7 @@ export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
     console.error(err);
     return null;
   }
-  return;
+  return wrap;
 };
 
 export class Wrap {
