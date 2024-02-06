@@ -320,8 +320,8 @@ export class Wrap {
     // cancel queued animation frame
     window.cancelAnimationFrame(this.raf);
     // remove event listeners
-    this.removeResize();
-    this.removeKeydown();
+    this.removeResize && this.removeResize();
+    this.removeKeydown && this.removeKeydown();
     // remove canvas
     // REVIEW: when there's a code error, sometimes, it ends up with multiple canvases with same id but removing all old canvases will also remove new one
     this.props.canvas.remove();
