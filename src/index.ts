@@ -315,7 +315,7 @@ export class Wrap {
     this.unloadCombined();
   }
 
-  private unloadCombined() {
+  unloadCombined() {
     // cancel queued animation frame
     window.cancelAnimationFrame(this.raf);
     // remove event listeners
