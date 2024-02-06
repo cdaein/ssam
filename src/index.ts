@@ -312,6 +312,7 @@ export class Wrap {
     return;
   }
 
+  // REVIEW: why 2 steps - dispose and then unloadCombined?
   hotReload() {
     this.unloadCombined();
   }
@@ -323,7 +324,6 @@ export class Wrap {
     this.removeResize && this.removeResize();
     this.removeKeydown && this.removeKeydown();
     // remove canvas
-    // REVIEW: when there's a code error, sometimes, it ends up with multiple canvases with same id but removing all old canvases will also remove new one
     this.props.canvas.remove();
     // user clean-up (remove any side effects)
     this.unload && this.unload(this.props);
@@ -338,16 +338,17 @@ export class Wrap {
       import.meta.hot.off("ssam:warn", ssamWarnCallback);
       import.meta.hot.off("ssam:log", ssamLogCallback);
       import.meta.hot.off("ssam:ffmpeg-reqframe", ssamFfmpegReqframeCallback);
-      // import.meta.hot.off("ssam:git-success", this.ssamGitSuccessCallback);
       import.meta.hot.off("ssam:git-success", this.gitCb);
-    }
 
-    // REVIEW: after hot reloading and new canvas is created,
-    //         if multiple, remove all but one to ensure one active canvas is always present
-    const canvases = document.querySelectorAll(`#${this.settings.id}`);
-    if (canvases.length > 1) {
-      for (let i = 0; i < canvases.length - 1; i++) {
-        canvases[i].remove();
+      // REVIEW: after hot reloading and new canvas is created,
+      //         if multiple, remove all but one to ensure one active canvas is always present
+      // this won't solve errors that create erroneous canvas without any id.
+      // but i can't just remove them all b/c the canvas may not be part of ssam and still part of the app.
+      const canvases = document.querySelectorAll(`#${this.settings.id}`);
+      if (canvases.length > 1) {
+        for (let i = 0; i < canvases.length - 1; i++) {
+          canvases[i].remove();
+        }
       }
     }
 
