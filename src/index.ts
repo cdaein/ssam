@@ -35,6 +35,12 @@ import {
   endPngSeqRecord,
   setupPngSeqRecord,
 } from "./recorders/export-frames-png";
+import {
+  ssamWarnCallback,
+  ssamLogCallback,
+  ssamFfmpegReqframeCallback,
+  ssamGitSuccessCallbackWrapper,
+} from "./events/ws";
 
 export type {
   FrameFormat,
@@ -48,11 +54,6 @@ export type {
   SketchSettings,
   WebGLProps,
 } from "./types/types";
-
-// ws event listeners keep adding up, so if it's already added, don't add duplicates
-// I wish Vite provides a way to turn it off
-// this will mark if first hotReloaded was done or not
-let hotReloaded = false;
 
 export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
   const wrap = new Wrap();
@@ -145,51 +146,37 @@ export class Wrap {
   }: {
     settings: SketchSettingsInternal;
   }) => Promise<void>;
+  // TEST:
+  gitCb!: (data: any) => void;
 
-  constructor() {
-    // use ssam() function for interfacing with user. (class constructor can't use async)
-    // use class to hoist render function and to make it available within init
-
-    if (import.meta.hot) {
-      // add listeners only on first load, but not on hot reloads
-      // there's no way to turn off socket listeners, so they have to be added only once
-      if (!hotReloaded) {
-        import.meta.hot.on("ssam:warn", (data) => {
-          console.warn(`${data.msg}`);
-        });
-        import.meta.hot.on("ssam:log", (data) => {
-          console.log(`${data.msg}`);
-        });
-
-        import.meta.hot.on("ssam:git-success", (data) => {
-          if (data.format === "mp4") {
-            if (!getGlobalState().savingFrames) {
-              updateGlobalState({
-                savingFrames: true,
-                frameRequested: true,
-                recordState: "start",
-                commitHash: data.hash,
-              });
-            }
-          }
-          const canvas = document.querySelector(`#${data.canvasId}`);
-          saveCanvasFrame({
-            canvas: canvas as HTMLCanvasElement,
-            states: this.states,
-            settings: this.settings,
-            hash: data.hash,
-          });
-        });
-
-        import.meta.hot.on("ssam:ffmpeg-reqframe", () => {
-          // state that is tied to HMR need to come from global
-          updateGlobalState({
-            frameRequested: true,
-          });
+  // this is kinda ugly..
+  // because this function relies on this.states and this.settings,
+  // and also need to be referenced when hot.off() removal,
+  // i cannot move it to another file(module)
+  ssamGitSuccessCallback(data: any) {
+    if (data.format === "mp4") {
+      if (!getGlobalState().savingFrames) {
+        updateGlobalState({
+          savingFrames: true,
+          frameRequested: true,
+          recordState: "start",
+          commitHash: data.hash,
         });
       }
     }
+    // REVIEW: should i use internal variable instead?
+    const canvas = document.querySelector(`#${data.canvasId}`);
+    saveCanvasFrame({
+      canvas: canvas as HTMLCanvasElement,
+      states: this.states,
+      settings: this.settings,
+      hash: data.hash,
+    });
+  }
 
+  // use ssam() function for interfacing with user. (class constructor can't use async)
+  // use class to hoist render function and to make it available within init
+  constructor() {
     return this;
   }
 
@@ -268,6 +255,20 @@ export class Wrap {
     this.props.deltaTime = this.globalState.deltaTime;
     this.props.loopCount = this.globalState.loopCount;
 
+    // set up web socket listeners (to communicate with vite dev server, plugins)
+    if (import.meta.hot) {
+      import.meta.hot.on("ssam:warn", ssamWarnCallback);
+      import.meta.hot.on("ssam:log", ssamLogCallback);
+      import.meta.hot.on("ssam:ffmpeg-reqframe", ssamFfmpegReqframeCallback);
+      import.meta.hot.on(
+        "ssam:git-success",
+        (this.gitCb = ssamGitSuccessCallbackWrapper(
+          this.states,
+          this.settings,
+        )),
+      );
+    }
+
     try {
       await sketch(this.props);
     } catch (err: any) {
@@ -331,7 +332,15 @@ export class Wrap {
   dispose() {
     const { states, props } = this;
 
-    hotReloaded = true;
+    // each hot reload, turn off websocket listeners.
+    // they are added back with new Wrap constructor call
+    if (import.meta.hot) {
+      import.meta.hot.off("ssam:warn", ssamWarnCallback);
+      import.meta.hot.off("ssam:log", ssamLogCallback);
+      import.meta.hot.off("ssam:ffmpeg-reqframe", ssamFfmpegReqframeCallback);
+      // import.meta.hot.off("ssam:git-success", this.ssamGitSuccessCallback);
+      import.meta.hot.off("ssam:git-success", this.gitCb);
+    }
 
     // REVIEW: after hot reloading and new canvas is created,
     //         if multiple, remove all but one to ensure one active canvas is always present
