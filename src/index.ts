@@ -21,7 +21,7 @@ import {
   computePrevFrame,
   resetTime,
 } from "./time";
-import { fitCanvasToWindow } from "./canvas";
+import { fitCanvasToParent } from "./canvas";
 import { getGlobalState, updateGlobalState } from "./store";
 import { saveCanvasFrame } from "./recorders/export-frame";
 import {
@@ -297,7 +297,7 @@ export class Wrap {
     this.removeResize = removeResize;
     this.removeKeydown = removeKeydown;
 
-    fitCanvasToWindow({
+    fitCanvasToParent({
       userSettings,
       settings: this.settings,
       props: this.props,

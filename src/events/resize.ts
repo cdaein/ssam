@@ -1,5 +1,5 @@
 import { resizeCanvas } from "@daeinc/canvas";
-import { fitCanvasToWindow } from "../canvas";
+import { fitCanvasToParent } from "../canvas";
 import type {
   SketchProps,
   SketchRender,
@@ -68,7 +68,7 @@ export default ({
     }
 
     if (settings.centered) {
-      fitCanvasToWindow({
+      fitCanvasToParent({
         userSettings,
         settings,
         props,

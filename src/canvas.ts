@@ -10,7 +10,7 @@ import { toHTMLElement } from "@daeinc/dom";
 export const createCanvas = (settings: SketchSettingsInternal) => {
   if (settings.canvas !== null && settings.canvas !== undefined) {
     if (settings.canvas.nodeName.toLowerCase() !== "canvas") {
-      throw new Error("canvas must be an HTMLCanvasElement");
+      throw new Error("Pass an HTMLCanvasElement");
     }
   }
 
@@ -79,7 +79,7 @@ export const destroyCanvas = (canvas: HTMLCanvasElement) => {
     canvas.height = 0;
     canvas.remove();
   }
-  // TODO
+  // TODO:
   // also remove any reference to canvas
 };
 
@@ -112,8 +112,7 @@ export const centerCanvasToWindow = (
     // canvas.style.maxHeight = `${settings.dimensions[1]}px`;
   }
 };
-
-export const fitCanvasToWindow = ({
+export const fitCanvasToParent = ({
   userSettings,
   settings,
   props,
@@ -136,8 +135,8 @@ export const fitCanvasToWindow = ({
         1,
         Math.min(
           (parentWidth - margin * 2) / props.width,
-          (parentHeight - margin * 2) / props.height
-        )
+          (parentHeight - margin * 2) / props.height,
+        ),
       );
       props.canvas.style.transform = `scale(${scale})`;
     } else {
@@ -148,7 +147,7 @@ export const fitCanvasToWindow = ({
       // scale canvas style to its parent
       const scaledDimension = Math.min(
         canvasParent.clientWidth,
-        canvasParent.clientHeight
+        canvasParent.clientHeight,
       );
       props.canvas.style.width = `${scaledDimension}px`;
       props.canvas.style.height = `${scaledDimension}px`;
@@ -161,8 +160,8 @@ export const fitCanvasToWindow = ({
         1,
         Math.min(
           (grandParentWidth - margin * 2) / canvasParent.clientWidth,
-          (grandParentHeight - margin * 2) / canvasParent.clientHeight
-        )
+          (grandParentHeight - margin * 2) / canvasParent.clientHeight,
+        ),
       );
       canvasParent.style.transform = `scale(${scale})`;
     }
