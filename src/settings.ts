@@ -34,7 +34,7 @@ export const createSettings = ({
     canvas: null,
     dimensions: null,
     pixelRatio: 1,
-    centered: true,
+    // centered: true,
     scaleContext: true,
     pixelated: false,
     // animation
@@ -98,7 +98,7 @@ export const createSettings = ({
   // convert to array format
   combined.frameFormat = toArray(combined.frameFormat);
   combined.framesFormat = checkSupportedFramesFormats(
-    toArray(combined.framesFormat)
+    toArray(combined.framesFormat),
   );
 
   return combined;

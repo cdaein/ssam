@@ -67,13 +67,15 @@ export default ({
       // }
     }
 
-    if (settings.centered) {
-      fitCanvasToParent({
-        userSettings,
-        settings,
-        props,
-      });
-    }
+    // FIX: used to check for "centered", now it's gone,
+    // check for scaleCanvas?
+    // if (settings.centered) {
+    fitCanvasToParent({
+      userSettings,
+      settings,
+      props,
+    });
+    // }
 
     return;
   };

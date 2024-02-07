@@ -68,8 +68,6 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
 
   canvas.id = settings.id;
 
-  centerCanvasToWindow(canvas, settings);
-
   return { canvas, context, gl, width, height, pixelRatio };
 };
 
@@ -83,35 +81,6 @@ export const destroyCanvas = (canvas: HTMLCanvasElement) => {
   // also remove any reference to canvas
 };
 
-export const centerCanvasToWindow = (
-  canvas: HTMLCanvasElement,
-  settings: SketchSettingsInternal
-) => {
-  // canvas centering
-  // TODO: needs extra scaling of style.width & height to fit window/container
-  // REVIEW: this is probably be better done in index.html <style>
-  //         but, for now, this module doesn't provide html file, so...
-  if (settings.centered) {
-    if (canvas.parentElement) {
-      const canvasContainer = canvas.parentElement;
-      // canvasContainer.style.width = "100vw";
-      // canvasContainer.style.height = "100vh";
-      canvasContainer.style.display = "flex";
-      canvasContainer.style.justifyContent = "center";
-      canvasContainer.style.alignItems = "center";
-
-      if (!settings.scaleContext) {
-        // TODO: centering does not work at pixelRatio=2
-      }
-    }
-  } else {
-    // scale canvas even when not centered.
-    // canvas.style.width = 100 + "%";
-    // canvas.style.height = 100 + "%";
-    // canvas.style.maxWidth = `${settings.dimensions[0]}px`;
-    // canvas.style.maxHeight = `${settings.dimensions[1]}px`;
-  }
-};
 export const fitCanvasToParent = ({
   userSettings,
   settings,
@@ -121,9 +90,10 @@ export const fitCanvasToParent = ({
   settings: SketchSettingsInternal;
   props: BaseProps;
 }) => {
-  // resizing canvas style (when !fullscreen & centered)
+  // resizing canvas style when !fullscreen
   // REVIEW: this should be better done with CSS class rules.
-  if (userSettings.dimensions && settings.centered) {
+  // TODO: check for `scaleCanvas` settings
+  if (userSettings.dimensions) {
     const margin = 50; // px // TODO: add to settings.sketchMargin ? canvasMargin
     const canvasParent = props.canvas.parentElement!;
 
