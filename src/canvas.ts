@@ -91,9 +91,7 @@ export const fitCanvasToParent = ({
   props: BaseProps;
 }) => {
   // resizing canvas style when !fullscreen
-  // TODO: add and check for `scaleCanvas` settings
-  if (userSettings.dimensions) {
-    // TODO: add to settings.sketchMargin ? canvasMargin
+  if (userSettings.dimensions && settings.scaleToParent) {
     const margin = 50; // px
     const canvasParent = props.canvas.parentElement!;
 

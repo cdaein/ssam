@@ -34,7 +34,7 @@ export const createSettings = ({
     canvas: null,
     dimensions: null,
     pixelRatio: 1,
-    // centered: true,
+    scaleToParent: true,
     scaleContext: true,
     pixelated: false,
     // animation

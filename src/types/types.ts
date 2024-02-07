@@ -102,8 +102,11 @@ export type SketchSettings = {
   dimensions?: [number, number] | null;
   /** Set pixel ratio */
   pixelRatio?: number;
-  /** Center canvas */
-  // centered?: boolean;
+  /**
+   * Apply inline CSS transform to scale canvas to its parent.
+   * @default true
+   */
+  scaleToParent?: boolean;
   /** Scale context to account for pixelRatio */
   scaleContext?: boolean;
   /**
@@ -167,7 +170,7 @@ export interface SketchSettingsInternal {
   canvas: HTMLCanvasElement | null; // if null, new canvas will be created
   dimensions: [number, number] | null;
   pixelRatio: number;
-  // centered: boolean;
+  scaleToParent: boolean;
   scaleContext: boolean;
   pixelated: boolean;
   attributes?: CanvasRenderingContext2DSettings | WebGLContextAttributes;
@@ -313,7 +316,7 @@ export interface States {
     canvas: HTMLCanvasElement | null; // if null, new canvas will be created
     dimensions: [number, number];
     pixelRatio: number;
-    // centered: boolean;
+    scaleToParent: boolean;
     scaleContext: boolean;
     pixelated: boolean;
     attributes?: CanvasRenderingContext2DSettings | WebGLContextAttributes;
