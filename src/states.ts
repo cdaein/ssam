@@ -38,7 +38,7 @@ export const states: States = {
     canvas: null,
     dimensions: [window.innerWidth, window.innerHeight],
     pixelRatio: 1,
-    centered: true,
+    // centered: true,
     scaleContext: true,
     pixelated: false,
     attributes: {},
