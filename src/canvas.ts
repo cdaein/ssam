@@ -91,49 +91,22 @@ export const fitCanvasToParent = ({
   props: BaseProps;
 }) => {
   // resizing canvas style when !fullscreen
-  // REVIEW: this should be better done with CSS class rules.
-  // TODO: check for `scaleCanvas` settings
+  // TODO: add and check for `scaleCanvas` settings
   if (userSettings.dimensions) {
-    const margin = 50; // px // TODO: add to settings.sketchMargin ? canvasMargin
+    // TODO: add to settings.sketchMargin ? canvasMargin
+    const margin = 50; // px
     const canvasParent = props.canvas.parentElement!;
 
-    if (canvasParent.nodeName.toLowerCase() === "body") {
-      // if canvas is child of body
-      const parentWidth = canvasParent.clientWidth;
-      const parentHeight = canvasParent.clientHeight;
-      const scale = Math.min(
-        1,
-        Math.min(
-          (parentWidth - margin * 2) / props.width,
-          (parentHeight - margin * 2) / props.height,
-        ),
-      );
-      props.canvas.style.transform = `scale(${scale})`;
-    } else {
-      // TODO: when custom parent & centered, weird scaling issue.
-      //       how should it respond?
-      // if (settings.centered) return;
-
-      // scale canvas style to its parent
-      const scaledDimension = Math.min(
-        canvasParent.clientWidth,
-        canvasParent.clientHeight,
-      );
-      props.canvas.style.width = `${scaledDimension}px`;
-      props.canvas.style.height = `${scaledDimension}px`;
-
-      // scale canvas parent to its grand parent
-      const canvasGrandParent = canvasParent.parentElement!;
-      const grandParentWidth = canvasGrandParent.clientWidth;
-      const grandParentHeight = canvasGrandParent.clientHeight;
-      const scale = Math.min(
-        1,
-        Math.min(
-          (grandParentWidth - margin * 2) / canvasParent.clientWidth,
-          (grandParentHeight - margin * 2) / canvasParent.clientHeight,
-        ),
-      );
-      canvasParent.style.transform = `scale(${scale})`;
-    }
+    // if canvas is child of body
+    const parentWidth = canvasParent.clientWidth;
+    const parentHeight = canvasParent.clientHeight;
+    const scale = Math.min(
+      1,
+      Math.min(
+        (parentWidth - margin * 2) / props.width,
+        (parentHeight - margin * 2) / props.height,
+      ),
+    );
+    props.canvas.style.transform = `scale(${scale})`;
   }
 };
