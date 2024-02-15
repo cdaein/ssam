@@ -50,6 +50,9 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
     const parentElement = canvas.parentElement || document.body;
     width = parentElement.clientWidth;
     height = parentElement.clientHeight;
+    if (settings.dimensions) {
+      [width, height] = settings.dimensions;
+    }
 
     ({ context, gl, width, height } = resizeCanvas({
       canvas,
