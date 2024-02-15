@@ -17,6 +17,7 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
   let canvas: HTMLCanvasElement;
   let context: SketchContext;
   let gl: WebGLRenderingContext | WebGL2RenderingContext | undefined;
+
   let width = window.innerWidth;
   let height = window.innerHeight;
   if (settings.dimensions) {
@@ -45,6 +46,10 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
   } else {
     // use existing canvas (use existing DOM tree)
     canvas = settings.canvas;
+    // ignore settings.parent but use existing parent element from DOM tree.
+    const parentElement = canvas.parentElement || document.body;
+    width = parentElement.clientWidth;
+    height = parentElement.clientHeight;
 
     ({ context, gl, width, height } = resizeCanvas({
       canvas,
