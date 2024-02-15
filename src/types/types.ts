@@ -93,6 +93,7 @@ export type SketchSettings = {
   id?: string;
   /**
    * Set canvas parent either as `HTMLElement` object or string selector. ex. `div#app`
+   * If Ssam uses an existing canvas element, this setting is ignored and Ssam will use the existing DOM tree.
    * @default "body"
    */
   parent?: HTMLElement | string;

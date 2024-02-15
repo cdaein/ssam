@@ -43,11 +43,8 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
       height: number;
     });
   } else {
-    // use existing canvas
+    // use existing canvas (use existing DOM tree)
     canvas = settings.canvas;
-    if (settings.parent) {
-      toHTMLElement(settings.parent).appendChild(canvas);
-    }
 
     ({ context, gl, width, height } = resizeCanvas({
       canvas,
