@@ -35,12 +35,8 @@ export default ({
     //  2. if parent, don't go into fullscreen at all.
     //  3. inline-styling will override anyways...
 
-    // when fullscreen & new canvas
-    if (
-      userSettings.dimensions === undefined &&
-      userSettings.canvas === undefined
-    ) {
-      // console.log("handle resize");
+    // when fullscreen (either new canvas or existing one)
+    if (userSettings.dimensions === undefined) {
       // the event is attached to the window, so no need to check for now
       // const doResize =
       //   canvas.width !== canvas.clientWidth ||
