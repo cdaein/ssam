@@ -26,7 +26,7 @@ export const createSettings = ({
   const defaultSettings: SketchSettingsInternal = {
     // document
     title: "",
-    background: "#333",
+    // background: "#333",
     // canvas
     // id: "ssam-canvas-" + Math.floor(Math.random() * 100000).toString(),
     id: "ssam-canvas",
@@ -79,7 +79,9 @@ export const createSettings = ({
   if (combined.title.length !== 0) {
     document.title = combined.title;
   }
-  document.body.style.background = combined.background;
+  // FIX: don't set body background all the time.
+  // - better to handle with css (or only set parent bg color)
+  // document.body.style.background = combined.background;
 
   // canvas
   // pixelated is handle at canvas creation

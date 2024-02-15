@@ -32,7 +32,7 @@ export const createStates = ({
 export const states: States = {
   settings: {
     title: "Sketch",
-    background: "#333",
+    // background: "#333",
     mode: "2d",
     parent: "body",
     canvas: null,

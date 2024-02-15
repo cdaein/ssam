@@ -43,7 +43,7 @@ export const createProps = ({
   resizeProp: () => void;
 }) => {
   const { canvas, context, gl, width, height, pixelRatio } = createCanvas(
-    settings
+    settings,
   ) as CanvasProps;
 
   // function props
@@ -183,7 +183,7 @@ export const updatableKeys = [
   // DOM
   "parent",
   "title",
-  "background",
+  // "background",
   // canvas
   "dimensions",
   "width",
@@ -239,9 +239,10 @@ export const createUpdateProp = ({
         }
       } else if (key === "title") {
         document.title = options[key];
-      } else if (key === "background") {
-        document.body.style.background = options[key];
       }
+      // else if (key === "background") {
+      //   document.body.style.background = options[key];
+      // }
       // canvas
       // REVIEW: don't directly use resizeCanvas() dep,
       //      but use resize handler so it will also render right after
@@ -258,14 +259,14 @@ export const createUpdateProp = ({
             key === "dimensions"
               ? options[key][0]
               : key === "width"
-              ? options[key]
-              : props.width,
+                ? options[key]
+                : props.width,
           height:
             key === "dimensions"
               ? options[key][1]
               : key === "height"
-              ? options[key]
-              : props.height,
+                ? options[key]
+                : props.height,
           pixelRatio: key === "pixelRatio" ? options[key] : props.pixelRatio,
           scaleContext: settings.scaleContext,
           attributes: settings.attributes,

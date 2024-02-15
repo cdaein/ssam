@@ -86,7 +86,7 @@ export type SketchSettings = {
    * Set background color of HTML page. uses CSS color string. ex. `"#aaa"`
    * @default "#333"
    */
-  background?: string;
+  // background?: string;
   /** Set sketch mode to use for either 2d or 3d sketches. */
   mode?: SketchMode;
   /** Set the HTML5 Canvas element's id attribute. */
@@ -163,7 +163,7 @@ export type SketchSettings = {
 export interface SketchSettingsInternal {
   // document
   title: string;
-  background: string;
+  // background: string;
   // canvas
   mode: SketchMode;
   id: string;
@@ -310,7 +310,7 @@ export interface States {
   settings: {
     // document
     title: string;
-    background: string;
+    // background: string;
     // canvas
     mode: SketchMode;
     parent: HTMLElement | string;
