@@ -30,10 +30,11 @@ export default ({
   // check if canvas size changed
 
   const handleResize = () => {
-    // REVIEW: how to handle if canvas parent is not 100% of window?
-    //  1. instead of always window.innerWidth, use parent's 100%?
-    //  2. if parent, don't go into fullscreen at all.
-    //  3. inline-styling will override anyways...
+    // TODO: for fullscreen canvas,
+    // - what if parent has padding? how to handle transform scaling and positioning?
+    //  - or, admit this is limitation, and just wrap the parent within another <div> and handle spacing there,
+    //    so, ssam can keep 100% size.
+    // - this may be related to the fitCanvasToParent used below.
 
     // when fullscreen (either new canvas or existing one)
     if (userSettings.dimensions === undefined) {
@@ -42,11 +43,16 @@ export default ({
       //   canvas.width !== canvas.clientWidth ||
       //   canvas.height !== canvas.clientHeight;
 
+      const parentElement = canvas.parentElement || document.body;
+
+      // console.log(parentElement.clientWidth, window.innerWidth);
+      // console.log(parentElement.clientHeight, window.innerHeight);
+
       ({ width: props.width, height: props.height } = resizeCanvas({
         canvas,
         context: settings.mode,
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: parentElement.clientWidth,
+        height: parentElement.clientHeight,
         pixelRatio: Math.max(settings.pixelRatio, 1),
         pixelated: settings.pixelated,
         scaleContext: settings.scaleContext,
@@ -79,7 +85,6 @@ export default ({
   const add = () => {
     window.addEventListener("resize", handleResize);
   };
-
   const remove = () => {
     window.removeEventListener("resize", handleResize);
   };
