@@ -1,11 +1,16 @@
 import { getGlobalState, updateGlobalState } from "../store";
-import type { SketchProps, SketchStates, WebGLProps } from "../types/types";
+import type {
+  SketchProps,
+  SketchStates,
+  WebGL2Props,
+  WebGLProps,
+} from "../types/types";
 
 export default ({
   props,
   states,
 }: {
-  props: SketchProps | WebGLProps;
+  props: SketchProps | WebGLProps | WebGL2Props;
   states: SketchStates;
 }) => {
   const handleKeydown = (ev: KeyboardEvent) => {

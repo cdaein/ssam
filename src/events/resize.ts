@@ -1,30 +1,30 @@
 import { resizeCanvas } from "@daeinc/canvas";
 import { fitCanvasToParent } from "../canvas";
 import type {
-  SketchProps,
+  FinalProps,
+  SketchMode,
   SketchRender,
   SketchResize,
   SketchSettings,
   SketchSettingsInternal,
-  WebGLProps,
 } from "../types/types";
 
 // window resize event
 // REVIEW: do i need to separate window resize and canvas resize?
 // canvas style change: window resize
 // resize() return: canvas resize
-export default ({
+export default <Mode extends SketchMode>({
   props,
   userSettings,
   settings,
   render,
   resize,
 }: {
-  props: SketchProps | WebGLProps;
+  props: FinalProps<Mode>;
   userSettings: SketchSettings;
   settings: SketchSettingsInternal;
-  render: SketchRender;
-  resize: SketchResize;
+  render: SketchRender<Mode>;
+  resize: SketchResize<Mode>;
 }) => {
   const { canvas } = props;
   // check if canvas size changed

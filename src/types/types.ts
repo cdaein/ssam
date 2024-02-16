@@ -2,28 +2,23 @@ import { Wrap } from "..";
 import { Format as GifFormat } from "gifenc";
 import type p5 from "p5";
 
-export type Sketch = (props: SketchProps | WebGLProps) => Promise<void> | void;
-
-export type SketchRender = (
-  props: SketchProps | WebGLProps,
+export type Sketch<Mode extends SketchMode> = (
+  props: FinalProps<Mode>,
 ) => Promise<void> | void;
 
-// export type SketchRender =
-//   | ((props: SketchProps) => Promise<void> | void)
-//   | ((props: WebGLProps) => Promise<void> | void);
+// just aliases to make typings simpler. same as using Sketch<Mode>
+// export type Sketch2D = Sketch<"2d">;
+// export type SketchWebGL = Sketch<"webgl" | "webgl2">;
 
-export type SketchResize = (props: SketchProps | WebGLProps) => void;
+export type SketchRender<Mode extends SketchMode> = (
+  props: FinalProps<Mode>,
+) => Promise<void> | void;
 
-// export type SketchResize =
-//   | ((props: SketchProps) => void)
-//   | ((props: WebGLProps) => void);
+export type SketchResize<Mode extends SketchMode> = (
+  props: FinalProps<Mode>,
+) => void;
 
 export type SketchLoop = (timestamp: number) => void;
-
-// export type SketchObject = {
-//   render: SketchRender;
-//   resize: SketchResize;
-// };
 
 export type SketchMode = "2d" | "webgl" | "webgl2";
 
@@ -216,8 +211,9 @@ export interface SketchStates {
 }
 
 /** props that are shared by all sketch modes */
-export interface BaseProps {
-  wrap: Wrap;
+// export interface BaseProps {
+export type BaseProps<Mode extends SketchMode> = {
+  wrap: Wrap<Mode>;
   /** `HTMLCanvasElement` */
   canvas: HTMLCanvasElement;
   /** Canvas width. may be different from canvas.width due to pixel ratio scaling */
@@ -267,7 +263,7 @@ export interface BaseProps {
   update: (options: Record<string, any>) => void;
   /** Extra data sent from `settings.data`. */
   data: Record<string, any>;
-}
+};
 
 // REVIEW: separate updatable/writable props (during life of a sketch), and fixed/readable props
 
@@ -279,32 +275,35 @@ export type SketchContext =
 /**
  * to use with canvas with 2d sketches
  */
-export interface SketchProps extends BaseProps {
+export interface SketchProps extends BaseProps<"2d"> {
   context: CanvasRenderingContext2D;
 }
 
 /**
  * props type specific to `webgl` or `webgl2` mode
  */
-export interface WebGLProps extends BaseProps {
+export interface WebGLProps extends BaseProps<"webgl"> {
   /** webgl context */
-  // context: WebGLRenderingContext;
   gl: WebGLRenderingContext;
 }
 
-export interface P5Props extends BaseProps {
-  p5: p5;
+export interface WebGL2Props extends BaseProps<"webgl2"> {
+  /** webgl context */
+  gl: WebGL2RenderingContext;
 }
 
-// export interface Props {
-//   wrap: Wrap;
-//   canvas: HTMLCanvasElement;
-//   context: CanvasRenderingContext2D;
-//   width: number;
-//   height: number;
-//   frame: number;
-//   render: any;
+// export interface P5Props extends BaseProps {
+//   p5: p5;
 // }
+
+// Don't like the name but for now, let's call it Final Props
+// - SsamProps?
+
+export type FinalProps<Mode extends SketchMode> = Mode extends "2d"
+  ? SketchProps
+  : Mode extends "webgl"
+    ? WebGLProps
+    : WebGL2Props;
 
 export interface States {
   settings: {
@@ -355,7 +354,7 @@ export interface States {
     exportTotalFrames: number;
   };
   props: {
-    wrap: Wrap | null;
+    wrap: Wrap<SketchMode> | null;
     /** `HTMLCanvasElement` */
     canvas: HTMLCanvasElement | null;
     /** canvas 2d context */

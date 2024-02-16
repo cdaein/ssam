@@ -13,9 +13,12 @@ import {
 } from "./time";
 import type {
   BaseProps,
+  FinalProps,
+  SketchMode,
   SketchProps,
   SketchSettingsInternal,
   SketchStates,
+  WebGL2Props,
   WebGLProps,
 } from "./types/types";
 import { getGlobalState, updateGlobalState } from "./store";
@@ -29,14 +32,14 @@ type CanvasProps = {
   pixelRatio: number;
 };
 
-export const createProps = ({
+export const createProps = <Mode extends SketchMode>({
   wrap,
   settings,
   states,
   renderProp,
   resizeProp,
 }: {
-  wrap: Wrap;
+  wrap: Wrap<Mode>;
   settings: SketchSettingsInternal;
   states: SketchStates;
   renderProp: () => void;
@@ -53,7 +56,7 @@ export const createProps = ({
     states,
   });
 
-  const baseProps: BaseProps = {
+  const baseProps: BaseProps<Mode> = {
     wrap,
     // canvas
     canvas,
@@ -81,24 +84,25 @@ export const createProps = ({
     data: settings.data,
   };
 
-  let props: SketchProps | WebGLProps;
+  // let props: SketchProps | WebGLProps;
+  let props: FinalProps<Mode>;
 
   if (settings.mode === "2d") {
     props = {
       ...baseProps,
       context: context as CanvasRenderingContext2D,
-    } as SketchProps;
+    } as FinalProps<Mode>;
   } else if (settings.mode === "webgl") {
     props = {
       ...baseProps,
       gl: gl as WebGLRenderingContext,
-    } as WebGLProps;
+    } as FinalProps<Mode>;
   } else {
     // webgl2
     props = {
       ...baseProps,
       gl: gl as WebGL2RenderingContext,
-    } as WebGLProps;
+    } as FinalProps<Mode>;
   }
 
   props.update = createUpdateProp({
@@ -214,7 +218,7 @@ export const createUpdateProp = ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: SketchProps | WebGLProps;
+  props: SketchProps | WebGLProps | WebGL2Props;
 }) => {
   return (options: Record<string, any>) => {
     // check if options only include updatableKeys

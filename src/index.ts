@@ -2,10 +2,14 @@ import { createProps } from "./props";
 import { createSettings } from "./settings";
 import { createStates } from "./states";
 import {
+  FinalProps,
   FramesFormatObj,
   Sketch,
   SketchContext,
+  SketchMode,
   SketchProps,
+  SketchRender,
+  SketchResize,
   SketchSettings,
   SketchSettingsInternal,
   SketchStates,
@@ -47,16 +51,21 @@ export type {
   FramesFormat,
   GifOptions,
   Sketch,
+  SketchMode,
   SketchLoop,
   SketchProps,
   SketchRender,
   SketchResize,
   SketchSettings,
   WebGLProps,
+  FinalProps,
 } from "./types/types";
 
-export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
-  const wrap = new Wrap();
+export const ssam = async <Mode extends SketchMode>(
+  sketch: Sketch<Mode>,
+  settings: SketchSettings,
+) => {
+  const wrap = new Wrap<Mode>();
   try {
     await wrap.setup(sketch, settings);
     wrap.run();
@@ -67,14 +76,14 @@ export const ssam = async (sketch: Sketch, settings: SketchSettings) => {
   return wrap;
 };
 
-export class Wrap {
+export class Wrap<Mode extends SketchMode> {
   userSettings!: SketchSettings;
   settings!: SketchSettingsInternal;
   states!: SketchStates;
-  props!: SketchProps | WebGLProps;
+  props!: FinalProps<Mode>;
   removeResize!: () => void;
   removeKeydown!: () => void;
-  unload?: (props: SketchProps | WebGLProps) => void;
+  unload?: (props: FinalProps<Mode>) => void;
   private raf!: number;
   globalState!: Record<string, any>;
   count!: number;
@@ -91,7 +100,7 @@ export class Wrap {
     context: SketchContext;
     settings: SketchSettingsInternal;
     states: SketchStates;
-    props: SketchProps | WebGLProps;
+    props: FinalProps<Mode>;
   }) => void;
   endGifAnimRecord!: ({
     settings,
@@ -103,7 +112,7 @@ export class Wrap {
     props,
   }: {
     settings: SketchSettingsInternal;
-    props: SketchProps | WebGLProps;
+    props: FinalProps<Mode>;
   }) => void;
   encodeWebM!: ({
     canvas,
@@ -114,7 +123,7 @@ export class Wrap {
     canvas: HTMLCanvasElement;
     settings: SketchSettingsInternal;
     states: SketchStates;
-    props: SketchProps | WebGLProps;
+    props: FinalProps<Mode>;
   }) => Promise<void>;
   endWebMRecord!: ({
     settings,
@@ -128,7 +137,7 @@ export class Wrap {
   }: {
     settings: SketchSettingsInternal;
     states: SketchStates;
-    props: SketchProps | WebGLProps;
+    props: FinalProps<Mode>;
   }) => void;
   encodeMp4Browser!: ({
     canvas,
@@ -139,7 +148,7 @@ export class Wrap {
     canvas: HTMLCanvasElement;
     settings: SketchSettingsInternal;
     states: SketchStates;
-    props: SketchProps | WebGLProps;
+    props: FinalProps<Mode>;
   }) => void;
   endMp4BrowserRecord!: ({
     settings,
@@ -148,6 +157,9 @@ export class Wrap {
   }) => Promise<void>;
   // TEST:
   gitCb!: (data: any) => void;
+
+  render!: SketchRender<Mode>;
+  resize!: SketchResize<Mode>;
 
   // this is kinda ugly..
   // because this function relies on this.states and this.settings,
@@ -180,7 +192,7 @@ export class Wrap {
     return this;
   }
 
-  async setup(sketch: Sketch, userSettings: SketchSettings) {
+  async setup(sketch: Sketch<Mode>, userSettings: SketchSettings) {
     this.userSettings = userSettings;
 
     // for manual counting when recording (use only for recording)
@@ -195,8 +207,8 @@ export class Wrap {
       wrap: this,
       settings: this.settings,
       states: this.states,
-      renderProp: () => this.render(this.props as SketchProps | WebGLProps),
-      resizeProp: () => this.resize(this.props as SketchProps | WebGLProps),
+      renderProp: () => this.render(this.props),
+      resizeProp: () => this.resize(this.props),
     });
 
     // dynamic import of export libraries
@@ -687,17 +699,6 @@ export class Wrap {
   postExportCombined() {
     // run right after export finished
     this.postExport && this.postExport();
-  }
-
-  // REVIEW: does this have to be async method?
-  render(_props: SketchProps | WebGLProps): void | Promise<void> {
-    // this will be overwritten in sketch by wrap.render()
-    // without this declaration, TS thinks it doesn't exist. (sketch closure)
-    return Promise.resolve();
-  }
-
-  resize(_props: SketchProps | WebGLProps) {
-    // same as this.render()
   }
 
   // helper method. same as { animate: false }
