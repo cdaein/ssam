@@ -40,11 +40,11 @@ See [documentation](https://github.com/cdaein/ssam/wiki)
 
 ## Example
 
-```js
+```typescript
 import { ssam } from "ssam";
-import type { Sketch, SketchProps, SketchSettings } from "ssam";
+import type { Sketch, SketchSettings } from "ssam";
 
-const sketch = ({ wrap, width, height }: SketchProps) => {
+const sketch: Sketch<"2d"> = ({ wrap, width, height }) => {
   //  setup/init
   const numShapes = 40;
   const colors = [`#aaa`, `blue`, `white`, `black`, `lightpink`];
@@ -55,7 +55,7 @@ const sketch = ({ wrap, width, height }: SketchProps) => {
     h: height,
   }));
 
-  wrap.render = ({ context: ctx, playhead }: SketchProps) => {
+  wrap.render = ({ context: ctx, playhead }) => {
     // animation loop
     ctx.fillStyle = `lightblue`;
     ctx.fillRect(0, 0, width, height);
@@ -68,26 +68,18 @@ const sketch = ({ wrap, width, height }: SketchProps) => {
       ctx.fill();
     });
   };
-
-  wrap.resize = ({ width, height }: SketchProps) => {
-    // resize
-    console.log(width, height);
-  };
 };
 
 // sketch settings
 const settings: SketchSettings = {
-  mode: "2d",
   dimensions: [320, 320],
-  pixelRatio: 1,
   duration: 3_000,
   playFps: 12,
   exportFps: 12,
-  frameFormat: "png",
   framesFormat: "gif",
 };
 
-ssam(sketch as Sketch, settings);
+ssam(sketch, settings);
 ```
 
 The code above can create and export the gif:
