@@ -8,11 +8,10 @@ import {
   SketchContext,
   SketchMode,
   SketchProps,
-  SketchRender,
-  SketchResize,
   SketchSettings,
   SketchSettingsInternal,
   SketchStates,
+  WebGL2Props,
   WebGLProps,
 } from "./types/types";
 import resizeHandler from "./events/resize";
@@ -159,8 +158,8 @@ export class Wrap<Mode extends SketchMode> {
   // TEST:
   gitCb!: (data: any) => void;
 
-  render!: SketchRender<Mode>;
-  resize!: SketchResize<Mode>;
+  // render?: SketchRender<Mode>;
+  // resize?: SketchResize<Mode>;
 
   // this is kinda ugly..
   // because this function relies on this.states and this.settings,
@@ -686,6 +685,16 @@ export class Wrap<Mode extends SketchMode> {
     // doesn't do anything, because playLoop() updates prevFrame anyways
     this.states.prevFrame = null;
     this.props.loopCount = 0;
+  }
+
+  render(props: FinalProps<Mode>): Promise<void> | void {
+    // this will be overwritten in sketch by wrap.render()
+    // without this declaration, TS thinks it doesn't exist. (sketch closure)
+    return Promise.resolve();
+  }
+
+  resize(props: FinalProps<Mode>) {
+    //
   }
 
   handleResize() {
