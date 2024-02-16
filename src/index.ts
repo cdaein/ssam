@@ -313,8 +313,13 @@ export class Wrap {
   }
 
   // REVIEW: why 2 steps - dispose and then unloadCombined?
+  // NOTES: where to call methods (hotReload, unloadCombined, dispose) is a bit arbitrary..
+  //  need a structure for use in Frameworks (React) and independently.
   hotReload() {
     this.unloadCombined();
+    // remove canvas
+    // below is moved to here due to cleaning up of React component also removed the canvas. need to separate these operations.
+    this.props.canvas.remove();
   }
 
   unloadCombined() {
@@ -323,8 +328,6 @@ export class Wrap {
     // remove event listeners
     this.removeResize && this.removeResize();
     this.removeKeydown && this.removeKeydown();
-    // remove canvas
-    this.props.canvas.remove();
     // user clean-up (remove any side effects)
     this.unload && this.unload(this.props);
   }
