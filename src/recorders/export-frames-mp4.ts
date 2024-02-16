@@ -13,7 +13,7 @@ export const setupMp4Record = ({
   hash,
 }: {
   settings: SketchSettingsInternal;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
   hash?: string;
 }) => {
   if (import.meta.hot) {

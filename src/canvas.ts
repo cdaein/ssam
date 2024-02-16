@@ -93,7 +93,7 @@ export const fitCanvasToParent = ({
 }: {
   userSettings: SketchSettings;
   settings: SketchSettingsInternal;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
   // resizing canvas style when !fullscreen
   if (userSettings.dimensions && settings.scaleToParent) {

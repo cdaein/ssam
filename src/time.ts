@@ -51,7 +51,7 @@ export const computePlayhead = ({
   props,
 }: {
   settings: SketchSettingsInternal;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
   const { duration } = settings;
   props.playhead = duration !== Infinity ? props.time / duration : 0;
@@ -62,7 +62,7 @@ export const computePrevFrame = ({
   props,
 }: {
   states: SketchStates;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
   // call before updating props.frame to a new value
   updateGlobalState({ prevFrame: props.frame });
@@ -76,7 +76,7 @@ export const computeFrame = ({
 }: {
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
   let { duration, playFps, exportFps, totalFrames } = settings;
   const fps = getGlobalState().savingFrames ? exportFps : playFps;
@@ -109,7 +109,7 @@ export const computeLoopCount = ({
   props,
 }: {
   settings: SketchSettingsInternal;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
   const prevFrame = getGlobalState().prevFrame;
 
@@ -143,7 +143,7 @@ export const computeLastTimestamp = ({
   props,
 }: {
   states: SketchStates;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
   states.lastTimestamp = states.frameInterval
     ? states.timestamp - (props.deltaTime % states.frameInterval)
@@ -158,7 +158,7 @@ export const resetTime = ({
 }: {
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
   const { playFps, exportFps } = settings;
   const fps = getGlobalState().savingFrames ? exportFps : playFps;

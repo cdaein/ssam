@@ -42,7 +42,7 @@ export const encodeGifAnim = ({
     | WebGL2RenderingContext;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
   // record frame
   let data: Uint8ClampedArray;

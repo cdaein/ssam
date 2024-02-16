@@ -21,7 +21,7 @@ export const setupWebMRecord = ({
   props,
 }: {
   settings: SketchSettingsInternal;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
   if (!("VideoEncoder" in window)) {
     console.warn("The browser does not support WebCodecs");
@@ -78,7 +78,7 @@ export const encodeWebM = async ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
   if (!("VideoEncoder" in window)) {
     return;
@@ -97,7 +97,7 @@ export const encodeVideoFrame = ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps;
+  props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
   // NOTE: timestamp unit is in micro-seconds!!
   const frame = new VideoFrame(canvas, {
