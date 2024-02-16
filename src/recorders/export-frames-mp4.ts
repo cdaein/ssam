@@ -5,13 +5,15 @@
  */
 
 import { formatFilename } from "../helpers";
-import type { SketchSettingsInternal } from "../types/types";
+import type { BaseProps, SketchSettingsInternal } from "../types/types";
 
 export const setupMp4Record = ({
   settings,
+  props,
   hash,
 }: {
   settings: SketchSettingsInternal;
+  props: BaseProps;
   hash?: string;
 }) => {
   if (import.meta.hot) {
@@ -25,18 +27,17 @@ export const setupMp4Record = ({
       exportTotalFrames,
     } = settings;
 
-    // TODO: this is repeated in other places. refactor it.
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-    if (dimensions) {
-      width = dimensions[0];
-      height = dimensions[1];
-    }
+    // NOTES: this is fixed by using props.canvas.width. delete after some real use. (Feb.16,2024)
+    // let width = window.innerWidth;
+    // let height = window.innerHeight;
+    // if (dimensions) {
+    //   [width, height] = dimensions;
+    // }
 
     import.meta.hot.send("ssam:ffmpeg", {
       fps: exportFps,
-      width: width * pixelRatio,
-      height: height * pixelRatio,
+      width: props.canvas.width, // this already takes into account pixelRatio
+      height: props.canvas.height,
       totalFrames: exportTotalFrames,
       filename: formatFilename({
         filename,
@@ -46,7 +47,7 @@ export const setupMp4Record = ({
       format: "mp4",
     });
   } else {
-    console.warn(`mp4 recording is only availabe in dev environment`);
+    console.warn(`mp4 export is only availabe in dev environment`);
     return;
   }
 };

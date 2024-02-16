@@ -517,7 +517,11 @@ export class Wrap {
         if (format === "gif") {
           this.setupGifAnimRecord();
         } else if (format === "mp4") {
-          setupMp4Record({ settings, hash: getGlobalState().commitHash });
+          setupMp4Record({
+            settings,
+            props,
+            hash: getGlobalState().commitHash,
+          });
         } else if (format === "mp4-browser") {
           this.setupMp4BrowserRecord({ settings, states, props });
         } else if (format === "webm") {
