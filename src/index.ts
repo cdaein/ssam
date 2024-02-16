@@ -58,6 +58,7 @@ export type {
   SketchResize,
   SketchSettings,
   WebGLProps,
+  WebGL2Props,
   FinalProps,
 } from "./types/types";
 
