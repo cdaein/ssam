@@ -327,6 +327,10 @@ export class Wrap<Mode extends SketchMode> {
   // REVIEW: why 2 steps - dispose and then unloadCombined?
   // NOTES: where to call methods (hotReload, unloadCombined, dispose) is a bit arbitrary..
   //  need a structure for use in Frameworks (React) and independently.
+
+  /**
+   * Calls `unloadCombined()` and remove canvas
+   */
   hotReload() {
     this.unloadCombined();
     // remove canvas
@@ -334,6 +338,9 @@ export class Wrap<Mode extends SketchMode> {
     this.props.canvas.remove();
   }
 
+  /**
+   * Cancel animation frame, remove listeners (resize, keydown) and calls `unload()`
+   */
   unloadCombined() {
     // cancel queued animation frame
     window.cancelAnimationFrame(this.raf);
@@ -344,6 +351,9 @@ export class Wrap<Mode extends SketchMode> {
     this.unload && this.unload(this.props);
   }
 
+  /**
+   * Turn off socket listeners (for plugins)
+   */
   dispose() {
     const { states, props } = this;
 
