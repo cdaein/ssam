@@ -68,13 +68,7 @@ export const encodeGifAnim = ({
     });
   } else {
     // REVIEW: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/readPixels
-    let gl: WebGLRenderingContext | WebGL2RenderingContext;
-    if (settings.mode === "webgl") {
-      gl = context as WebGLRenderingContext;
-    } else {
-      // webgl2
-      gl = context as WebGL2RenderingContext;
-    }
+    const gl = context as WebGLRenderingContext | WebGL2RenderingContext;
     const pixels = new Uint8Array(
       gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
     );

@@ -88,7 +88,13 @@ export class Wrap<Mode extends SketchMode> {
   globalState!: Record<string, any>;
   count!: number;
   loop!: (timestamp: number) => void;
+  /**
+   * Runs right before export. Useful if some values need to reset for exporting.
+   */
   preExport?: () => void;
+  /**
+   * Runs right after export.
+   */
   postExport?: () => void;
   setupGifAnimRecord!: () => Promise<void>;
   encodeGifAnim!: ({
@@ -591,7 +597,7 @@ export class Wrap<Mode extends SketchMode> {
             context:
               settings.mode === "2d"
                 ? (props as SketchProps).context
-                : (props as WebGLProps).gl,
+                : (props as WebGLProps | WebGL2Props).gl,
             settings,
             states,
             props,
