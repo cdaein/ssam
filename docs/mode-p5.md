@@ -1,8 +1,6 @@
 # `p5` mode
 
-> ☝️ Work-in-progress documentation. The library doesn't reflect the p5 mode update yet.
-
-Ssam can wrap your p5js sketch using the instance mode. Due to how p5js works, this mode works slightly different from other modes.
+> ⚠️ This is an old documentation and the library doesn't support the p5.js mode (yet). Below is just a work-in-progress. Please refer to the [Wiki](https://github.com/cdaein/ssam/wiki) for currently supported features.
 
 ```js
 import { ssame } from "ssam";
