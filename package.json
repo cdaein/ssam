@@ -14,7 +14,9 @@
     "build": "tsc --noemit && tsup",
     "build-vite": "tsc --noemit && vite build --config vite.build.config.ts",
     "preview": "vite preview",
-    "watch": "tsup --watch"
+    "watch": "tsup --watch",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "author": "Daeinc",
   "license": "MIT",
@@ -30,6 +32,7 @@
     "@daeinc/draw": "^0.4.0",
     "@types/node": "^20.11.5",
     "@types/p5": "^1.7.6",
+    "@vitest/coverage-v8": "^1.3.0",
     "animejs": "^3.2.2",
     "license-checker": "^25.0.1",
     "ogl": "^1.0.3",
@@ -39,7 +42,8 @@
     "typescript": "^5.3.3",
     "vite": "^5.0.12",
     "vite-plugin-ssam-export": "^0.1.1",
-    "vite-plugin-ssam-ffmpeg": "^0.2.3"
+    "vite-plugin-ssam-ffmpeg": "^0.2.3",
+    "vitest": "^1.3.0"
   },
   "repository": {
     "type": "git",
