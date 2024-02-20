@@ -413,8 +413,10 @@ export class Wrap<Mode extends SketchMode> {
       if (states.firstLoopRender) {
         states.firstLoopRenderTime = timestamp;
         states.firstLoopRender = false;
-        this.raf = window.requestAnimationFrame(this.loop);
-        return;
+        // this return causes 1fr time duration (8/16ms) added to timestamp at the beginning.
+        // by not returning `states.timestamp` starts from 0.
+        // this.raf = window.requestAnimationFrame(this.loop);
+        // return;
       }
 
       states.timestamp =
