@@ -103,7 +103,7 @@ export const computeFrame = ({
   }
 };
 
-// REVIEW: not used atm. just count loop when resetTime() b/c that's been working fine.
+// REVIEW: only used for recordLoop() atm. just count loop when resetTime() b/c that's been working fine.
 export const computeLoopCount = ({
   settings,
   props,
@@ -138,6 +138,11 @@ export const computeLoopCount = ({
   }
 };
 
+/**
+ * Used for calculating `props.deltaTime`.
+ * It accounts for difference between `props.deltaTime` and `props.frameInterval`, so any remaining value is used to decode whether to render next frame.
+ * @param  -
+ */
 export const computeLastTimestamp = ({
   states,
   props,
@@ -145,8 +150,13 @@ export const computeLastTimestamp = ({
   states: SketchStates;
   props: BaseProps<"2d" | "webgl" | "webgl2">;
 }) => {
+  // if playFps is set (frameInterval !== null),
+  // - if deltaTime is less than interval, pass it on.
+  // - if deltaTime is greater than interval (ie. rendering took longer), account for difference
   states.lastTimestamp = states.frameInterval
-    ? states.timestamp - (props.deltaTime % states.frameInterval)
+    ? // either below or below below (same)
+      // states.timestamp - (props.deltaTime % states.frameInterval)
+      states.timestamp - states.deltaRemainder
     : states.timestamp;
 };
 
@@ -164,21 +174,29 @@ export const resetTime = ({
   const fps = getGlobalState().savingFrames ? exportFps : playFps;
 
   states.startTime = states.timestamp;
+
   props.time = 0;
+  // props.time %= props.duration;
+
   props.playhead = 0;
+
   // REVIEW: can't remember why i set this to be -1. 🤷
   // props.frame = playFps ? 0 : -1;
+
   props.frame = 0;
 
+  states.deltaRemainder = states.frameInterval
+    ? props.deltaTime % states.frameInterval
+    : 0;
+
   // states.lastTimestamp = 0;
-  states.lastTimestamp = states.startTime - (fps ? 1000 / fps : 0);
+  states.lastTimestamp =
+    states.startTime - (fps ? 1000 / fps : 0) - states.deltaRemainder;
 
   if (settings.numLoops > 1) {
     props.loopCount = (props.loopCount + 1) % settings.numLoops;
     updateGlobalState({ loopCount: props.loopCount }); // do i need this? is globalState.loopCount ever used?
   }
-
-  // console.log(states.timestamp, states.lastTimestamp);
 
   states.timeResetted = false;
 };

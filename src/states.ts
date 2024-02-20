@@ -17,6 +17,7 @@ export const createStates = ({
     timestamp: 0,
     lastTimestamp: 0,
     frameInterval: settings.playFps !== null ? 1000 / settings.playFps : null,
+    deltaRemainder: 0,
     timeResetted: false,
     firstLoopRender: true,
     firstLoopRenderTime: 0,

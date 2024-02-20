@@ -202,6 +202,7 @@ export interface SketchStates {
   timestamp: number;
   lastTimestamp: number;
   frameInterval: number | null;
+  deltaRemainder: number;
   timeResetted: boolean;
   firstLoopRender: boolean;
   firstLoopRenderTime: number;

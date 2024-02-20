@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+coverage
+test
 
 # Editor directories and files
 .vscode/*
@@ -26,3 +28,4 @@ dist-ssr
 process
 output
 demo
+

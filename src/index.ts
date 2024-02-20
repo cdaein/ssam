@@ -435,6 +435,7 @@ export class Wrap<Mode extends SketchMode> {
   async playLoop(timestamp: number) {
     const { settings, states, props } = this;
 
+    // timestamp continues to increase
     timestamp = timestamp - states.firstLoopRenderTime;
 
     // when paused, accumulate pausedDuration
@@ -444,20 +445,24 @@ export class Wrap<Mode extends SketchMode> {
       return;
     }
 
+    // recording completed
     if (this.states.timeResetted) {
       resetTime({ settings, states, props });
     }
 
     // time
-    // 1. better dt handling
-    // this.props.time = (this.states.timestamp - this.states.startTime) % this.props.duration;
+    // 1. better dt handling (doesn't work with resetTime)
+    // props.time = (states.timestamp - states.startTime) % props.duration;
+
     // 2. full reset each loop. but, dt is one-frame (8 or 16ms) off
     props.time = states.timestamp - states.startTime + states.timeNavOffset;
 
     if (props.time >= props.duration) {
       resetTime({ settings, states, props });
     }
-    props.deltaTime = states.timestamp - states.lastTimestamp;
+
+    props.deltaTime =
+      states.timestamp - states.lastTimestamp - states.deltaRemainder;
 
     // throttle frame rate
     if (states.frameInterval !== null) {
@@ -467,10 +472,15 @@ export class Wrap<Mode extends SketchMode> {
       }
     }
 
+    states.deltaRemainder = states.frameInterval
+      ? props.deltaTime % states.frameInterval
+      : 0;
+
     // the calling order matters
     computePlayhead({ settings, props });
     computeFrame({ settings, states, props });
     // computeLoopCount({ settings, props });
+
     // update lastTimestamp for deltaTime calculation
     computeLastTimestamp({ states, props });
 
