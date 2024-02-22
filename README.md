@@ -1,3 +1,5 @@
+![example gif animation](./docs/example.gif)
+
 # Ssam
 
 Ssam.js (쌈 as in [Korean dish](https://en.wikipedia.org/wiki/Ssam)) wraps your HTML5 Canvas sketches and provides helpful features such as animation props and file exports. It is inspired by [`canvas-sketch`](https://github.com/mattdesl/canvas-sketch/).
@@ -40,51 +42,64 @@ See [documentation](https://github.com/cdaein/ssam/wiki)
 
 ## Example
 
+The code used to create the cover gif:
+
 ```typescript
+import { drawRect } from "@daeinc/draw";
+import { snapBy } from "@daeinc/math";
+import { css, hsv, srgb } from "@thi.ng/color";
+import { Smush32 } from "@thi.ng/random";
 import { ssam } from "ssam";
 import type { Sketch, SketchSettings } from "ssam";
 
-const sketch: Sketch<"2d"> = ({ wrap, width, height }) => {
-  //  setup/init
-  const numShapes = 40;
-  const colors = [`#aaa`, `blue`, `white`, `black`, `lightpink`];
-  const lines = new Array(numShapes).fill({}).map(() => ({
-    x: Math.random() * width,
-    y: 0,
-    w: (Math.random() * width) / 10 + width / 40,
-    h: height,
-  }));
+const seed = 1249;
+const rnd = new Smush32(seed);
+const num = 200;
 
-  wrap.render = ({ context: ctx, playhead }) => {
-    // animation loop
-    ctx.fillStyle = `lightblue`;
+const sketch: Sketch<"2d"> = ({ wrap, context: ctx, width, height }) => {
+  const sn = 40; // snap
+  const rects = Array.from({ length: num }, (_, i) => {
+    const w = snapBy(rnd.minmaxInt(sn, 200), sn);
+    const h = snapBy(rnd.minmaxInt(sn, 100), sn);
+    const x = snapBy(rnd.minmaxInt((sn + w) / 2, width - (sn + w) / 2), sn);
+    const y = snapBy(rnd.minmaxInt((sn + h) / 2, height - (sn + h) / 2), sn);
+    return [x, y, w, h];
+  });
+
+  wrap.render = ({ playhead }) => {
+    ctx.fillStyle = css(srgb(hsv(0, 0, 0.95)));
     ctx.fillRect(0, 0, width, height);
 
-    lines.forEach((line, i) => {
-      const cycle = Math.sin(i + playhead * Math.PI * 2);
-      ctx.beginPath();
-      ctx.rect(line.x + (cycle * width) / 8, line.y, line.w, line.h);
-      ctx.fillStyle = colors[i % colors.length];
-      ctx.fill();
+    rects.forEach((r, i) => {
+      const w = r[2] / 2 + (Math.sin(i + playhead * Math.PI * 2) * r[2]) / 2;
+      drawRect(ctx, [snapBy(r[0], 1), snapBy(r[1], 1)], [w, r[3]], "center");
+      const c = hsv([
+        (i / num) * 0.15,
+        Math.sin(i) * 0.5 + 0.5,
+        Math.cos(i / 8) * 0.4 + 0.9,
+      ]);
+      if (i % 5 === 0) {
+        ctx.fillStyle = css(srgb(c));
+        ctx.fill();
+      } else {
+        ctx.strokeStyle = css(srgb(c));
+        ctx.stroke();
+      }
     });
   };
 };
 
-// sketch settings
 const settings: SketchSettings = {
-  dimensions: [320, 320],
+  dimensions: [600, 200],
   duration: 3_000,
   playFps: 12,
   exportFps: 12,
-  framesFormat: "gif",
+  pixelated: true,
+  framesFormat: ["gif"],
 };
 
 ssam(sketch, settings);
 ```
-
-The code above can create and export the gif:
-
-![example gif animation](./docs/example.gif)
 
 ## License
 
