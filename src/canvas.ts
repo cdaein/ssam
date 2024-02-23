@@ -1,11 +1,9 @@
 import {
   BaseProps,
-  SketchContext,
   SketchSettings,
   SketchSettingsInternal,
 } from "./types/types";
 import { createCanvas as create, resizeCanvas } from "@daeinc/canvas";
-import { toHTMLElement } from "@daeinc/dom";
 
 export const createCanvas = (settings: SketchSettingsInternal) => {
   if (settings.canvas !== null && settings.canvas !== undefined) {
@@ -14,20 +12,22 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
     }
   }
 
-  let canvas: HTMLCanvasElement;
-  let context: SketchContext;
-  let gl: WebGLRenderingContext | WebGL2RenderingContext | undefined;
-
-  let width = window.innerWidth;
-  let height = window.innerHeight;
-  if (settings.dimensions) {
-    [width, height] = settings.dimensions;
-  }
+  // 1. use settings dimensions.
+  // 2. if no settings.dimensions, and if existing canvas, use parent dimensions. (or body)
+  // 3. else, use window dimensions
+  const [width, height] =
+    settings.dimensions || settings.canvas
+      ? [
+          (settings.canvas?.parentElement || document.body).clientWidth,
+          (settings.canvas?.parentElement || document.body).clientHeight,
+        ]
+      : [window.innerWidth, window.innerHeight];
   const pixelRatio = Math.max(settings.pixelRatio, 1);
 
   if (settings.canvas === undefined || settings.canvas === null) {
     // create new canvas
-    ({ canvas, context, gl, width, height } = create({
+    // use settings.parent or body (default)
+    const canvasObj = create({
       parent: settings.parent,
       context: settings.mode,
       width,
@@ -36,26 +36,14 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
       pixelated: settings.pixelated,
       scaleContext: settings.scaleContext,
       attributes: settings.attributes,
-    }) as {
-      canvas: HTMLCanvasElement;
-      context: SketchContext;
-      gl?: WebGLRenderingContext | WebGL2RenderingContext;
-      width: number;
-      height: number;
     });
+    canvasObj.canvas.id = settings.id;
+    return { ...canvasObj, pixelRatio };
   } else {
     // use existing canvas (use existing DOM tree)
-    canvas = settings.canvas;
-    // ignore settings.parent but use existing parent element from DOM tree.
-    const parentElement = canvas.parentElement || document.body;
-    width = parentElement.clientWidth;
-    height = parentElement.clientHeight;
-    if (settings.dimensions) {
-      [width, height] = settings.dimensions;
-    }
-
-    ({ context, gl, width, height } = resizeCanvas({
-      canvas,
+    // ignore settings.parent and use existing canvas parent (or should i switch parent?)
+    const canvasObj = resizeCanvas({
+      canvas: settings.canvas,
       context: settings.mode,
       width,
       height,
@@ -63,17 +51,10 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
       pixelated: settings.pixelated,
       scaleContext: settings.scaleContext,
       attributes: settings.attributes,
-    }) as {
-      context: SketchContext;
-      gl?: WebGLRenderingContext | WebGL2RenderingContext;
-      width: number;
-      height: number;
     });
+    canvasObj.canvas.id = settings.id;
+    return { ...canvasObj, pixelRatio };
   }
-
-  canvas.id = settings.id;
-
-  return { canvas, context, gl, width, height, pixelRatio };
 };
 
 export const destroyCanvas = (canvas: HTMLCanvasElement) => {

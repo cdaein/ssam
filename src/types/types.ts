@@ -162,6 +162,7 @@ export interface SketchSettingsInternal {
   // canvas
   mode: SketchMode;
   id: string;
+  /** Default parent is `"body"` */
   parent: HTMLElement | string;
   canvas: HTMLCanvasElement | null; // if null, new canvas will be created
   dimensions: [number, number] | null;
