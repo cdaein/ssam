@@ -24,7 +24,9 @@ npm install ssam
 
 ## How to
 
-See [documentation](https://github.com/cdaein/ssam/wiki)
+- See [Wiki](https://github.com/cdaein/ssam/wiki) for documentation.
+- [ssam-examples](https://github.com/cdaein/ssam-examples) repo has basic examples.
+- [ssam-thing-examples](https://github.com/cdaein/ssam-thing-examples) repo has examples of drawing with Thing Umbrella packages.
 
 ## Features
 
