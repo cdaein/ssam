@@ -15,13 +15,20 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
   // 1. use settings dimensions.
   // 2. if no settings.dimensions, and if existing canvas, use parent dimensions. (or body)
   // 3. else, use window dimensions
-  const [width, height] =
-    settings.dimensions || settings.canvas
-      ? [
-          (settings.canvas?.parentElement || document.body).clientWidth,
-          (settings.canvas?.parentElement || document.body).clientHeight,
-        ]
-      : [window.innerWidth, window.innerHeight];
+
+  // want to simplify, but this is buggy.
+  // const [width, height] =
+  //   settings.dimensions || settings.canvas
+  //     ? [
+  //         (settings.canvas?.parentElement || document.body).clientWidth,
+  //         (settings.canvas?.parentElement || document.body).clientHeight,
+  //       ]
+  //     : [window.innerWidth, window.innerHeight];
+
+  let [width, height] = [window.innerWidth, window.innerHeight];
+  if (settings.dimensions) {
+    [width, height] = settings.dimensions;
+  }
   const pixelRatio = Math.max(settings.pixelRatio, 1);
 
   if (settings.canvas === undefined || settings.canvas === null) {
@@ -42,8 +49,15 @@ export const createCanvas = (settings: SketchSettingsInternal) => {
   } else {
     // use existing canvas (use existing DOM tree)
     // ignore settings.parent and use existing canvas parent (or should i switch parent?)
+    const canvas = settings.canvas;
+    const parentElement = canvas.parentElement || document.body;
+    width = parentElement.clientWidth;
+    height = parentElement.clientHeight;
+    if (settings.dimensions) {
+      [width, height] = settings.dimensions;
+    }
     const canvasObj = resizeCanvas({
-      canvas: settings.canvas,
+      canvas,
       context: settings.mode,
       width,
       height,
