@@ -335,7 +335,7 @@ export class Wrap<Mode extends SketchMode> {
   //  need a structure for use in Frameworks (React) and independently.
 
   /**
-   * Calls `unloadCombined()` and remove canvas
+   * Calls `this.unloadCombined()` and remove canvas
    */
   hotReload() {
     this.unloadCombined();
@@ -345,7 +345,7 @@ export class Wrap<Mode extends SketchMode> {
   }
 
   /**
-   * Cancel animation frame, remove listeners (resize, keydown) and calls `unload()`
+   * Cancel animation frame, remove listeners (resize, keydown) and calls `this.unload()`
    */
   unloadCombined() {
     // cancel queued animation frame
@@ -715,12 +715,20 @@ export class Wrap<Mode extends SketchMode> {
     this.props.loopCount = 0;
   }
 
+  /**
+   * `wrap.render(props)` handles animation loop.
+   * Place any code you want updated each frame.
+   */
   render(props: FinalProps<Mode>): Promise<void> | void {
     // this will be overwritten in sketch by wrap.render()
     // without this declaration, TS thinks it doesn't exist. (sketch closure)
     return Promise.resolve();
   }
 
+  /**
+   * `wrap.resize(props)` is called when the canvas is resized.
+   * You can get the updated dimensions with `props.width` and `props.height`.
+   */
   resize(props: FinalProps<Mode>) {
     //
   }
