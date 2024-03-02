@@ -83,7 +83,7 @@ export type GifOptions = {
 export type RecordState = "inactive" | "start" | "in-progress" | "end";
 
 /**
- * User provided settings. all optional properties must either come from user. If not, it will be filled internally with default settings.
+ * User provided settings. Any properties not defined by user will be merged internally with default settings.
  */
 export type SketchSettings = {
   /** Set HTML webpage title. it replaces the `<title>` tag and is displayed on top of browser window */
