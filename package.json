@@ -30,20 +30,20 @@
   "devDependencies": {
     "@daeinc/color": "^0.2.4",
     "@daeinc/draw": "^0.5.0",
-    "@types/node": "^20.11.20",
+    "@types/node": "^20.12.8",
     "@types/p5": "^1.7.6",
-    "@vitest/coverage-v8": "^1.3.1",
+    "@vitest/coverage-v8": "^1.6.0",
     "animejs": "^3.2.2",
     "license-checker": "^25.0.1",
-    "ogl": "^1.0.4",
-    "p5": "^1.9.0",
+    "ogl": "^1.0.6",
+    "p5": "^1.9.3",
     "prettier": "^3.2.5",
     "tsup": "^8.0.2",
-    "typescript": "^5.3.3",
-    "vite": "^5.1.4",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
     "vite-plugin-ssam-export": "^0.1.1",
     "vite-plugin-ssam-ffmpeg": "^0.2.3",
-    "vitest": "^1.3.1"
+    "vitest": "^1.6.0"
   },
   "repository": {
     "type": "git",
