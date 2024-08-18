@@ -67,7 +67,6 @@ export const ssam = async <Mode extends SketchMode>(
 ) => {
   try {
     const wrap = await Wrap.create(sketch, settings);
-    await wrap.setup(settings);
     wrap.run();
     return wrap;
   } catch (err) {
@@ -199,7 +198,7 @@ export class Wrap<Mode extends SketchMode> {
   ): Promise<Wrap<Mode>> {
     const wrap = new Wrap(sketch, userSettings);
     try {
-      await wrap.setup(userSettings);
+      await wrap.setup();
       return wrap;
     } catch (err: any) {
       throw new Error(err);
@@ -278,7 +277,7 @@ export class Wrap<Mode extends SketchMode> {
     return this;
   }
 
-  async setup(userSettings: SketchSettings) {
+  async setup() {
     // dynamic import of export libraries
     if (this.settings.framesFormat.includes("gif")) {
       const { setupGifAnimRecord, encodeGifAnim, endGifAnimRecord } =
