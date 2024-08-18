@@ -335,6 +335,13 @@ export interface WebGL2Props extends BaseProps<"webgl2"> {
 //   p5: p5;
 // }
 
+export type VideoEncodeParams<Mode extends SketchMode> = {
+  canvas: HTMLCanvasElement;
+  settings: SketchSettingsInternal;
+  states: SketchStates;
+  props: FinalProps<Mode>;
+};
+
 // Don't like the name but for now, let's call it Final Props
 // - SsamProps?
 

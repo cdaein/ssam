@@ -11,6 +11,7 @@ import {
   SketchSettings,
   SketchSettingsInternal,
   SketchStates,
+  VideoEncodeParams,
   WebGL2Props,
   WebGLProps,
 } from "./types/types";
@@ -88,13 +89,9 @@ export class Wrap<Mode extends SketchMode> {
   globalState: Record<string, any>;
   count!: number;
   loop!: (timestamp: number) => void;
-  /**
-   * Runs right before export. Useful if some values need to reset for exporting.
-   */
+  /** Runs right before export. Useful if some values need to reset for exporting. */
   preExport?: () => void;
-  /**
-   * Runs right after export.
-   */
+  /** Runs right after export. */
   postExport?: () => void;
   setupGifAnimRecord!: () => Promise<void>;
   encodeGifAnim!: ({
@@ -120,17 +117,7 @@ export class Wrap<Mode extends SketchMode> {
     settings: SketchSettingsInternal;
     props: FinalProps<Mode>;
   }) => void;
-  encodeWebM!: ({
-    canvas,
-    settings,
-    states,
-    props,
-  }: {
-    canvas: HTMLCanvasElement;
-    settings: SketchSettingsInternal;
-    states: SketchStates;
-    props: FinalProps<Mode>;
-  }) => Promise<void>;
+  encodeWebM!: (params: VideoEncodeParams<Mode>) => Promise<void>;
   endWebMRecord!: ({
     settings,
   }: {
@@ -145,17 +132,7 @@ export class Wrap<Mode extends SketchMode> {
     states: SketchStates;
     props: FinalProps<Mode>;
   }) => void;
-  encodeMp4Browser!: ({
-    canvas,
-    settings,
-    states,
-    props,
-  }: {
-    canvas: HTMLCanvasElement;
-    settings: SketchSettingsInternal;
-    states: SketchStates;
-    props: FinalProps<Mode>;
-  }) => void;
+  encodeMp4Browser!: (params: VideoEncodeParams<Mode>) => void;
   endMp4BrowserRecord!: ({
     settings,
   }: {
