@@ -24,10 +24,10 @@ npm install ssam
 
 ## CDN
 
-If you don't use NPM or use sites like [CodePen](https://codepen.io/cdaein/pen/dyBdpEy) for creating a quick sketch, use CDN such as [unpkg](https://unpkg.com/ssam@0.19.0/dist/ssam.esm.js) or [jsdelivr](https://cdn.jsdelivr.net/npm/ssam@0.19.0/dist/ssam.esm.js) and directly import Ssam with a URL:
+If you don't use NPM or use sites like [CodePen](https://codepen.io/cdaein/pen/dyBdpEy) for creating a quick sketch, use CDN such as [unpkg](https://unpkg.com/ssam/dist/ssam.esm.js) or [jsdelivr](https://cdn.jsdelivr.net/npm/ssam/dist/ssam.esm.js) and directly import Ssam with a URL:
 
 ```js
-import { ssam } from "https://cdn.jsdelivr.net/npm/ssam@0.19.0/dist/ssam.esm.js";
+import { ssam } from "https://cdn.jsdelivr.net/npm/ssam/dist/ssam.esm.js";
 ```
 
 ## How to
