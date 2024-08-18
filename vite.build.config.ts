@@ -16,6 +16,13 @@ export default defineConfig({
     },
     rollupOptions: {
       external: ["p5"],
+      output: [
+        {
+          format: "es",
+          dir: "dist/static",
+          entryFileNames: "index.js",
+        },
+      ],
     },
   },
 });

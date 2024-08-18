@@ -1,5 +1,5 @@
-import { Wrap } from "..";
-import { Format as GifFormat } from "gifenc";
+import type { Wrap } from "..";
+import type { Format as GifFormat } from "gifenc";
 
 export type Sketch<Mode extends SketchMode> = (
   props: FinalProps<Mode>,
