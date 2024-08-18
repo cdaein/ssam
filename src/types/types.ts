@@ -93,9 +93,15 @@ export type SketchSettings = {
    * @default "#333"
    */
   // background?: string;
-  /** Set sketch mode to use for either 2d or 3d sketches. */
+  /**
+   * Set sketch mode to use for either 2d or 3d sketches.
+   * @default "2d"
+   */
   mode?: SketchMode;
-  /** Set the HTML5 Canvas element's id attribute. */
+  /**
+   * Set the HTML5 Canvas element's id attribute.
+   * @default "ssam-canvas"
+   */
   id?: string;
   /**
    * Set canvas parent either as `HTMLElement` object or string selector. ex. `div#app`
@@ -114,7 +120,10 @@ export type SketchSettings = {
    * @default true
    */
   scaleToParent?: boolean;
-  /** Scale context to account for pixelRatio */
+  /**
+   * Scale context to account for pixelRatio
+   * @default true
+   */
   scaleContext?: boolean;
   /**
    * When `true`, it sets the following options:
@@ -122,6 +131,7 @@ export type SketchSettings = {
    * canvas.style.imageRendering = "pixelated";
    * ctx.imageSmoothingEnabled = false;
    * ```
+   * @default false
    */
   pixelated?: boolean;
   /** You can add context attributes for 2d or webgl canvas */
