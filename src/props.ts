@@ -235,7 +235,7 @@ export const createUpdateProp = ({
       if (key === "parent") {
         if (
           typeof options[key] === "string" ||
-          options[key] instanceof Element
+          options[key] instanceof HTMLElement
         ) {
           toHTMLElement(options[key]).appendChild(canvas);
         } else {
