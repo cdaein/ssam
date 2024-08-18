@@ -28,6 +28,8 @@ If you don't use NPM or use sites like [CodePen](https://codepen.io/cdaein/pen/d
 
 ```js
 import { ssam } from "https://cdn.jsdelivr.net/npm/ssam/dist/ssam.esm.js";
+// or,
+import { ssam } from "https://esm.run/ssam";
 ```
 
 ## How to
