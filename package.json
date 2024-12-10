@@ -21,7 +21,7 @@
   "author": "Daeinc",
   "license": "MIT",
   "dependencies": {
-    "@daeinc/canvas": "^0.15.0",
+    "@daeinc/canvas": "^0.16.1",
     "@daeinc/dom": "^0.4.1",
     "gifenc": "^1.0.3",
     "mp4-muxer": "^4.3.3",
@@ -33,6 +33,7 @@
     "@types/node": "^22.4.0",
     "@types/p5": "^1.7.6",
     "@vitest/coverage-v8": "^2.0.5",
+    "@webgpu/types": "^0.1.51",
     "animejs": "^3.2.2",
     "esbuild-plugin-license": "^1.2.3",
     "license-checker": "^25.0.1",
