@@ -21,7 +21,7 @@
   "author": "Daeinc",
   "license": "MIT",
   "dependencies": {
-    "@daeinc/canvas": "^0.16.2",
+    "@daeinc/canvas": "^0.16.3",
     "@daeinc/dom": "^0.4.1",
     "gifenc": "^1.0.3",
     "mp4-muxer": "^4.3.3",
