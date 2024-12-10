@@ -102,11 +102,17 @@ export const createProps = <Mode extends SketchMode>({
       ...baseProps,
       gl: gl as WebGLRenderingContext,
     } as FinalProps<Mode>;
-  } else {
+  } else if (settings.mode === "webgl2") {
     // webgl2
     props = {
       ...baseProps,
       gl: gl as WebGL2RenderingContext,
+    } as FinalProps<Mode>;
+  } else {
+    // webgpu
+    props = {
+      ...baseProps,
+      context: context as GPUCanvasContext,
     } as FinalProps<Mode>;
   }
 

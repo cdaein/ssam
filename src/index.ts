@@ -600,8 +600,10 @@ export class Wrap<Mode extends SketchMode> {
           this.encodeGifAnim({
             context:
               settings.mode === "2d"
-                ? (props as SketchProps | WebGPUProps).context
-                : (props as WebGLProps | WebGL2Props).gl,
+                ? (props as SketchProps).context
+                : settings.mode === "webgpu"
+                  ? (props as WebGPUProps).context
+                  : (props as WebGLProps | WebGL2Props).gl,
             settings,
             states,
             props,
