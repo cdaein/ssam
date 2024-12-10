@@ -14,6 +14,7 @@ import {
   VideoEncodeParams,
   WebGL2Props,
   WebGLProps,
+  WebGPUProps,
 } from "./types/types";
 import resizeHandler from "./events/resize";
 import keydownHandler from "./events/keydown";
@@ -600,7 +601,9 @@ export class Wrap<Mode extends SketchMode> {
             context:
               settings.mode === "2d"
                 ? (props as SketchProps).context
-                : (props as WebGLProps | WebGL2Props).gl,
+                : settings.mode === "webgpu"
+                  ? (props as WebGPUProps).context
+                  : (props as WebGLProps | WebGL2Props).gl,
             settings,
             states,
             props,

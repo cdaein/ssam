@@ -1,5 +1,6 @@
-import type { Wrap } from "..";
+import type { Context, ContextType } from "@daeinc/canvas";
 import type { Format as GifFormat } from "gifenc";
+import type { Wrap } from "..";
 
 export type Sketch<Mode extends SketchMode> = (
   props: FinalProps<Mode>,
@@ -20,9 +21,10 @@ export type SketchResize<Mode extends SketchMode> = (
 export type SketchLoop = (timestamp: number) => void;
 
 /*
- * "2d", "webgl" or "webgl2"
+ * "2d", "webgl", "webgl2" or "webgpu"
  */
-export type SketchMode = "2d" | "webgl" | "webgl2";
+export type SketchMode = Context;
+// export type SketchMode = "2d" | "webgl" | "webgl2" | "webgpu";
 
 // gif is not supported by default
 export type FrameFormat = "png" | "jpg" | "jpeg" | "webp";
@@ -306,10 +308,7 @@ export type BaseProps<Mode extends SketchMode> = {
 
 // REVIEW: separate updatable/writable props (during life of a sketch), and fixed/readable props
 
-export type SketchContext =
-  | CanvasRenderingContext2D
-  | WebGLRenderingContext
-  | WebGL2RenderingContext;
+export type SketchContext = ContextType<SketchMode>;
 
 /**
  * to use with canvas with 2d sketches
@@ -331,6 +330,11 @@ export interface WebGL2Props extends BaseProps<"webgl2"> {
   gl: WebGL2RenderingContext;
 }
 
+export interface WebGPUProps extends BaseProps<"webgpu"> {
+  /** webgpu context */
+  context: GPUCanvasContext;
+}
+
 // export interface P5Props extends BaseProps {
 //   p5: p5;
 // }
@@ -349,7 +353,11 @@ export type FinalProps<Mode extends SketchMode> = Mode extends "2d"
   ? SketchProps
   : Mode extends "webgl"
     ? WebGLProps
-    : WebGL2Props;
+    : Mode extends "webgl2"
+      ? WebGL2Props
+      : Mode extends "webgpu"
+        ? WebGPUProps
+        : never;
 
 // export interface States {
 //   settings: {

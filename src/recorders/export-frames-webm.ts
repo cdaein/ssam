@@ -8,6 +8,7 @@ import type {
   BaseProps,
   SketchStates,
   FramesFormatObj,
+  SketchMode,
 } from "../types/types";
 import { ArrayBufferTarget, Muxer } from "webm-muxer";
 import { downloadBlob, isObject } from "../helpers";
@@ -16,12 +17,12 @@ let muxer: Muxer<ArrayBufferTarget> | null = null;
 let videoEncoder: VideoEncoder | null = null;
 let lastKeyframe: number | null = null;
 
-export const setupWebMRecord = ({
+export const setupWebMRecord = <Mode extends SketchMode>({
   settings,
   props,
 }: {
   settings: SketchSettingsInternal;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   if (!("VideoEncoder" in window)) {
     console.warn("The browser does not support WebCodecs");
@@ -69,7 +70,7 @@ export const setupWebMRecord = ({
   console.log(`recording (${format}) started`);
 };
 
-export const encodeWebM = async ({
+export const encodeWebM = async <Mode extends SketchMode>({
   canvas,
   settings,
   states,
@@ -78,7 +79,7 @@ export const encodeWebM = async ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   if (!("VideoEncoder" in window)) {
     return;
@@ -88,7 +89,7 @@ export const encodeWebM = async ({
   encodeVideoFrame({ canvas, settings, states, props });
 };
 
-export const encodeVideoFrame = ({
+export const encodeVideoFrame = <Mode extends SketchMode>({
   canvas,
   settings,
   states,
@@ -97,7 +98,7 @@ export const encodeVideoFrame = ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   // NOTE: timestamp unit is in micro-seconds!!
   const frame = new VideoFrame(canvas, {

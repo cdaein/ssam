@@ -5,15 +5,19 @@
  */
 
 import { formatFilename } from "../helpers";
-import type { BaseProps, SketchSettingsInternal } from "../types/types";
+import type {
+  BaseProps,
+  SketchMode,
+  SketchSettingsInternal,
+} from "../types/types";
 
-export const setupMp4Record = ({
+export const setupMp4Record = <Mode extends SketchMode>({
   settings,
   props,
   hash,
 }: {
   settings: SketchSettingsInternal;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
   hash?: string;
 }) => {
   if (import.meta.hot) {

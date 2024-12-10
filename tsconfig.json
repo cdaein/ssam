@@ -13,7 +13,8 @@
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "typeRoots": ["./node_modules/@webgpu/types", "../node_modules/@types"]
   },
   "include": ["src", "src/types/gifenc.d.ts"]
 }

@@ -5,6 +5,7 @@
 import { getGlobalState, updateGlobalState } from "./store";
 import type {
   BaseProps,
+  SketchMode,
   SketchSettingsInternal,
   SketchStates,
 } from "./types/types";
@@ -46,37 +47,37 @@ export const computeExportTotalFrames = (settings: SketchSettingsInternal) => {
   }
 };
 
-export const computePlayhead = ({
+export const computePlayhead = <Mode extends SketchMode>({
   settings,
   props,
 }: {
   settings: SketchSettingsInternal;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   const { duration } = settings;
   props.playhead = duration !== Infinity ? props.time / duration : 0;
 };
 
-export const computePrevFrame = ({
+export const computePrevFrame = <Mode extends SketchMode>({
   states,
   props,
 }: {
   states: SketchStates;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   // call before updating props.frame to a new value
   updateGlobalState({ prevFrame: props.frame });
   states.prevFrame = props.frame;
 };
 
-export const computeFrame = ({
+export const computeFrame = <Mode extends SketchMode>({
   settings,
   states,
   props,
 }: {
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   let { duration, playFps, exportFps, totalFrames } = settings;
   const fps = getGlobalState().savingFrames ? exportFps : playFps;
@@ -104,12 +105,12 @@ export const computeFrame = ({
 };
 
 // REVIEW: only used for recordLoop() atm. just count loop when resetTime() b/c that's been working fine.
-export const computeLoopCount = ({
+export const computeLoopCount = <Mode extends SketchMode>({
   settings,
   props,
 }: {
   settings: SketchSettingsInternal;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   const prevFrame = getGlobalState().prevFrame;
 
@@ -143,12 +144,12 @@ export const computeLoopCount = ({
  * It accounts for difference between `props.deltaTime` and `props.frameInterval`, so any remaining value is used to decode whether to render next frame.
  * @param  -
  */
-export const computeLastTimestamp = ({
+export const computeLastTimestamp = <Mode extends SketchMode>({
   states,
   props,
 }: {
   states: SketchStates;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   // if playFps is set (frameInterval !== null),
   // - if deltaTime is less than interval, pass it on.
@@ -161,14 +162,14 @@ export const computeLastTimestamp = ({
 };
 
 // REVIEW: when reset, delta time is always 1 frame duration more (ex. 8ms on 120fps)
-export const resetTime = ({
+export const resetTime = <Mode extends SketchMode>({
   settings,
   states,
   props,
 }: {
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   const { playFps, exportFps } = settings;
   const fps = getGlobalState().savingFrames ? exportFps : playFps;

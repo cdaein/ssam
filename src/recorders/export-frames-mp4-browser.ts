@@ -7,6 +7,7 @@ import type {
   BaseProps,
   SketchStates,
   FramesFormatObj,
+  SketchMode,
 } from "../types/types";
 import { ArrayBufferTarget, Muxer } from "mp4-muxer";
 import { downloadBlob, isObject } from "../helpers";
@@ -15,14 +16,14 @@ let muxer: Muxer<ArrayBufferTarget> | null = null;
 let videoEncoder: VideoEncoder | null = null;
 let lastKeyframe: number | null = null;
 
-export const setupMp4BrowserRecord = ({
+export const setupMp4BrowserRecord = <Mode extends SketchMode>({
   settings,
   states,
   props,
 }: {
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   if (!("VideoEncoder" in window)) {
     console.warn("The browser does not support WebCodecs");
@@ -79,7 +80,7 @@ export const setupMp4BrowserRecord = ({
   console.log(`recording (${format}) started`);
 };
 
-export const encodeMp4Browser = ({
+export const encodeMp4Browser = <Mode extends SketchMode>({
   canvas,
   settings,
   states,
@@ -88,7 +89,7 @@ export const encodeMp4Browser = ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   if (!("VideoEncoder" in window)) {
     return;
@@ -98,7 +99,7 @@ export const encodeMp4Browser = ({
   encodeVideoFrame({ canvas, settings, states, props });
 };
 
-export const encodeVideoFrame = ({
+export const encodeVideoFrame = <Mode extends SketchMode>({
   canvas,
   settings,
   states,
@@ -107,7 +108,7 @@ export const encodeVideoFrame = ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   // NOTE: timestamp unit is in micro-seconds!!
   const frame = new VideoFrame(canvas, {
