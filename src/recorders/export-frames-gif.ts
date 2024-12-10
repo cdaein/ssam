@@ -161,8 +161,8 @@ export const endGifAnimRecord = ({
   const format = "gif";
 
   gif.finish();
-  // REVIEW: buffer type
-  const buffer: ArrayBuffer = gif.bytesView();
+
+  const buffer = gif.bytesView();
 
   downloadBlob(new Blob([buffer], { type: "image/gif" }), settings, format);
 
