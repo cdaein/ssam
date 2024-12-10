@@ -24,8 +24,8 @@
     "@daeinc/canvas": "^0.16.3",
     "@daeinc/dom": "^0.4.1",
     "gifenc": "^1.0.3",
-    "mp4-muxer": "^4.3.3",
-    "webm-muxer": "^4.0.1"
+    "mp4-muxer": "^5.1.5",
+    "webm-muxer": "^5.0.2"
   },
   "devDependencies": {
     "@daeinc/color": "^0.2.4",
@@ -38,8 +38,8 @@
     "animejs": "^3.2.2",
     "esbuild-plugin-license": "^1.2.3",
     "license-checker": "^25.0.1",
-    "ogl": "^1.0.8",
-    "p5": "^1.10.0",
+    "ogl": "^1.0.9",
+    "p5": "^1.11.2",
     "prettier": "^3.4.2",
     "three": "^0.171.0",
     "tsup": "^8.3.5",
