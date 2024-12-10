@@ -1,5 +1,6 @@
 import {
   BaseProps,
+  SketchMode,
   SketchSettings,
   SketchSettingsInternal,
 } from "./types/types";
@@ -81,14 +82,14 @@ export const destroyCanvas = (canvas: HTMLCanvasElement) => {
   // also remove any reference to canvas
 };
 
-export const fitCanvasToParent = ({
+export const fitCanvasToParent = <Mode extends SketchMode>({
   userSettings,
   settings,
   props,
 }: {
   userSettings: SketchSettings;
   settings: SketchSettingsInternal;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   // resizing canvas style when !fullscreen
   if (userSettings.dimensions && settings.scaleToParent) {

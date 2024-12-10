@@ -9,6 +9,7 @@ import type { Encoder } from "gifenc";
 import { downloadBlob } from "../helpers";
 import {
   BaseProps,
+  SketchMode,
   SketchSettingsInternal,
   SketchStates,
 } from "../types/types";
@@ -30,7 +31,7 @@ export const setupGifAnimRecord = async () => {
   console.log(`recording (${format}) started`);
 };
 
-export const encodeGifAnim = ({
+export const encodeGifAnim = <Mode extends SketchMode>({
   context,
   settings,
   states,
@@ -39,10 +40,11 @@ export const encodeGifAnim = ({
   context:
     | CanvasRenderingContext2D
     | WebGLRenderingContext
-    | WebGL2RenderingContext;
+    | WebGL2RenderingContext
+    | GPUCanvasContext;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: BaseProps<"2d" | "webgl" | "webgl2">;
+  props: BaseProps<Mode>;
 }) => {
   // record frame
   let data: Uint8ClampedArray;

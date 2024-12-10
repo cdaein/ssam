@@ -14,6 +14,7 @@ import {
   VideoEncodeParams,
   WebGL2Props,
   WebGLProps,
+  WebGPUProps,
 } from "./types/types";
 import resizeHandler from "./events/resize";
 import keydownHandler from "./events/keydown";
@@ -599,7 +600,7 @@ export class Wrap<Mode extends SketchMode> {
           this.encodeGifAnim({
             context:
               settings.mode === "2d"
-                ? (props as SketchProps).context
+                ? (props as SketchProps | WebGPUProps).context
                 : (props as WebGLProps | WebGL2Props).gl,
             settings,
             states,

@@ -4,13 +4,14 @@ import type {
   SketchStates,
   WebGL2Props,
   WebGLProps,
+  WebGPUProps,
 } from "../types/types";
 
 export default ({
   props,
   states,
 }: {
-  props: SketchProps | WebGLProps | WebGL2Props;
+  props: SketchProps | WebGLProps | WebGL2Props | WebGPUProps;
   states: SketchStates;
 }) => {
   const handleKeydown = (ev: KeyboardEvent) => {

@@ -1,4 +1,5 @@
 import { resizeCanvas } from "@daeinc/canvas";
+import type { ContextType } from "@daeinc/canvas";
 import { toHTMLElement } from "@daeinc/dom";
 import { Wrap } from ".";
 import { createCanvas } from "./canvas";
@@ -20,13 +21,17 @@ import type {
   SketchStates,
   WebGL2Props,
   WebGLProps,
+  WebGPUProps,
 } from "./types/types";
 import { getGlobalState, updateGlobalState } from "./store";
 
 type CanvasProps = {
   canvas: HTMLCanvasElement;
-  context: CanvasRenderingContext2D;
-  gl: WebGLRenderingContext | WebGL2RenderingContext;
+  // context: CanvasRenderingContext2D | GPUCanvasContext;
+  // gl: WebGLRenderingContext | WebGL2RenderingContext;
+  // NOTE: to minimize manual typing, take types from upstream dependency
+  context: ContextType<"2d" | "webgpu">;
+  gl: ContextType<"webgl" | "webgl2">;
   width: number;
   height: number;
   pixelRatio: number;
@@ -218,7 +223,7 @@ export const createUpdateProp = ({
   canvas: HTMLCanvasElement;
   settings: SketchSettingsInternal;
   states: SketchStates;
-  props: SketchProps | WebGLProps | WebGL2Props;
+  props: SketchProps | WebGLProps | WebGL2Props | WebGPUProps;
 }) => {
   return (options: Record<string, any>) => {
     // check if options only include updatableKeys
