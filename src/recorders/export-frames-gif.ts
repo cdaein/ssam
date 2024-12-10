@@ -9,6 +9,7 @@ import type { Encoder } from "gifenc";
 import { downloadBlob } from "../helpers";
 import {
   BaseProps,
+  SketchContext,
   SketchMode,
   SketchSettingsInternal,
   SketchStates,
@@ -37,11 +38,7 @@ export const encodeGifAnim = <Mode extends SketchMode>({
   states,
   props,
 }: {
-  context:
-    | CanvasRenderingContext2D
-    | WebGLRenderingContext
-    | WebGL2RenderingContext
-    | GPUCanvasContext;
+  context: SketchContext;
   settings: SketchSettingsInternal;
   states: SketchStates;
   props: BaseProps<Mode>;
@@ -68,6 +65,48 @@ export const encodeGifAnim = <Mode extends SketchMode>({
       palette,
       delay,
     });
+  } else if (settings.mode === "webgpu") {
+    // if (context.constructor.name !== "GPUCanvasContext") {
+    //   console.warn("Not using GPUCanvasContext");
+    //   return;
+    // }
+
+    // NOTE:
+    // creating a temporary canvas is slow. also, using canvas.toBlob() was much faster
+    // but the result was erratic with random frames in-between.
+    // ideally, i can use context and buffer to get uint array but it was getting complicated so
+    // will need to come back later
+    const canvas = props.canvas;
+    const dataURL = canvas.toDataURL("image/png");
+    const img = new Image();
+    img.src = dataURL;
+    img.onload = () => {
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+      const tempCtx = tempCanvas.getContext("2d")!;
+      tempCtx.drawImage(img, 0, 0);
+
+      const imageData = tempCtx.getImageData(
+        0,
+        0,
+        tempCanvas.width,
+        tempCanvas.height,
+      );
+      data = imageData.data;
+      const palette =
+        settings.gifOptions.palette ||
+        quantize(data, settings.gifOptions.maxColors || 256);
+      const index = applyPalette(data, palette);
+      // const index = getIndexedFrame(data, palette);
+
+      const fpsInterval = 1 / settings.exportFps;
+      const delay = fpsInterval * 1000;
+      gif.writeFrame(index, props.canvas.width, props.canvas.height, {
+        palette,
+        delay,
+      });
+    };
   } else {
     // REVIEW: https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/readPixels
     const gl = context as WebGLRenderingContext | WebGL2RenderingContext;
