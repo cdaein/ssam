@@ -67,8 +67,9 @@ export const ssam = async <Mode extends SketchMode>(
   sketch: Sketch<Mode>,
   settings: SketchSettings,
 ) => {
+  const wrap = new Wrap<Mode>();
   try {
-    const wrap = await Wrap.create(sketch, settings);
+    await wrap.setup(sketch, settings);
     wrap.run();
     return wrap;
   } catch (err) {
@@ -78,16 +79,16 @@ export const ssam = async <Mode extends SketchMode>(
 };
 
 export class Wrap<Mode extends SketchMode> {
-  sketch: Sketch<Mode>;
-  userSettings: SketchSettings;
-  settings: SketchSettingsInternal;
-  states: SketchStates;
-  props: FinalProps<Mode>;
-  removeResize: () => void;
-  removeKeydown: () => void;
+  // sketch!: Sketch<Mode>;
+  userSettings!: SketchSettings;
+  settings!: SketchSettingsInternal;
+  states!: SketchStates;
+  props!: FinalProps<Mode>;
+  removeResize!: () => void;
+  removeKeydown!: () => void;
   unload?: (props: FinalProps<Mode>) => void;
-  private raf: number;
-  globalState: Record<string, any>;
+  private raf!: number;
+  globalState!: Record<string, any>;
   count!: number;
   loop!: (timestamp: number) => void;
   /** Runs right before export. Useful if some values need to reset for exporting. */
@@ -170,23 +171,13 @@ export class Wrap<Mode extends SketchMode> {
     });
   }
 
-  static async create<Mode extends SketchMode>(
-    sketch: Sketch<Mode>,
-    userSettings: SketchSettings,
-  ): Promise<Wrap<Mode>> {
-    const wrap = new Wrap(sketch, userSettings);
-    try {
-      await wrap.setup();
-      return wrap;
-    } catch (err: any) {
-      throw new Error(err);
-    }
-  }
-
   // use ssam() function for interfacing with user. (class constructor can't use async)
   // use class to hoist render function and to make it available within init
-  constructor(sketch: Sketch<Mode>, userSettings: SketchSettings) {
-    this.sketch = sketch;
+  constructor() {
+    return this;
+  }
+
+  async setup(sketch: Sketch<Mode>, userSettings: SketchSettings) {
     this.userSettings = userSettings;
 
     // for manual counting when recording (use only for recording)
@@ -205,57 +196,6 @@ export class Wrap<Mode extends SketchMode> {
       resizeProp: () => this.resize(this.props),
     });
 
-    this.globalState = getGlobalState();
-
-    // REVIEW: some of these may not need to be stored globally
-    this.states.startTime = this.globalState.startTime;
-    this.states.lastStartTime = this.globalState.lastStartTime;
-    this.states.pausedStartTime = this.globalState.pausedStartTime;
-    this.states.pausedDuration = this.globalState.pausedDuration;
-    this.states.timestamp = this.globalState.timestamp;
-    this.states.lastTimestamp = this.globalState.lastTimestamp;
-    //frameInterval: null // REVIEW
-    this.states.firstLoopRender = this.globalState.firstLoopRender;
-    this.states.firstLoopRenderTime = this.globalState.firstLoopRenderTime;
-    this.states.prevFrame = this.globalState.prevFrame;
-
-    this.props.playhead = this.globalState.playhead;
-    this.props.frame = this.globalState.frame;
-    this.props.time = this.globalState.time;
-    this.props.deltaTime = this.globalState.deltaTime;
-    this.props.loopCount = this.globalState.loopCount;
-
-    const { add: addResize, remove: removeResize } = resizeHandler({
-      props: this.props,
-      userSettings,
-      settings: this.settings,
-      render: this.render,
-      resize: this.resize,
-    });
-
-    const { add: addKeydown, remove: removeKeydown } = keydownHandler({
-      props: this.props,
-      states: this.states,
-    });
-
-    addResize();
-    if (this.settings.hotkeys) {
-      addKeydown();
-    }
-    // REVIEW: bind(this)?
-    this.removeResize = removeResize;
-    this.removeKeydown = removeKeydown;
-
-    fitCanvasToParent({
-      userSettings,
-      settings: this.settings,
-      props: this.props,
-    });
-
-    return this;
-  }
-
-  async setup() {
     // dynamic import of export libraries
     if (this.settings.framesFormat.includes("gif")) {
       const { setupGifAnimRecord, encodeGifAnim, endGifAnimRecord } =
@@ -292,6 +232,26 @@ export class Wrap<Mode extends SketchMode> {
       this.endMp4BrowserRecord = endMp4BrowserRecord;
     }
 
+    this.globalState = getGlobalState();
+
+    // REVIEW: some of these may not need to be stored globally
+    this.states.startTime = this.globalState.startTime;
+    this.states.lastStartTime = this.globalState.lastStartTime;
+    this.states.pausedStartTime = this.globalState.pausedStartTime;
+    this.states.pausedDuration = this.globalState.pausedDuration;
+    this.states.timestamp = this.globalState.timestamp;
+    this.states.lastTimestamp = this.globalState.lastTimestamp;
+    //frameInterval: null // REVIEW
+    this.states.firstLoopRender = this.globalState.firstLoopRender;
+    this.states.firstLoopRenderTime = this.globalState.firstLoopRenderTime;
+    this.states.prevFrame = this.globalState.prevFrame;
+
+    this.props.playhead = this.globalState.playhead;
+    this.props.frame = this.globalState.frame;
+    this.props.time = this.globalState.time;
+    this.props.deltaTime = this.globalState.deltaTime;
+    this.props.loopCount = this.globalState.loopCount;
+
     // set up web socket listeners (to communicate with vite dev server, plugins)
     if (import.meta.hot) {
       import.meta.hot.on("ssam:warn", ssamWarnCallback);
@@ -307,11 +267,38 @@ export class Wrap<Mode extends SketchMode> {
     }
 
     try {
-      await this.sketch(this.props);
+      await sketch(this.props);
     } catch (err: any) {
       console.error("Error at sketch init:", err);
       return null;
     }
+
+    const { add: addResize, remove: removeResize } = resizeHandler({
+      props: this.props,
+      userSettings,
+      settings: this.settings,
+      render: this.render,
+      resize: this.resize,
+    });
+
+    const { add: addKeydown, remove: removeKeydown } = keydownHandler({
+      props: this.props,
+      states: this.states,
+    });
+
+    addResize();
+    if (this.settings.hotkeys) {
+      addKeydown();
+    }
+    // REVIEW: bind(this)?
+    this.removeResize = removeResize;
+    this.removeKeydown = removeKeydown;
+
+    fitCanvasToParent({
+      userSettings,
+      settings: this.settings,
+      props: this.props,
+    });
 
     // render at least once. this is the first frame.
     // REVIEW: loop() render doesn't run the first frame b/c of frame throttling code.
