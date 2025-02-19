@@ -1,4 +1,4 @@
-![example gif animation](./docs/example.gif)
+[![example gif animation](./docs/example.gif)](https://codepen.io/cdaein/pen/zYVRZZW)
 
 # Ssam
 
