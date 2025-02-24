@@ -60,6 +60,7 @@ export type {
   SketchSettings,
   WebGLProps,
   WebGL2Props,
+  WebGPUProps,
   FinalProps,
 } from "./types/types";
 
