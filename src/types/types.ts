@@ -260,7 +260,7 @@ export type BaseProps<Mode extends SketchMode> = {
    */
   frame: number;
   /**
-   * Elapsed time. when it reaches `duration`, it will reset to `0`
+   * Elapsed time in milliseconds. when it reaches `duration`, it will reset to `0`
    */
   time: number;
   /** Time it took between renders in milliseconds */
@@ -269,7 +269,7 @@ export type BaseProps<Mode extends SketchMode> = {
   duration: number;
   /** Number of total frames over duration */
   totalFrames: number;
-  /** The current loop count. it is based on `numLoop` in the settings. it increases by `1` and resets back to `0`. `duration` setting is required. */
+  /** The current loop count. it is based on `settings.numLoops`. it increases by `1` and resets back to `0`. `settings.duration` is required. */
   loopCount: number;
   /**
    * The number of loops to repeat in the sketch that is defined in `settings.numLoops`
@@ -428,7 +428,7 @@ export type FinalProps<Mode extends SketchMode> = Mode extends "2d"
 //     playhead: number;
 //     /** frame count. starting at `0` */
 //     frame: number;
-//     /** elapsed time. when it reaches `duration`, it will reset to `0` */
+//     /** elapsed time in milliseconds. when it reaches `duration`, it will reset to `0` */
 //     time: number;
 //     /** time it took between renders in milliseconds */
 //     deltaTime: number;
