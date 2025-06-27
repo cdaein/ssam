@@ -289,7 +289,7 @@ export class Wrap<Mode extends SketchMode> {
 
     addResize();
     if (this.settings.hotkeys) {
-      addKeydown();
+      addKeydown(this.settings.hotkeys);
     }
     // REVIEW: bind(this)?
     this.removeResize = removeResize;
