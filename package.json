@@ -17,6 +17,7 @@
     "watch": "tsup --watch",
     "test": "vitest",
     "coverage": "vitest run --coverage"
+    "prepublishOnly": "npm run build"
   },
   "author": "Daeinc",
   "license": "MIT",
