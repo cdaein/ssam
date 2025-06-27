@@ -84,6 +84,14 @@ export type GifOptions = {
 
 export type RecordState = "inactive" | "start" | "in-progress" | "end";
 
+export type Hotkeys = {
+  togglePlay?: boolean;
+  exportFrame?: boolean;
+  exportFrames?: boolean;
+  git?: boolean;
+  // arrowKeys?: boolean; // not implemented yet
+};
+
 /**
  * User provided settings. Any properties not defined by user will be merged internally with default settings.
  */
@@ -169,8 +177,22 @@ export type SketchSettings = {
   framesFormat?: FramesFormat | FramesFormat[];
   /** GIF export options. */
   gifOptions?: GifOptions;
-  /** Set to `false` to not use Ssam-provided hot keys (ex. `CMD+S` for image export) */
-  hotkeys?: boolean;
+  /**
+   * Set it to either `true` or `false` to enable or disable all Ssam-provided hotkeys (ex. `CMD+S` for image export).
+   * Or, disable individual hotkeys selectively.
+   *
+   * @default
+   * true
+   *
+   * @example
+   * hotkeys: true // use all Ssam-provided hot keys (export frame, git commit, etc.)
+   * hotkeys: false // disable all Ssam-provided hot keys
+   * hotkeys: {
+   *   togglePlay: false, // disable spacebar hotkey. all other hotkeys still work.
+   * }
+   *
+   */
+  hotkeys?: boolean | Hotkeys;
   /** Send extra data to the sketch. it is accessible via `props.data` */
   data?: Record<string, any>;
 };
@@ -210,7 +232,7 @@ export interface SketchSettingsInternal {
   framesFormat: FramesFormat[];
   gifOptions: GifOptions;
   // sketch
-  hotkeys: boolean;
+  hotkeys: Hotkeys;
   data: Record<string, any>;
 }
 

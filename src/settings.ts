@@ -5,7 +5,19 @@ import {
   computePlayFps,
   computeTotalFrames,
 } from "./time";
-import { SketchSettings, SketchSettingsInternal } from "./types/types";
+import { Hotkeys, SketchSettings, SketchSettingsInternal } from "./types/types";
+
+/**
+ * Set all properties of `hotkeys` to `val`
+ * @param val -
+ */
+const createHotkeysObj = (val: boolean) => ({
+  togglePlay: val,
+  exportFrame: val,
+  exportFrames: val,
+  git: val,
+  // arrowKeys: val, // not implemented yet
+});
 
 /**
  * combine settings. use base object (defaultSettings) as starting point and override with main object (userSettings).
@@ -53,12 +65,13 @@ export const createSettings = ({
     framesFormat: [],
     gifOptions: {},
     // sketch
-    hotkeys: true,
+    hotkeys: createHotkeysObj(true),
     mode: "2d",
     data: {},
   };
 
   const combined = Object.assign({}, defaultSettings, main);
+
   // if main has undefined value, use value from base
   for (const [key, value] of Object.entries(combined)) {
     if (value === undefined) {
@@ -102,6 +115,16 @@ export const createSettings = ({
   combined.framesFormat = checkSupportedFramesFormats(
     toArray(combined.framesFormat),
   );
+
+  if (typeof combined.hotkeys === "boolean") {
+    const val = combined.hotkeys as boolean;
+    combined.hotkeys = createHotkeysObj(val);
+  } else if (typeof combined.hotkeys === "object") {
+    combined.hotkeys = {
+      ...createHotkeysObj(true),
+      ...(combined.hotkeys || {}),
+    };
+  }
 
   return combined;
 };
