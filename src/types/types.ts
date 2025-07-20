@@ -179,7 +179,7 @@ export type SketchSettings = {
   gifOptions?: GifOptions;
   /**
    * Set it to either `true` or `false` to enable or disable all Ssam-provided hotkeys (ex. `CMD+S` for image export).
-   * Or, disable individual hotkeys selectively.
+   * Or, disable individual hotkeys selectively by setting `togglePlay`, `exportFrame`, `exportFrames`, `git`.
    *
    * @default
    * true
