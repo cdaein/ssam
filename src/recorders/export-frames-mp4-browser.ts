@@ -8,7 +8,6 @@ import {
   Mp4OutputFormat,
   Output,
 } from "mediabunny";
-import { ArrayBufferTarget, Muxer } from "mp4-muxer";
 import { downloadBlob, isObject } from "../helpers";
 import type {
   BaseProps,
