@@ -3,21 +3,27 @@
  * WebM Muxer: https://github.com/Vanilagy/webm-muxer/blob/main/demo/script.js
  */
 
+import {
+  BufferTarget,
+  CanvasSource,
+  Output,
+  WebMOutputFormat,
+} from "mediabunny";
+import { downloadBlob, isObject } from "../helpers";
 import type {
-  SketchSettingsInternal,
   BaseProps,
-  SketchStates,
   FramesFormatObj,
   SketchMode,
+  SketchSettingsInternal,
+  SketchStates,
 } from "../types/types";
-import { ArrayBufferTarget, Muxer } from "webm-muxer";
-import { downloadBlob, isObject } from "../helpers";
 
-let muxer: Muxer<ArrayBufferTarget> | null = null;
-let videoEncoder: VideoEncoder | null = null;
-let lastKeyframe: number | null = null;
+let output: Output<WebMOutputFormat, BufferTarget> | null = null;
+let canvasSource: CanvasSource | null = null;
 
-export const setupWebMRecord = <Mode extends SketchMode>({
+let lastKeyframe = -Infinity;
+
+export const setupWebMRecord = async <Mode extends SketchMode>({
   settings,
   props,
 }: {
@@ -33,37 +39,34 @@ export const setupWebMRecord = <Mode extends SketchMode>({
   const format = "webm";
 
   // default values
-  // TODO: support more codecs
-  const codecStrings: ["V_VP9", string] = ["V_VP9", "vp09.00.10.08"];
+  const codecStrings: ["vp8" | "vp9" | "av1", string] = [
+    "vp9",
+    "vp09.00.10.08",
+  ];
+  // const codecStrings: ["V_VP9", string] = ["V_VP9", "vp09.00.10.08"];
   if (isObject(framesFormat)) {
     codecStrings[0] = framesFormat.codecStrings[0];
     codecStrings[1] = framesFormat.codecStrings[1];
   }
 
-  // TODO: output dimensions must be multiples of 2.
-  //       how to crop canvas for recording?
-  //       webm still plays, but it can't be converted to mp4
-  muxer = new Muxer({
-    target: new ArrayBufferTarget(),
-    video: {
-      codec: codecStrings[0],
-      width: props.canvas.width,
-      height: props.canvas.height,
-      frameRate: settings.exportFps,
-    },
+  output = new Output({
+    format: new WebMOutputFormat(),
+    target: new BufferTarget(),
   });
 
-  videoEncoder = new VideoEncoder({
-    output: (chunk, meta) => muxer?.addVideoChunk(chunk, meta!),
-    error: (e) => console.error(`WebMMuxer error: ${e}`),
+  canvasSource = new CanvasSource(props.canvas, {
+    codec: codecStrings[0],
+    fullCodecString: codecStrings[1],
+    // fullCodecString: "av01.0.05M.10", // supports 4k but can't play on M1 Mac (no hardware decoder) :(
+    bitrate: 1e7, // 1e7 = 10 Mbps
   });
 
-  videoEncoder.configure({
-    codec: codecStrings[1],
-    width: props.canvas.width,
-    height: props.canvas.height,
-    bitrate: 10_000_000, // 1e7 = 10 Mbps (keep high. needs mp4 convert again)
+  output.addVideoTrack(canvasSource, {
+    frameRate: settings.exportFps,
   });
+
+  // after adding all tracks, start output
+  await output.start();
 
   lastKeyframe = -Infinity;
 
@@ -89,7 +92,7 @@ export const encodeWebM = async <Mode extends SketchMode>({
   encodeVideoFrame({ canvas, settings, states, props });
 };
 
-export const encodeVideoFrame = <Mode extends SketchMode>({
+export const encodeVideoFrame = async <Mode extends SketchMode>({
   canvas,
   settings,
   states,
@@ -100,19 +103,18 @@ export const encodeVideoFrame = <Mode extends SketchMode>({
   states: SketchStates;
   props: BaseProps<Mode>;
 }) => {
-  // NOTE: timestamp unit is in micro-seconds!!
-  const frame = new VideoFrame(canvas, {
-    timestamp: props.time * 1e3 + props.duration * props.loopCount * 1e3,
-    // duration: 1e6 / props.exportFps, // this ensures the last frame duration & correct fps
-    // duration: props.deltaTime * 1e3, // keep it as a fallback option just in case
-  });
+  const timestampInSecounds =
+    (props.time + props.duration * props.loopCount) / 1e3;
+  const durationInSeconds = 1 / props.exportFps; // this ensures the last frame duration & correct fps
+  // const duration = props.deltaTime * 1e3 // keep it as a fallback option just in case
 
   // add video keyframe every 2 seconds (2000ms)
-  const needsKeyframe = props.time - lastKeyframe! >= 2000;
+  const needsKeyframe = props.time - lastKeyframe >= 500;
   if (needsKeyframe) lastKeyframe = props.time;
 
-  videoEncoder?.encode(frame, { keyFrame: needsKeyframe });
-  frame.close();
+  await canvasSource?.add(timestampInSecounds, durationInSeconds, {
+    keyFrame: needsKeyframe,
+  }); // Timestamp, duration (in seconds)
 
   console.log(
     `recording (webm) frame... ${states.recordedFrames + 1} of ${
@@ -130,18 +132,19 @@ export const endWebMRecord = async ({
     return;
   }
 
-  // const { framesFormat: format } = settings;
   const format = "webm";
 
-  await videoEncoder?.flush();
-  muxer?.finalize();
+  await output?.finalize(); // Resolves once the output is finalized
 
-  const { buffer } = muxer?.target as ArrayBufferTarget; // Buffer contains final WebM
+  // buffer contains final webm
+  const buffer = output?.target.buffer; // => Uint8Array
 
-  downloadBlob(new Blob([buffer!], { type: "video/webm" }), settings, format);
+  if (buffer) {
+    downloadBlob(new Blob([buffer], { type: "video/webm" }), settings, format);
+  }
 
-  muxer = null;
-  videoEncoder = null;
+  output = null;
+  canvasSource = null;
 
   console.log(`recording (${format}) complete`);
 };
