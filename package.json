@@ -25,6 +25,7 @@
     "@daeinc/canvas": "^0.16.3",
     "@daeinc/dom": "^0.4.1",
     "gifenc": "^1.0.3",
+    "mediabunny": "^1.24.3",
     "mp4-muxer": "^5.2.1",
     "webm-muxer": "^5.1.3"
   },
