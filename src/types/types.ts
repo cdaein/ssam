@@ -24,7 +24,6 @@ export type SketchLoop = (timestamp: number) => void;
  * "2d", "webgl", "webgl2" or "webgpu"
  */
 export type SketchMode = Context;
-// export type SketchMode = "2d" | "webgl" | "webgl2" | "webgpu";
 
 // gif is not supported by default
 export type FrameFormat = "png" | "jpg" | "jpeg" | "webp";
@@ -38,22 +37,23 @@ export type FramesFormatObj<Format> = Format extends "mp4-browser"
       format: Format;
       /**
        * Specify which codec to use.
-       * See [Mp4-Muxer](https://github.com/Vanilagy/mp4-muxer) for options
+       * See [`fullCodecString`](https://mediabunny.dev/guide/media-sources#video-encoding-config) from Mediabunny for more info.
        *
        * @default
        * ["avc", "avc1.4d002a"]
        */
-      codecStrings: ["avc" | "av1", string];
+      codecStrings: ["avc" | "hevc" | "vp8" | "vp9" | "av1", string];
     }
   : {
       format: Format;
       /**
        * Specity which codec to use.
-       * See [WebM-Muxer](https://github.com/Vanilagy/webm-muxer) for options.
+       * See [`fullCodecString`](https://mediabunny.dev/guide/media-sources#video-encoding-config) from Mediabunny for more info.
+       *
        * @default
-       * ["V_VP9", "vp09.00.10.08"]
+       * ["vp9", "vp09.00.10.08"]
        */
-      codecStrings: ["V_VP9", string];
+      codecStrings: ["vp8" | "vp9" | "av1", string];
     };
 
 export type FramesFormatStr = "gif" | "mp4" | "mp4-browser" | "webm" | "png";
@@ -73,7 +73,7 @@ export type GifOptions = {
    */
   maxColors?: number;
   /**
-   * "rgb565" (default), "rgb444", or "rgba4444"
+   * `"rgb565"` (default), `"rgb444"`, or `"rgba4444"`
    * @default "rgb565"
    */
   format?: GifFormat;
@@ -173,7 +173,22 @@ export type SketchSettings = {
   suffix?: string;
   /** Set file format for image export (ie. `png`, `jpg`). you can also use an array to export multiple formats at the same time. ex. `["webp", "png"]` */
   frameFormat?: FrameFormat | FrameFormat[];
-  /** Set file format for video/sequence export (ie. `webm`, `gif`, `mp4-browser`). you can also use an array to export multiple formats at the same time. ex. `["gif", "webm"]` */
+  /**
+   * Set file format for video/sequence export (ie. `webm`, `gif`, `mp4-browser`). you can also use an array to export multiple formats at the same time. ex. `["gif", "webm"]`
+   *
+   * @example
+   * ```ts
+   * framesFormat: "mp4"
+   * ```
+   *
+   * @example
+   * ```ts
+   * framesFormat: {
+   *   format: "mp4-browser",
+   *   codecStrings: ["avc", "avc1.4d002a"]
+   * }
+   * ```
+   */
   framesFormat?: FramesFormat | FramesFormat[];
   /** GIF export options. */
   gifOptions?: GifOptions;
