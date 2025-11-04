@@ -2,21 +2,28 @@
  * mp4 recording in browser
  */
 
-import type {
-  SketchSettingsInternal,
-  BaseProps,
-  SketchStates,
-  FramesFormatObj,
-  SketchMode,
-} from "../types/types";
+import {
+  BufferTarget,
+  CanvasSource,
+  Mp4OutputFormat,
+  Output,
+} from "mediabunny";
 import { ArrayBufferTarget, Muxer } from "mp4-muxer";
 import { downloadBlob, isObject } from "../helpers";
+import type {
+  BaseProps,
+  FramesFormatObj,
+  SketchMode,
+  SketchSettingsInternal,
+  SketchStates,
+} from "../types/types";
 
-let muxer: Muxer<ArrayBufferTarget> | null = null;
-let videoEncoder: VideoEncoder | null = null;
-let lastKeyframe: number | null = null;
+let output: Output<Mp4OutputFormat, BufferTarget> | null = null;
+let canvasSource: CanvasSource | null = null;
 
-export const setupMp4BrowserRecord = <Mode extends SketchMode>({
+let lastKeyframe = -Infinity;
+
+export const setupMp4BrowserRecord = async <Mode extends SketchMode>({
   settings,
   states,
   props,
@@ -38,42 +45,41 @@ export const setupMp4BrowserRecord = <Mode extends SketchMode>({
 
   // default values (supports 2k resolution)
   // safer option?: "avc1.42001f", // doesn't support 2k
-  const codecStrings: ["avc" | "av1", string] = ["avc", "avc1.4d002a"];
+  const codecStrings: ["avc" | "hevc" | "vp8" | "vp9" | "av1", string] = [
+    "avc",
+    "avc1.4d002a",
+  ];
   if (isObject(framesFormat)) {
     codecStrings[0] = framesFormat.codecStrings[0];
     codecStrings[1] = framesFormat.codecStrings[1];
   }
 
-  muxer = new Muxer({
-    target: new ArrayBufferTarget(),
-    video: {
-      // codec: 'avc' | 'hevc' | 'vp9' | 'av1',
-      codec: codecStrings[0],
-      width: props.canvas.width,
-      height: props.canvas.height,
-    },
-    fastStart: "in-memory",
+  output = new Output({
+    format: new Mp4OutputFormat({
+      fastStart: "in-memory",
+    }),
+    target: new BufferTarget(),
   });
 
-  videoEncoder = new VideoEncoder({
-    output: (chunk, meta) => muxer!.addVideoChunk(chunk, meta!),
-    error: (e) => console.error(`Mp4Muxer error: ${e}`),
+  canvasSource = new CanvasSource(props.canvas, {
+    codec: codecStrings[0],
+    fullCodecString: codecStrings[1],
+    // fullCodecString: "av01.0.05M.10", // supports 4k but can't play on M1 Mac (no hardware decoder) :(
+    bitrate: 1e7, // 1e7 = 10 Mbps
   });
+
+  output.addVideoTrack(canvasSource, {
+    frameRate: settings.exportFps,
+  });
+
+  // after adding all tracks, start output
+  await output.start();
 
   // https://jakearchibald.com/2022/html-codecs-parameter-for-av1/
   // https://developer.mozilla.org/en-US/docs/Web/Media/Formats/codecs_parameter#basic_syntax
   // https://www.w3.org/TR/webcodecs-avc-codec-registration/#fully-qualified-codec-strings
   // https://github.com/Vanilagy/mp4-muxer/issues/10#issuecomment-1644404829
   // ['avc1.420033','avc1.42001E','avc1.4D401E','hvc1.2.4.L153','vp8','vp9','vp09.00.10.08','avc1.640033','hvc1.1.6.H150.90','hev1.1.6.L120.90','av01.0.01M.08','av01.0.15M.10','hev1.1.6.L93.B0','hev1.2.4.L93.B0','hvc1.3.E.L93.B0','hvc1.4.10.L93.B0'];
-
-  videoEncoder.configure({
-    codec: codecStrings[1],
-    // codec: "av01.0.05M.10", // supports 4k but can't play on M1 Mac (no hardware decoder) :(
-    width: props.canvas.width,
-    height: props.canvas.height,
-    bitrate: 1e7, // 1e7 = 10 Mbps
-    framerate: settings.exportFps,
-  });
 
   lastKeyframe = -Infinity;
 
@@ -99,7 +105,7 @@ export const encodeMp4Browser = <Mode extends SketchMode>({
   encodeVideoFrame({ canvas, settings, states, props });
 };
 
-export const encodeVideoFrame = <Mode extends SketchMode>({
+export const encodeVideoFrame = async <Mode extends SketchMode>({
   canvas,
   settings,
   states,
@@ -110,19 +116,18 @@ export const encodeVideoFrame = <Mode extends SketchMode>({
   states: SketchStates;
   props: BaseProps<Mode>;
 }) => {
-  // NOTE: timestamp unit is in micro-seconds!!
-  const frame = new VideoFrame(canvas, {
-    timestamp: props.time * 1e3 + props.duration * props.loopCount * 1e3,
-    duration: 1e6 / props.exportFps, // this ensures the last frame duration & correct fps
-    // duration: props.deltaTime * 1e3, // keep it as a fallback option just in case
-  });
+  const timestampInSecounds =
+    (props.time + props.duration * props.loopCount) / 1e3;
+  const durationInSeconds = 1 / props.exportFps; // this ensures the last frame duration & correct fps
+  // const duration = props.deltaTime * 1e3 // keep it as a fallback option just in case
 
   // add video keyframe every 2 seconds (2000ms)
-  const needsKeyframe = props.time - lastKeyframe! >= 500;
+  const needsKeyframe = props.time - lastKeyframe >= 500;
   if (needsKeyframe) lastKeyframe = props.time;
 
-  videoEncoder?.encode(frame, { keyFrame: needsKeyframe });
-  frame.close();
+  await canvasSource?.add(timestampInSecounds, durationInSeconds, {
+    keyFrame: needsKeyframe,
+  }); // Timestamp, duration (in seconds)
 
   console.log(
     `recording (mp4-browser) frame... ${states.recordedFrames + 1} of ${
@@ -142,15 +147,17 @@ export const endMp4BrowserRecord = async ({
 
   const format = "mp4";
 
-  await videoEncoder?.flush();
-  muxer?.finalize();
+  await output?.finalize(); // Resolves once the output is finalized
 
-  const { buffer } = muxer?.target as ArrayBufferTarget; // Buffer contains final mp4
+  // buffer contains final mp4
+  const buffer = output?.target.buffer; // => Uint8Array
 
-  downloadBlob(new Blob([buffer!]), settings, format);
+  if (buffer) {
+    downloadBlob(new Blob([buffer]), settings, format);
+  }
 
-  muxer = null;
-  videoEncoder = null;
+  output = null;
+  canvasSource = null;
 
   console.log(`recording (mp4-browser) complete`);
 };
